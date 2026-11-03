@@ -169,6 +169,8 @@ npm run build
 
 ## 项目文档
 
+- [文档导航与仓库结构](docs/README.md)：按计划、使用、验收和未来候选分类查看项目资料
+- [v1.0 公开开发路线图](docs/V1_ROADMAP.md)：既定 A–I 阶段及原定验收边界，不增加开发范围
 - [完整使用说明](使用说明.md)：安装运行、交易所配置、策略与回放、资金及风控边界
 - [C1 工程验收记录](docs/PHASE_C1_RESULTS.md)：阶段测试证据与未通过项
 - [实盘验证状态](docs/LIVE_TRADING_VERIFICATION.md)：哪些已测试、哪些仍待真实账户验收
