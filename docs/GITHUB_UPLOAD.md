@@ -1,29 +1,29 @@
-# GitHub 上传指引
+# GitHub 仓库发布与使用说明
 
-请上传本轮生成的干净源码文件夹 SmartMoneyAITrader，不要上传正在运行的主工程文件夹或任何 backups 备份。压缩包是便携副本；要在 GitHub 浏览和继续开发代码，应上传解压后的源码文件。
+> **状态更新（2026-11-03）**：Smart Money AI Trader 已作为**公开可见仓库**发布。本文件保留原有 `GITHUB_UPLOAD.md` 路径，供历史阶段文档引用；此前要求“发布为 Private”的旧上传指引已不适用于当前仓库。
 
-## 推荐：GitHub Desktop
+## 仓库定位
 
-1. 安装并登录 [GitHub Desktop](https://desktop.github.com/download/)。
-2. 将源码 ZIP 解压到一个新目录，例如 D:\GitHub\SmartMoneyAITrader。确认目录内直接有 README.md、terminal、frontend、SOURCE_MANIFEST.json 和 .gitignore。
-3. 打开 Desktop，选择 File → Add Local Repository，选中这个源码目录。如果提示不是 Git 仓库，点击界面中的 create a repository here，在该目录创建本地仓库，不要重新选择主工程。若已经有目标 GitHub 仓库，先克隆到新的空目录，再把干净源码复制到克隆目录；不要删除 .git 或强制覆盖远程历史。
-4. 在 Changes 栏核对文件。应有 Python、React 源码、数据档案和构建产物；不应出现 runtime、credentials.dpapi、.env、数据库、.venv、node_modules 或本机报告。
-5. 填写提交说明，例如 Move 24h challenge into strategy templates。点击 Commit to main（界面分支名可能不同）。这是本地保存。
-6. 点击 Publish repository，仓库名可用 SmartMoneyAITrader。保持勾选 **Keep this code private**，再点击发布。此操作才会上传至你的 GitHub 账户。
-7. 在 GitHub 页面确认仓库有 Private 标识，根目录文件结构正确。当前版本写为 C1 template UI development，不能标记为 Stable。已有仓库请把本轮干净源码复制到本地克隆目录，保留 .git，核对 Changes 后 Commit 和 Push origin；不要重新建仓或强推覆盖历史。
+本仓库用于展示 **Smart Money AI Trader v1.0 · C1 开发检查点** 的源码、技术说明与阶段性测试证据。项目**尚非 Stable / 生产就绪版本**，也**没有完成真实资金交易闭环及托管保护单的完整验收**。
 
-完整流程见 [GitHub 官方说明](https://docs.github.com/en/desktop/adding-and-cloning-repositories/adding-an-existing-project-to-github-using-github-desktop)。
+初次了解项目，请先阅读 [README](../README.md)；实际运行细节见 [使用说明](../使用说明.md)；已验证和未验证内容分别记录在 [C1 工程验收记录](PHASE_C1_RESULTS.md) 及 [实盘验证状态](LIVE_TRADING_VERIFICATION.md)。
 
-## 本包已做的清理
+## 获取与阅读源码
 
-白名单导出，排除整个 runtime、历史私人报告、备份、环境变量、依赖环境和缓存。对选中文件及 ZIP 内部再次扫描常见密钥、私钥、私人聊天 ID 和用户目录路径，并输出 SOURCE_MANIFEST.json 与 SHA-256。扫描未匹配不等于可数学证明没有秘密；上传前仍可用 Desktop 查看实际待提交文件。
+```powershell
+git clone https://github.com/cuihanzhe955-commits/SmartMoneyAITrader.git
+cd SmartMoneyAITrader
+.\start.bat
+```
 
-不要把本机检查报告、凭据截图、个人交易账本作为 Issue 或附件上传。项目及依赖的公开发布许可证尚待后续 D 阶段审计，当前建议保留为私人仓库。
+建议在 Windows 11、Python 3.11+ 环境先运行**内置历史归档 + 本地模拟**，不需要交易账户。开发检查点并非可直接投入真实资金的发行版。
 
-## 验证和使用
+## 阶段记录与版本关系
 
-Windows 安装 Python 3.11+ 后双击 start.bat，缺失依赖会自动安装，已含编译前端，无需为了运行而安装 Node。设置页重新输入自己的凭据；本包没有携带原账户密钥或历史账户数据。
+- `SOURCE_MANIFEST.json` 是 C1 源码导出时生成的文件清单与哈希快照；仓库公开后的 README 等文档提交可能不再匹配当时清单的哈希。这不表示新的文档提交重新经过原 C1 测试与打包验收。
+- [C1 工程验收记录](PHASE_C1_RESULTS.md)保留了当轮测试完成时的历史描述；其中“当时未上传/未公开”的文字不是仓库当前公开状态。
+- 目前未发布开源许可证；公开可见仅供阅读与评估，不等于授予第三方自由复制、修改、分发或商业使用的许可。
 
-需要构建前端时，在 frontend 运行 npm ci 和 npm run build。离线测试使用 python -B tests/run_offline.py（需额外安装 pytest）。UI 测试需 playwright 与本机 Chrome。
+## 反馈与交流
 
-只读验收不会启动实盘；创建和启动交易所会话仍使用独立授权。当前尚未完成真实资金及托管保护单验收。
+欢迎通过仓库 [Issues](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/issues) 交流可以公开讨论的代码问题、测试复现及文档改进建议。项目开发与验证状态以对应提交和阶段性记录为准。
