@@ -1,8 +1,58 @@
-# Smart Money AI Trader v1.0 · C1 开发检查点
+# Smart Money AI Trader
 
-已将挑战整合至「策略实验室 → 策略模板」，也可在创建会话时选择「24小时翻倍挑战」。侧栏不再单列挑战。操作及验证见 [挑战模板更新说明](docs/CHALLENGE_TEMPLATE_UPDATE.md)。
+**AI 辅助量化交易研究与可视化工作台**  ·  *AI-Assisted Quantitative Trading Research Workbench*
 
-当前不是 Stable。只读验收和 Mock 测试不等于真实账户成交验证；未执行真实资金试单。阶段结果见 [C1 验收记录](docs/PHASE_C1_RESULTS.md)。
+![Status](https://img.shields.io/badge/status-C1%20development-blue) ![Live trading](https://img.shields.io/badge/live%20trading-not%20verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![Frontend](https://img.shields.io/badge/React-TypeScript-0B7285?logo=react&logoColor=white)
+
+> **版本声明（2026-11-03）**：当前公开代码为 **v1.0 · C1 开发检查点**，**不是 Stable / 生产就绪版本**。已记录的离线测试与模拟交易结果不等于真实账户成交验证；**尚未完成真实资金交易闭环及托管保护单的完整验收**。
+
+## 项目简介
+
+Smart Money AI Trader 是一个面向**软件工程实践、智能决策研究及金融数据可视化**的个人开发项目。项目尝试将规则量化策略、可选的 AI 分析提案、风险约束、订单生命周期管理和 React 可视化工作台组织为可测试、可追溯的本地应用。
+
+项目重点是**模块化架构、决策可解释性、风控约束和异常恢复**。它不是盈利保证工具，也不构成投资建议；仓库中出现的「24小时翻倍挑战」是历史/模拟实验模板及目标名称，**不代表实际收益或可实现的投资回报**。
+
+## 当前功能与验证边界
+
+| 模块 / 能力 | 当前说明 |
+|---|---|
+| 本地工作台 | React + TypeScript 前端，FastAPI / WebSocket 后端；包含已编译前端产物 |
+| 市场数据与历史回放 | 支持内置历史数据与 CSV 导入、回放和模拟订单检查 |
+| 规则策略与 AI 提案 | 动量、趋势、均值回归、成交量、波动率等规则信号；可配置 AI 服务，提案受本地风控约束 |
+| 策略实验室 | 「24小时翻倍挑战」已整合进策略模板；当前挑战模式使用规则引擎 |
+| 风险与订单状态 | 包含仓位约束、IOC 适配、订单状态记录、异常和待核对订单阻断等实现 |
+| C1 离线与界面验收 | [C1 记录](docs/PHASE_C1_RESULTS.md)报告 **106 项回归通过、0 失败**，并完成前端构建与浏览器检查；使用历史数据/模拟账户或测试替身 |
+| 真实账户与资金闭环 | **未通过验收**；本轮未执行真实资金下单、成交、撤单及费用对账完整闭环 |
+| 交易所托管保护单 | **未完成创建、触发、撤销、重启恢复全生命周期的实现与验收**；现有止损主要依赖本地服务在线 |
+
+上述为 **C1 检查点记录和源码功能边界**，不代表本仓库已经通过独立安全审计、真实交易所联调或生产级验证。详见 [实盘验证状态](docs/LIVE_TRADING_VERIFICATION.md)。
+
+## 系统结构
+
+```mermaid
+flowchart LR
+    UI["React / TypeScript<br/>可视化工作台"] <--> API["FastAPI / WebSocket<br/>本地服务"]
+    API --> DATA["行情 / 历史数据"]
+    DATA --> ENGINE["规则策略 / AI 提案"]
+    ENGINE --> RISK["风险与订单约束"]
+    RISK --> EXEC["模拟执行 / CCXT 适配"]
+    EXEC --> STORE["SQLite / 事件记录"]
+    API --> STORE
+```
+
+该图仅说明**主要模块职责与数据流**；实际交易路径、授权门槛与风险限制以源码及阶段验证记录为准。
+
+## 项目文档
+
+- [C1 工程验收记录](docs/PHASE_C1_RESULTS.md)：离线测试、构建、浏览器检查、已知未通过项。
+- [真实交易验证状态](docs/LIVE_TRADING_VERIFICATION.md)：模拟/Mock 与实盘验证的区别、待完成门槛。
+- [挑战策略模板更新](docs/CHALLENGE_TEMPLATE_UPDATE.md)：策略实验室中的挑战配置。
+- [使用说明](使用说明.md)：安装与使用细节。
+- [GitHub 源码上传及清理说明](docs/GITHUB_UPLOAD.md)：源码导出范围、敏感文件排除与发布注意事项。
+
+---
+
+## 使用与开发
 
 ## 运行
 
@@ -68,3 +118,17 @@ npm run build
 
 接口依据：[OKX API V5](https://www.okx.com/docs-v5/en/)，[Binance Spot](https://developers.binance.com/docs/binance-spot-api-docs/rest-api/trading-endpoints)，[Binance USDⓈ-M Futures](https://developers.binance.com/docs/derivatives/usds-margined-futures/trade/rest-api/New-Order)。
 
+## 安全、合规与公开范围
+
+- **不要上传秘密信息**：API Key、Secret、Passphrase、`.env`、`runtime/`、数据库、交易账户标识、私人交易流水及日志等不应进入仓库。现有 `.gitignore` 仅帮助排除新文件，不能自动清理历史提交；公开前后都应检查历史记录并轮换任何疑似泄露的凭据。
+- **真实资金风险**：本地止损和移动止损依赖行情、网络及进程在线；暂停或断网时持仓可能仍留在交易所。只读健康检查、模拟回放与签名测试**不能替代真实账户闭环验收**，不建议直接投入真实资金运行当前开发检查点。
+- **交易权限与地区限制**：仅在本人有权使用的平台和地区遵守适用法律及交易所规则；出现 HTTP 451 等限制时应停止，不通过代理或其他方式绕过服务限制。
+- **不保证收益**：本仓库仅供代码阅读、学习与研究，不提供投资建议，不承诺收益、胜率或资金安全。
+
+## 许可证状态
+
+本仓库目前以**公开可见**方式展示代码，**尚未确定并发布开源许可证**，也未完成所涉及依赖及发布许可的审计。**Public 不等于已授权自由复制、修改、分发或商业使用。**在正式确定许可前，请勿将其视为已获开放复用授权的开源发行版。
+
+---
+
+*本 README 描述的是 2026-11-03 的 C1 公开检查点。后续开发进度应以对应提交及验收文档为准。*
