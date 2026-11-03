@@ -118,6 +118,8 @@ flowchart LR
 相关当前证据参见 [C1 工程验收记录](docs/PHASE_C1_RESULTS.md) 与 [实盘验证状态](docs/LIVE_TRADING_VERIFICATION.md)。路线图将随**实际已完成的工程工作与验证结果**更新，而不是仅依据开发计划改变状态。
 
 
+**新组件与研究想法：** [产品决策池（Product Decision Pool）](docs/PRODUCT_DECISION_POOL.md) 记录候选开源库、采用条件及延后原因。该清单**不扩充或更改已冻结的 v1.0 开发范围**，当前不授权安装依赖或修改交易核心。
+
 ## 快速开始（本地历史模拟）
 
 **系统要求**：Windows 11，Python 3.11 或以上；推荐先使用 Python 3.11。前端已编译，普通使用无需 Node.js。当前仍是 C1 开发检查点，**实盘未完成验收**。
