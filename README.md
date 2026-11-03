@@ -185,7 +185,7 @@ npm run build
 | 联系方式 | 账号 / 入口 |
 | :-- | :-- |
 | **微信 WeChat** | `PuRP1E22`（在微信中搜索添加） |
-| **QQ** | `16630125861`（在 QQ 中搜索添加） |
+| **QQ** | `1632832719`（在 QQ 中搜索添加） |
 | **Telegram** | [@LingYuChrisOedipus](https://t.me/LingYuChrisOedipus) |
 
 **请先沟通确认，不要直接付款。** 本仓库不收款，不设置自动交易或自动充值功能；上述服务与 Smart Money AI Trader 的软件功能、运行安全及项目许可证相互独立。
