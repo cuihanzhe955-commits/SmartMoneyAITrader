@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = {"ai", "challenge", "events", "execution", "market", "risk", "strategy", "terminal", "web", "tests", "scripts"}
 ROOT_FILES = {".gitignore", ".env.example", "README.md", "使用说明.md", "requirements.txt",
               "install.bat", "start.bat", "start.cmd", "stop.bat", "launch.py", "server.py", "terminal_host.py"}
-DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md"}
+DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md", "WINDOWS_QUICK_START.md"}
 VERSION = "1.0-C1-template-ui"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
