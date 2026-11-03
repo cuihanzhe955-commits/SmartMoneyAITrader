@@ -59,3 +59,10 @@ def test_package_will_not_overwrite_or_export_inside_source(tmp_path):
     with pytest.raises(ValueError,match="主工程之外"): build(root,root/"export")
     out=tmp_path/"existing";out.mkdir()
     with pytest.raises(ValueError,match="拒绝覆盖"):build(root,out)
+
+
+def test_guided_launcher_files_are_exportable():
+    assert allowed("scripts/launcher.py")
+    assert allowed("docs/WINDOWS_QUICK_START.md")
+    assert allowed("tests/test_launcher.py")
+    assert not allowed(".venv/Scripts/python.exe")
