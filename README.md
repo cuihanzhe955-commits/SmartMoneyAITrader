@@ -1,6 +1,6 @@
 # Smart Money AI Trader v1.0 · C1 开发检查点
 
-本轮已将挑战整合至「策略实验室 → 策略模板」，也可在创建会话时选择「24小时翻倍挑战」。侧栏不再单列挑战。操作及验证见 [挑战模板更新说明](docs/CHALLENGE_TEMPLATE_UPDATE.md)。
+已将挑战整合至「策略实验室 → 策略模板」，也可在创建会话时选择「24小时翻倍挑战」。侧栏不再单列挑战。操作及验证见 [挑战模板更新说明](docs/CHALLENGE_TEMPLATE_UPDATE.md)。
 
 当前不是 Stable。只读验收和 Mock 测试不等于真实账户成交验证；未执行真实资金试单。阶段结果见 [C1 验收记录](docs/PHASE_C1_RESULTS.md)，上传方法见 [GitHub 上传指引](docs/GITHUB_UPLOAD.md)。
 
