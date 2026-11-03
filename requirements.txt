@@ -1,0 +1,7 @@
+fastapi==0.162.0
+uvicorn==0.54.0
+websockets==17.4
+pydantic==2.14.2
+pywin32==312
+ccxt==4.5.91
+

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Velocity Terminal · Smart Money</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <aside>
+      <div class="brand">
+        <svg width="34" height="36" viewBox="0 0 36 36">
+          <path fill="#9788ff" d="M0 8h10l7 14 8-17h10L19 34h-5z" />
+        </svg>
+        <div>SMART MONEY<small>AI TRADER &nbsp; / &nbsp; BETA</small></div>
+      </div>
+      <label>WORKSPACE</label><button data-nav="overview">▦　工作台总览</button
+      ><button class="active" data-nav="challenge">ϟ　24小时翻倍挑战</button
+      ><button data-nav="history">◷　挑战档案</button>
+      <footer>
+        <i></i> 本地模拟环境<small>VELOCITY TERMINAL　v1.0</small>
+      </footer>
+    </aside>
+    <main>
+      <header>
+        <span
+          ><button class="crumb" data-nav="overview">SMART MONEY / 总览</button
+          >　<span class="muted">/　挑战工作台</span></span
+        ><span><i></i> 纯规则引擎　 <b class="tag">PAPER ONLY</b></span>
+      </header>
+      <article id="app">正在读取本地账户…</article>
+    </main>
+    <dialog id="modal">
+      <button id="close" class="right">关闭 ×</button>
+      <div id="detail"></div>
+    </dialog>
+    <div id="toast" role="status"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
