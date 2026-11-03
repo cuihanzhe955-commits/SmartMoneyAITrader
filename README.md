@@ -182,11 +182,14 @@ npm run build
 
 **购买咨询 / 联系开发者**
 
-| 联系方式 | 账号 / 入口 |
-| :-- | :-- |
-| **微信 WeChat** | `PuRP1E22`（在微信中搜索添加） |
-| **QQ** | `1632832719`（在 QQ 中搜索添加） |
-| **Telegram** | [@LingYuChrisOedipus](https://t.me/LingYuChrisOedipus) |
+以下二维码由开发者提供的联系方式重新生成，分别对应微信、QQ、Telegram 的添加入口。**扫码或点击二维码均可尝试联系**，不需要公开留言或提供账户密码。
+
+| 微信 WeChat | QQ | Telegram |
+| :---: | :---: | :---: |
+| <a href="https://u.wechat.com/EHh0vOjHfvhUI2EZiIg_Ihs?s=4"><img src="assets/support/wechat.svg" alt="微信添加开发者二维码" width="180"></a> | <a href="https://qm.qq.com/q/xo6MxVkBMW"><img src="assets/support/qq.svg" alt="QQ 添加开发者二维码" width="180"></a> | <a href="https://t.me/LingYuChrisOedipus"><img src="assets/support/telegram.svg" alt="Telegram 添加开发者二维码" width="180"></a> |
+| 微信号：`PuRP1E22` | QQ：`1632832719` | [@LingYuChrisOedipus](https://t.me/LingYuChrisOedipus) |
+
+> 温馨提示：二维码跳转可能需要相应 App。请先通过上述渠道确认具体服务条款及金额，再决定是否购买。
 
 **请先沟通确认，不要直接付款。** 本仓库不收款，不设置自动交易或自动充值功能；上述服务与 Smart Money AI Trader 的软件功能、运行安全及项目许可证相互独立。
 ## 风险与许可
