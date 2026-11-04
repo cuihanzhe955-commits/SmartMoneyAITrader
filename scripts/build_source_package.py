@@ -14,9 +14,9 @@ FOLDERS = {"ai", "challenge", "events", "execution", "market", "risk", "strategy
 ROOT_FILES = {".gitignore", ".env.example", "README.md", "使用说明.md", "requirements.txt", "requirements-research.txt",
               "install.bat", "start.bat", "start.cmd", "stop.bat", "launch.py", "server.py", "terminal_host.py"}
 DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md", "WINDOWS_QUICK_START.md", "README.md", "V1_ROADMAP.md", "PRODUCT_DECISION_POOL.md", "SmartMoney_Stable_Plan.md"}
-DOCS.update({"OPEN_SOURCE_AUDIT.md", "PHASE_D_COMPONENTS.md", "PROGRESS_STATUS.md", "PHASE_C2_FOUNDATION.md", "PHASE_C2_TRANSPORT.md", "PHASE_C2_SETTLEMENT.md",
+DOCS.update({"OPEN_SOURCE_AUDIT.md", "PHASE_D_COMPONENTS.md", "PHASE_D2_CCXT.md", "PROGRESS_STATUS.md", "PHASE_C2_FOUNDATION.md", "PHASE_C2_TRANSPORT.md", "PHASE_C2_SETTLEMENT.md",
              "PHASE_C2_MAINTENANCE.md", "PHASE_C2_RUNTIME.md", "PHASE_C2_LIFECYCLE.md", "PHASE_C2_RECOVERY.md", "PHASE_C2_DIAGNOSTICS.md", "PHASE_C3_READINESS.md"})
-VERSION = "1.0-D1-components"
+VERSION = "1.0-D2-ccxt"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
     "provider_token": re.compile(r"(?:sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{20,}"),

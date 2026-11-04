@@ -9,6 +9,10 @@ from market.feeds import SYMBOLS
 D = lambda x: Decimal(str(x))
 
 
+def finite_number(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+
 class Venue:
     def __init__(self, name, product, env, keys=None):
         self.name = name
@@ -79,7 +83,11 @@ class Venue:
 
     def balance(self):
         b = self.client.fetch_balance()
-        return float(b.get("free", {}).get("USDT") or 0), b.get("free", {})
+        free = b.get("free") if isinstance(b, dict) else None
+        if (not isinstance(free, dict) or "USDT" not in free
+                or any(not finite_number(v) or v < 0 for v in free.values())):
+            raise ValueError("交易所可用余额缺失或数值无效，已阻止下单")
+        return float(free["USDT"]), free
 
     def audit(self, s):
         if not self.swap:
@@ -290,6 +298,11 @@ class Venue:
         return bid, ask, timestamp / 1000
 
     def prepare(self, k, side, amount, holding, reference, leverage):
+        if (side not in ("BUY", "SELL") or
+                any(not finite_number(v) for v in (amount, holding, reference, leverage)) or
+                amount < 0 or holding < 0 or reference <= 0 or leverage <= 0 or
+                (side == "BUY" and amount <= 0) or (side == "SELL" and holding <= 0)):
+            raise ValueError("订单方向、预算、持仓或参考价无效")
         pair = self.pair(k)
         if not self.swap:
             # Refresh in the order lane, never on every scan or market tick.
@@ -310,13 +323,15 @@ class Venue:
         if not 0 < bid <= ask or ask / bid - 1 > 0.003:
             raise ValueError("盘口价差超过 0.3%")
         price = ask * 1.001 if side == "BUY" else bid * 0.999
+        price = float(self.client.price_to_precision(pair, price))
+        if not math.isfinite(price) or price <= 0:
+            raise ValueError("交易所价格精度处理结果无效")
         if abs(price / reference - 1) > 0.01:
             raise ValueError("报价偏离策略参考价超过 1%")
         free, balances = self.balance()
         contract = float(m.get("contractSize") or 1)
         if self.client.fetch_open_orders(pair):
             raise ValueError("交易对已有未结委托，禁止重复暴露")
-        qty = amount / price if side == "BUY" else holding
         if self.swap:
             positions = self.client.fetch_positions([pair])
             active = [p for p in positions if float(p.get("contracts") or 0) > 0]
@@ -344,8 +359,17 @@ class Venue:
             raise ValueError("USDT 可用余额不足")
         elif side == "SELL" and float(balances.get(k) or 0) + 1e-12 < holding:
             raise ValueError("交易所现货余额不足")
-        qty = float(self.client.amount_to_precision(pair, qty / contract))
-        price = float(self.client.price_to_precision(pair, price))
+        # Compute from the actual rounded limit price, not the pre-rounding quote.
+        # Decimal arithmetic keeps the budget bound independent of binary rounding.
+        if not math.isfinite(contract) or contract <= 0:
+            raise ValueError("交易所合约数量单位无效")
+        maximum = (D(amount) / D(price) if side == "BUY" else D(holding)) / D(contract)
+        qty = float(self.client.amount_to_precision(pair, str(maximum)))
+        if not math.isfinite(qty) or qty <= 0:
+            raise ValueError("订单未通过交易所数量精度规则")
+        if ((side == "BUY" and D(qty) * D(contract) * D(price) > D(amount)) or
+                (side == "SELL" and D(qty) * D(contract) > D(holding))):
+            raise ValueError("数量精度处理超出策略预算或持仓，已阻止下单")
         limits = m["limits"]
         if not all(math.isfinite(x) and x > 0 for x in (qty, price, contract)) or any(
             (rule.get("min") is not None and val < rule["min"])
