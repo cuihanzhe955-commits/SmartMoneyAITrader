@@ -681,6 +681,7 @@ export function Lab({ onUseTemplate }: { onUseTemplate: (challenge: boolean) => 
         </div>
       </div>
     </Panel>
+    <IndicatorResearch />
     <Panel title="组合策略预设" cap="STRATEGY MIX">
       <div className="pad">
         <p>
@@ -725,4 +726,34 @@ export function Lab({ onUseTemplate }: { onUseTemplate: (challenge: boolean) => 
     </Panel>
     </>
   );
+}
+
+function IndicatorResearch() {
+  const [symbol,setSymbol] = useState("BTC");
+  const [offset,setOffset] = useState(0);
+  const q = useQuery({queryKey:["indicator-research",symbol,offset], queryFn:() => api("research/indicators?symbol="+symbol+"&offset_minute="+offset)});
+  const d = q.data;
+  const number = (value: number) => value.toLocaleString("zh-CN", {maximumSignificantDigits:10});
+  return <Panel title="指标口径研究" cap="INDICATOR RESEARCH">
+    <div className="pad">
+      <p>比较原策略与标准平滑指标。此处使用项目附带公开历史归档，不是当前行情；不会修改已有策略或创建订单。</p>
+      <div className="buttons">
+        <select aria-label="指标研究币种" value={symbol} onChange={e=>setSymbol(e.target.value)}>{["BTC","ETH","SOL","DOGE","XRP","AVAX","LINK","ADA"].map(s=><option key={s}>{s}</option>)}</select>
+        <select aria-label="指标研究时点" value={offset} onChange={e=>setOffset(+e.target.value)}>{[0,60,360,720,1440].map(n=><option key={n} value={n}>归档起点 +{n} 分钟</option>)}</select>
+      </div>
+      {q.isPending ? <p>正在读取历史归档并计算…</p> : q.isError ? <p>研究数据读取失败，请检查归档文件。</p> : <>
+        <p>{d.source} · 截至 {new Date(d.as_of*1000).toLocaleString("zh-CN")} · {d.bars} 根{d.timeframe}</p>
+        <div className="scroll"><table><thead><tr><th>指标</th><th>原策略值</th><th>标准参考值</th><th>计算口径差异</th></tr></thead><tbody>
+          {d.comparisons.map((m:any)=><tr key={m.key}><td>{m.name}</td><td>{number(m.legacy)}</td><td>{number(m.standard)}<small>差额 {number(m.delta)}</small></td><td>{m.legacy_method} → {m.standard_method}</td></tr>)}
+        </tbody></table></div>
+        <p>原口径信号：{d.signals.legacy.join("、") || "无"}；标准口径信号：{d.signals.standard.join("、") || "无"}。</p>
+        <p>固定普通规则实验配置下，入场条件：原口径{d.signals.legacy_buy?"满足":"不满足"}，标准口径{d.signals.standard_buy?"满足":"不满足"}。当前执行口径仍为原策略。</p>
+        <p>{d.note}</p>
+        <button onClick={()=>{
+          const url=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:"application/json"}));
+          const link=document.createElement("a");link.href=url;link.download="indicator-research-"+symbol+".json";link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+        }}>导出指标对照报告</button>
+      </>}
+    </div>
+  </Panel>;
 }

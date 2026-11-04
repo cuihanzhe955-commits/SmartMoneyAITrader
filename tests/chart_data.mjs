@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {prepareCurve} from "../frontend/src/chart-data.ts";
+const d={state:{start:100,t:300,config:{capital:10}},curve:[[200,11],[100,10],[200,12],[400,99],[250,NaN]],fills:[{t:200,kind:"BUY"},{t:100,kind:"SELL"},{t:250,kind:"BUY"}]};
+const result=prepareCurve(d,1);
+assert.deepEqual(result.points,[{time:100,value:10},{time:200,value:12}]);
+assert.equal(result.rejected,2);
+assert.deepEqual(result.markers.map(m=>m.time),[100,200]);
+assert.equal(d.curve.length,5);
+assert.equal(prepareCurve({...d,curve:[[100,10],[200,15]]},1).points[1].value,15);
+assert.deepEqual(prepareCurve({state:{start:100,t:100,config:{capital:10}},curve:[]},1).points,[{time:100,value:10}]);
+assert.equal(prepareCurve({state:{start:100,t:100,config:{capital:10}},curve:[[200,99]]},1).points.length,0);
+assert.equal(prepareCurve({...d,state:{...d.state,t:5000}},1).points.length,0);
+assert.equal(prepareCurve(null,1).points.length,0);
+console.log("PASS chart normalization: sorted unique times, same-length updates, future/NaN rejection, marker alignment, fallback and range");

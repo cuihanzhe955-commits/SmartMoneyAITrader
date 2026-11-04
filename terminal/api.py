@@ -166,6 +166,11 @@ def create_app(path=None):
         return {key: {"name": name, "low": low, "high": high}
                 for key, (name, low, high) in RECOMMENDED.items()}
 
+    @app.get("/api/research/indicators")
+    def research_indicators(symbol: str = "BTC", offset_minute: int = 0):
+        from strategy.research import compare
+        return compare(symbol, offset_minute)
+
     @app.post("/api/credentials")
     def keys(x: Credentials):
         values = {

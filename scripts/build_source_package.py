@@ -11,12 +11,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = {"ai", "challenge", "events", "execution", "market", "risk", "strategy", "terminal", "web", "tests", "scripts"}
-ROOT_FILES = {".gitignore", ".env.example", "README.md", "使用说明.md", "requirements.txt",
+ROOT_FILES = {".gitignore", ".env.example", "README.md", "使用说明.md", "requirements.txt", "requirements-research.txt",
               "install.bat", "start.bat", "start.cmd", "stop.bat", "launch.py", "server.py", "terminal_host.py"}
 DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md", "WINDOWS_QUICK_START.md", "README.md", "V1_ROADMAP.md", "PRODUCT_DECISION_POOL.md", "SmartMoney_Stable_Plan.md"}
-DOCS.update({"PROGRESS_STATUS.md", "PHASE_C2_FOUNDATION.md", "PHASE_C2_TRANSPORT.md", "PHASE_C2_SETTLEMENT.md",
+DOCS.update({"OPEN_SOURCE_AUDIT.md", "PHASE_D_COMPONENTS.md", "PROGRESS_STATUS.md", "PHASE_C2_FOUNDATION.md", "PHASE_C2_TRANSPORT.md", "PHASE_C2_SETTLEMENT.md",
              "PHASE_C2_MAINTENANCE.md", "PHASE_C2_RUNTIME.md", "PHASE_C2_LIFECYCLE.md", "PHASE_C2_RECOVERY.md", "PHASE_C2_DIAGNOSTICS.md", "PHASE_C3_READINESS.md"})
-VERSION = "1.0-C3-readiness"
+VERSION = "1.0-D1-components"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
     "provider_token": re.compile(r"(?:sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{20,}"),
@@ -32,7 +32,8 @@ def allowed(name):
         return False
     if len(parts)==1: return name in ROOT_FILES
     if parts[0] in FOLDERS:
-        return p.suffix in {".py", ".html", ".css", ".js"}
+        return p.suffix in {".py", ".html", ".css", ".js", ".mjs"}
+    if parts[0]=="third_party": return len(parts)==2 and parts[1] in {"lightweight-charts-LICENSE.txt","lightweight-charts-NOTICE.txt","ccxt-LICENSE.txt"}
     if parts[0]=="docs": return len(parts)==2 and parts[1] in DOCS
     if parts[0]=="assets": return p.suffix.lower() == ".svg"
     if parts[0]=="frontend":
@@ -40,7 +41,7 @@ def allowed(name):
             len(parts)==2 and parts[1] in {"package.json","package-lock.json","tsconfig.json","vite.config.ts","index.html"}
         ) or (parts[1]=="dist" and p.suffix in {".js",".css",".html"})
     if parts[0]=="data":
-        return len(parts)==2 and (parts[1] in {"okx-spot-rules.json","SHA256SUMS.txt"} or
+        return len(parts)==2 and (parts[1] in {"okx-spot-rules.json","SHA256SUMS.txt","indicator-reference.json"} or
             bool(re.fullmatch(r"(BTC|ETH|SOL|DOGE|XRP|AVAX|LINK|ADA)USDT-1m-2024-08-0[45]\.zip",parts[1])))
     return False
 

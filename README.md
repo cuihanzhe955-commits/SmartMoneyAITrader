@@ -4,9 +4,9 @@
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-C3%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-D1%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前公开版本：v1.0 · C3 准备检查点（2026-11-04）。** 最新隔离离线回归 330 项通过；模拟联调准备清单、保护生命周期与恢复界面已有测试证据，详见 [C3 记录](docs/PHASE_C3_READINESS.md)。真实账户与资金验收按[最新决议](docs/SmartMoney_Stable_Plan.md)后移至非资金开发完成之后。尚非 Stable/生产就绪版本；平台 demo 联调与真实资金验收尚未通过。此前沟通百分比为无固定权重的工程估算，正式状态见 [阶段与验收口径](docs/PROGRESS_STATUS.md)。
+> **当前公开版本：v1.0 · D1 组件研究检查点（2026-11-04）。** 最新隔离离线回归 374 项通过；新增指标口径研究与净值图修复见 [D1 记录](docs/PHASE_D_COMPONENTS.md)。模拟联调准备清单、保护生命周期与恢复界面已有测试证据，详见 [C3 记录](docs/PHASE_C3_READINESS.md)。真实账户与资金验收按[最新决议](docs/SmartMoney_Stable_Plan.md)后移至非资金开发完成之后。尚非 Stable/生产就绪版本；平台 demo 联调与真实资金验收尚未通过。此前沟通百分比为无固定权重的工程估算，正式状态见 [阶段与验收口径](docs/PROGRESS_STATUS.md)。
 
 ## 项目概览
 

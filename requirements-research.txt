@@ -1,0 +1,3 @@
+# Optional isolated indicator reference POC only; not a production dependency.
+TA-Lib==0.8.3
+numpy==2.5.4

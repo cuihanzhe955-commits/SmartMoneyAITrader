@@ -1,13 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import {
-  createChart,
-  AreaSeries,
-  ColorType,
-  createSeriesMarkers,
-  type UTCTimestamp,
-} from "lightweight-charts";
+import { Curve } from "./equity-chart";
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 import { motion } from "motion/react";
 import {
@@ -55,90 +49,6 @@ const nav = [
   ["通知中心", Bell],
   ["设置", Gear],
 ] as const;
-function Curve({ d }: { d: Row }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [range, R] = useState(24);
-  useEffect(() => {
-    if (!ref.current || !d.state) return;
-    const light = document.body.classList.contains("light"),
-      color = light ? "#56657b" : "#99a8bf";
-    const chart = createChart(ref.current, {
-      autoSize: true,
-      layout: {
-        background: { type: ColorType.Solid, color: "transparent" },
-        textColor: color,
-        attributionLogo: true,
-      },
-      grid: {
-        vertLines: { color: "#7888a51a" },
-        horzLines: { color: "#7888a525" },
-      },
-      timeScale: { timeVisible: true, secondsVisible: false },
-      handleScroll: false,
-      handleScale: false,
-    });
-    const series = chart.addSeries(AreaSeries, {
-      lineColor: "#9885ff",
-      topColor: "#9581ff44",
-      bottomColor: "#9581ff02",
-      lineWidth: 2,
-    });
-    const points = new Map<number, number>(d.curve);
-    if (!points.size) points.set(d.state.start, d.state.config.capital);
-    const start = d.state.t - range * 3600;
-    series.setData(
-      [...points]
-        .filter(([t]) => t >= start)
-        .map(([t, v]) => ({ time: t as UTCTimestamp, value: v })),
-    );
-    series.createPriceLine({
-      price: d.state.config.capital,
-      color: "#8391aa",
-      lineWidth: 1,
-      lineStyle: 2,
-      title: "初始",
-    });
-    if (d.state.config.profile === "challenge")
-      series.createPriceLine({
-        price: d.state.config.capital * 2,
-        color: "#edaa60",
-        lineWidth: 1,
-        lineStyle: 2,
-        title: "目标",
-      });
-    createSeriesMarkers(
-      series,
-      [...d.fills]
-        .reverse()
-        .filter((a: Row) => a.t >= start && points.has(a.t))
-        .map((a: Row) => ({
-          time: a.t as UTCTimestamp,
-          position:
-            a.kind === "BUY" ? ("belowBar" as const) : ("aboveBar" as const),
-          color: a.kind === "BUY" ? "#39cb9b" : "#f0798c",
-          shape: "circle" as const,
-          size: 0.5,
-        })),
-    );
-    chart.timeScale().fitContent();
-    return () => chart.remove();
-  }, [d.state?.id, d.curve?.length, d.state?.t, range]);
-  return (
-    <Panel title="账户净值" cap="EQUITY / USDT">
-      <div className="plotbar">
-        <span>●　策略净值</span>
-        <select value={range} onChange={(e) => R(+e.target.value)}>
-          {[1, 6, 24].map((n) => (
-            <option key={n} value={n}>
-              {n} 小时
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="chart" ref={ref} />
-    </Panel>
-  );
-}
 function Events({ rows }: { rows: Row[] }) {
   const show = useUI((s) => s.show);
   return (
