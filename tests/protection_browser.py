@@ -88,6 +88,11 @@ def run():
                 errors=[];page.on("pageerror",lambda e:errors.append(str(e)))
                 page.goto(url)
                 page.locator("aside").get_by_role("button",name="设置",exact=True).click()
+                page.get_by_text("模拟平台联调准备 · 查看待办",exact=True).click()
+                prep=page.get_by_label("模拟平台联调准备")
+                prep.get_by_role("button",name="运行模拟只读预检",exact=True).click()
+                prep.get_by_text("本机准备条件与只读预检已就绪；平台成交验收仍未完成。",exact=True).wait_for()
+                assert not page.request.get(url+"/api/demo-readiness").json()["platform_integration_verified"]
                 page.evaluate("""() => {
                     const tag=document.createElement('div');
                     tag.textContent='自动化测试 · 平台回报为 Mock · 未进行平台账户联调';

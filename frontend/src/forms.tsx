@@ -425,6 +425,7 @@ function LiveChecks() {
   const [stopSymbol, setStopSymbol] = useState("");
   const [stopPrice, setStopPrice] = useState("");
   const [protectionBusy, setProtectionBusy] = useState(false);
+  const readiness = useQuery({queryKey: ["demo-readiness"], queryFn: () => api("demo-readiness"), refetchInterval: 5000});
   const protection = useQuery({queryKey: ["protection-status"], queryFn: () => api("protection-status"), refetchInterval: 5000});
   const session = useQuery({queryKey: ["acceptance-session"], queryFn: () => api("state")});
   const id = session.data?.state?.id;
@@ -446,6 +447,24 @@ function LiveChecks() {
   return <Panel title="实盘验收 · 只读健康检查" cap="LIVE READINESS">
     <div className="pad">
       <p>核验账户权限、专用预算、现货规则、盘口时效及未核对订单。检查不会下单、启动机器人或赋予交易授权。</p>
+      <details aria-label="模拟平台联调准备">
+        <summary>模拟平台联调准备 · 查看待办</summary>
+        <p>此清单只检查本机准备条件；不会发送测试订单，也不会确认账户资格或授予交易权限。</p>
+        {readiness.isPending ? <p>正在检查本机条件…</p> : readiness.isError ? <p>准备清单读取失败，请检查本地服务</p> : <>
+          <div className="scroll"><table className="demo-readiness-table"><thead><tr><th>准备项</th><th>状态</th><th>下一步</th></tr></thead><tbody>
+            {readiness.data.steps.map((s: any) => <tr key={s.key}><td>{s.name}</td><td>{({READY:"条件已满足",ACTION_REQUIRED:"需要处理",BLOCKED:"存在阻断",USER_CHECK_REQUIRED:"需要自行确认",NOT_VERIFIED:"尚未验收"} as Record<string,string>)[s.status]}</td><td>{s.message}</td></tr>)}
+          </tbody></table></div>
+          <button disabled={busy || !readiness.data.can_run_readonly} onClick={async () => {
+            setBusy(true);
+            try { await run(async () => {
+              await api("account/verify", {id: readiness.data.session_id}); await saved.refetch(); await readiness.refetch();
+            }, "模拟只读预检完成，未提交订单"); }
+            finally { setBusy(false); }
+          }}>运行模拟只读预检</button>
+          <button onClick={() => readiness.refetch()}>刷新准备清单</button>
+          {readiness.data.prereqs_ready && <p>本机准备条件与只读预检已就绪；平台成交验收仍未完成。</p>}
+        </>}
+      </details>
       <div aria-label="托管保护维护状态">
         <strong>托管保护维护</strong>
         {protection.isPending ? <p>正在读取维护状态…</p> : protection.isError ? <p>维护状态读取失败，请检查本地服务</p> : <>

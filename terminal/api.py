@@ -125,6 +125,11 @@ def create_app(path=None):
     def protection_status():
         return rt().hosted_status()
 
+    @app.get("/api/demo-readiness")
+    def demo_readiness():
+        from execution.demo_readiness import inspect_local
+        return inspect_local(rt())
+
     @app.post("/api/protection-action")
     def protection_action(x: ProtectionAction):
         result = rt().hosted_action(x.id, x.action, x.client_id, x.symbol, x.stop_price)

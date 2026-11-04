@@ -386,6 +386,11 @@ th {
 .protection-table td {
   vertical-align: top;
 }
+.demo-readiness-table td:last-child {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 600px;
+}
 td:nth-child(4) {
   white-space: normal;
 }

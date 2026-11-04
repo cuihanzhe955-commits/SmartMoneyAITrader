@@ -12,6 +12,20 @@ def token(state):
     return digest([scope(state), state["config"], state.get("revision"), position_version(state)])
 
 
+def credential_version(rt, state):
+    return digest(rt.vault.values.get(rt.account_key(state["config"])) or {})
+
+
+def ledger_version(rt):
+    orders=[list(row) for row in rt.db.db.execute("SELECT client_id,stage,body FROM venue_orders ORDER BY client_id")]
+    stops=[]
+    if rt.db.db.execute("SELECT 1 FROM sqlite_master WHERE name='hosted_stops'").fetchone():
+        stops=[list(row) for row in rt.db.db.execute("""SELECT client_id,stage,
+            json_extract(body,'$.released'),json_extract(body,'$.exchange_time'),json_extract(body,'$.children')
+            FROM hosted_stops ORDER BY client_id""")]
+    return digest([orders,stops])
+
+
 def inspect_session(rt, session_id):
     from terminal.runtime import safe_error, protection_ready
     if not rt.health_mutex.acquire(blocking=False):
@@ -26,6 +40,8 @@ def inspect_session(rt, session_id):
             state = copy.deepcopy(state)
             rt.check_binding(state)
             binding, version = rt.account_ref(state["config"]), token(state)
+            credentials = credential_version(rt, state)
+            ledger_stamp = ledger_version(rt)
         started = int(time.time())
         checks = []
 
@@ -77,7 +93,8 @@ def inspect_session(rt, session_id):
                     raise ValueError("数据库完整性检查失败")
                 if live.unresolved(rt.db):
                     raise ValueError("存在未确认订单，必须先查询原单并完成对账")
-                if not current or token(current) != version or rt.account_ref(current["config"]) != binding:
+                if (not current or token(current) != version or rt.account_ref(current["config"]) != binding
+                        or credential_version(rt, current) != credentials or ledger_version(rt) != ledger_stamp):
                     raise ValueError("检查期间账户、配置或持仓发生变化，请重新检查")
                 return {"database": "ok", "unresolved_orders": 0, "snapshot_unchanged": True}
 
@@ -94,7 +111,8 @@ def inspect_session(rt, session_id):
                           environment=state["config"]["execution"], engine=state["config"]["engine"],
                           started_at=started, finished_at=int(time.time()), scope_hash=version,
                           read_only=True, real_funds_verified=False, authorizes_trading=False,
-                          runtime_id=rt.runtime_id, requires_recheck=False, recheck_reasons=[],
+                          runtime_id=rt.runtime_id, _credential_version=credentials, _ledger_version=ledger_stamp,
+                          requires_recheck=False, recheck_reasons=[],
                           status="BLOCKED" if any(c["status"] == "FAIL" for c in checks) else "READ_ONLY_PASSED",
                           checks=checks,
                           remaining=["真实资金试单尚未获授权、未执行",
@@ -102,7 +120,7 @@ def inspect_session(rt, session_id):
                                      "账户及地区使用资格需符合交易所要求；API 连通不能证明资格"])
             rt.db.db.execute("INSERT INTO acceptance_reports VALUES(?,?,?,?)",
                             (report["id"], session_id, report["finished_at"], encode(report)))
-            return report
+            return {key:value for key,value in report.items() if key not in ("_credential_version", "_ledger_version")}
     finally:
         rt.health_mutex.release()
 
@@ -118,13 +136,19 @@ def latest_report(rt, session_id):
         reasons.append("程序已重启，旧报告需要重新核验")
     if not 0 <= time.time() - report.get("finished_at", 0) < 60:
         reasons.append("报告已超过 60 秒有效展示期，或本机时间发生变化")
+    if report.get("_ledger_version") != ledger_version(rt):
+        reasons.append("普通订单或保护记录已变化，或旧报告缺少账本版本，需要重新核验")
     current = rt.db.load(session_id)
     if not current or token(current) != report.get("scope_hash"):
         reasons.append("账户、配置或持仓已变化")
     elif current["config"].get("execution") != "paper":
+        if report.get("_credential_version") != credential_version(rt, current):
+            reasons.append("交易凭据已更换或旧报告缺少凭据版本，需要重新核验")
         try:
             rt.check_binding(current)
         except ValueError:
             reasons.append("原账户凭据绑定需要重新核验")
     report.update(requires_recheck=bool(reasons), recheck_reasons=reasons)
+    report.pop("_credential_version", None)
+    report.pop("_ledger_version", None)
     return report

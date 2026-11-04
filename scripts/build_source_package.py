@@ -15,7 +15,7 @@ ROOT_FILES = {".gitignore", ".env.example", "README.md", "使用说明.md", "req
               "install.bat", "start.bat", "start.cmd", "stop.bat", "launch.py", "server.py", "terminal_host.py"}
 DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md", "WINDOWS_QUICK_START.md", "README.md", "V1_ROADMAP.md", "PRODUCT_DECISION_POOL.md", "SmartMoney_Stable_Plan.md"}
 DOCS.update({"PROGRESS_STATUS.md", "PHASE_C2_FOUNDATION.md", "PHASE_C2_TRANSPORT.md", "PHASE_C2_SETTLEMENT.md",
-             "PHASE_C2_MAINTENANCE.md", "PHASE_C2_RUNTIME.md", "PHASE_C2_LIFECYCLE.md", "PHASE_C2_RECOVERY.md", "PHASE_C2_DIAGNOSTICS.md"})
+             "PHASE_C2_MAINTENANCE.md", "PHASE_C2_RUNTIME.md", "PHASE_C2_LIFECYCLE.md", "PHASE_C2_RECOVERY.md", "PHASE_C2_DIAGNOSTICS.md", "PHASE_C3_READINESS.md"})
 VERSION = "1.0-C2-demo-protection"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {

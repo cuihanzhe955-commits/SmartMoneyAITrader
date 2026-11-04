@@ -65,6 +65,10 @@ def run():
                 errors=[]; p.on("pageerror",lambda e:errors.append(str(e)))
                 p.goto(url)
                 p.locator("aside").get_by_role("button",name="设置",exact=True).click()
+                p.get_by_text("模拟平台联调准备 · 查看待办",exact=True).click()
+                prep=p.get_by_label("模拟平台联调准备")
+                assert prep.get_by_role("button",name="运行模拟只读预检",exact=True).is_disabled()
+                prep.get_by_text("尚未验收",exact=True).wait_for()
                 p.get_by_label("托管保护维护状态").get_by_text("暂无托管保护记录；当前不代表已获得交易所保护",exact=True).wait_for()
                 status = p.request.get(url+"/api/protection-status").json()
                 assert status["mode"] == "demo_protection" and not status["automatic_creation"] and not status["live_creation"]
