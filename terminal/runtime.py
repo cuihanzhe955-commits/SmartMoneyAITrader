@@ -42,6 +42,7 @@ class Runtime:
     def __init__(self, root):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
+        self.runtime_id = digest([str(self.root), time.time_ns()])
         self.db = Store(self.root / "terminal.db")
         self.lock = threading.RLock()
         self.exit = threading.Event()

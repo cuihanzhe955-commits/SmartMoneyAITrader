@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = {"ai", "challenge", "events", "execution", "market", "risk", "strategy", "terminal", "web", "tests", "scripts"}
 ROOT_FILES = {".gitignore", ".env.example", "README.md", "使用说明.md", "requirements.txt",
               "install.bat", "start.bat", "start.cmd", "stop.bat", "launch.py", "server.py", "terminal_host.py"}
-DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md", "WINDOWS_QUICK_START.md"}
+DOCS = {"PHASE_C1_RESULTS.md", "CHALLENGE_TEMPLATE_UPDATE.md", "LIVE_TRADING_VERIFICATION.md", "GITHUB_UPLOAD.md", "WINDOWS_QUICK_START.md", "README.md", "V1_ROADMAP.md", "PRODUCT_DECISION_POOL.md", "SmartMoney_Stable_Plan.md"}
 VERSION = "1.0-C1-template-ui"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
@@ -32,6 +32,7 @@ def allowed(name):
     if parts[0] in FOLDERS:
         return p.suffix in {".py", ".html", ".css", ".js"}
     if parts[0]=="docs": return len(parts)==2 and parts[1] in DOCS
+    if parts[0]=="assets": return p.suffix.lower() == ".svg"
     if parts[0]=="frontend":
         return (parts[1]=="src" and p.suffix in {".tsx",".ts",".css"}) or (
             len(parts)==2 and parts[1] in {"package.json","package-lock.json","tsconfig.json","vite.config.ts","index.html"}

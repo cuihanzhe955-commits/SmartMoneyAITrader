@@ -4,6 +4,7 @@ import json
 import time
 from execution.identity import digest, position_version, scope
 from execution import live
+from execution.protection import audit_protection
 from events.store import encode
 
 
@@ -51,13 +52,16 @@ def inspect_session(rt, session_id):
             if venue.name != "okx":
                 raise ValueError("此版本尚未完整核验该平台的条件单清单")
             inventory = venue.algo_inventory()
+            audit = audit_protection(state, inventory)
             if inventory:
                 # Keep operational identifiers in the local report only.
-                checks.append(dict(key="algo_inventory", name="发现的条件单", status="FAIL",
-                                   message="这些委托尚未与策略账本核对，不认定为托管保护",
-                                   details=inventory))
+                checks.append(dict(key="algo_inventory", name="保护单状态与持仓数量", status="FAIL",
+                                   message="；".join(audit["issues"][:3]), details=audit))
                 raise ValueError("存在未核对条件单，请在交易所核对后重新检查")
-            return {"pending_algos": 0, "exchange_protection_verified": False}
+            if audit["positions"]:
+                checks.append(dict(key="algo_positions", name="持仓托管保护缺口", status="WARN",
+                                   message="；".join(audit["issues"][:3]), details=audit))
+            return audit
 
         check("algos", "条件单与保护状态核对", algos)
         check("quotes", "持仓盘口时效", lambda: {
@@ -90,6 +94,7 @@ def inspect_session(rt, session_id):
                           environment=state["config"]["execution"], engine=state["config"]["engine"],
                           started_at=started, finished_at=int(time.time()), scope_hash=version,
                           read_only=True, real_funds_verified=False, authorizes_trading=False,
+                          runtime_id=rt.runtime_id, requires_recheck=False, recheck_reasons=[],
                           status="BLOCKED" if any(c["status"] == "FAIL" for c in checks) else "READ_ONLY_PASSED",
                           checks=checks,
                           remaining=["真实资金试单尚未获授权、未执行",
@@ -105,4 +110,21 @@ def inspect_session(rt, session_id):
 def latest_report(rt, session_id):
     row = rt.db.db.execute("SELECT body FROM acceptance_reports WHERE session_id=? ORDER BY rowid DESC LIMIT 1",
                            (session_id,)).fetchone()
-    return json.loads(row[0]) if row else None
+    if not row:
+        return None
+    report = json.loads(row[0])
+    reasons = []
+    if report.get("runtime_id") != rt.runtime_id:
+        reasons.append("程序已重启，旧报告需要重新核验")
+    if not 0 <= time.time() - report.get("finished_at", 0) < 60:
+        reasons.append("报告已超过 60 秒有效展示期，或本机时间发生变化")
+    current = rt.db.load(session_id)
+    if not current or token(current) != report.get("scope_hash"):
+        reasons.append("账户、配置或持仓已变化")
+    elif current["config"].get("execution") != "paper":
+        try:
+            rt.check_binding(current)
+        except ValueError:
+            reasons.append("原账户凭据绑定需要重新核验")
+    report.update(requires_recheck=bool(reasons), recheck_reasons=reasons)
+    return report

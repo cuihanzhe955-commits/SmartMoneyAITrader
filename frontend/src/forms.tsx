@@ -375,12 +375,12 @@ export function Settings() {
 }
 
 function LiveChecks() {
-  const [busy, setBusy] = useState(false), [result, setResult] = useState<Row | null>(null);
+  const [busy, setBusy] = useState(false);
   const session = useQuery({queryKey: ["acceptance-session"], queryFn: () => api("state")});
   const id = session.data?.state?.id;
   const saved = useQuery({queryKey: ["acceptance-report", id],
-    queryFn: () => api("account/verification?id=" + id), enabled: !!id});
-  const report = result?.session_id === id ? result : saved.data?.report;
+    queryFn: () => api("account/verification?id=" + id), enabled: !!id, refetchInterval: 5000});
+  const report = saved.data?.report;
   const remote = session.data?.state?.config?.execution !== "paper" && !!id;
   return <Panel title="实盘验收 · 只读健康检查" cap="LIVE READINESS">
     <div className="pad">
@@ -390,7 +390,7 @@ function LiveChecks() {
       <div className="buttons">
         <button disabled={!remote || busy} onClick={async () => {
           setBusy(true);
-          try { await run(async () => setResult(await api("account/verify", {id})), "只读检查完成"); }
+          try { await run(async () => { await api("account/verify", {id}); await saved.refetch(); }, "只读检查完成"); }
           finally { setBusy(false); }
         }}>{busy ? "正在核验…" : "运行只读验收"}</button>
         {report && <button onClick={() => {
@@ -401,7 +401,8 @@ function LiveChecks() {
         }}>导出本机检查报告</button>}
       </div>
       {report && <>
-        <p role="status">{report.status === "READ_ONLY_PASSED" ? "只读检查通过 · 尚未完成实盘验收" : "存在阻断项 · 请先处理"} · {new Date(report.finished_at * 1000).toLocaleString("zh-CN")}</p>
+        <p role="status">{report.requires_recheck ? "旧验收报告 · 需要重新核验" : report.status === "READ_ONLY_PASSED" ? "只读检查通过 · 尚未完成实盘验收" : "存在阻断项 · 请先处理"} · {new Date(report.finished_at * 1000).toLocaleString("zh-CN")}</p>
+        {report.requires_recheck && <p>{report.recheck_reasons.join("；")}</p>}
         <p>结果为当时快照，账户或持仓变化后请重新检查；启动时仍会独立复核。</p>
         <div className="scroll"><table><thead><tr><th>检查项</th><th>结果</th><th>说明</th></tr></thead>
           <tbody>{report.checks.map((c: Row, i: number) => <tr key={c.key + i}>

@@ -182,7 +182,7 @@ class Venue:
                         raise ValueError("交易所条件单分页重复或身份不完整")
                     seen.add(algo)
                     result.append({k: row.get(k, "") for k in (
-                        "algoId", "instId", "ordType", "state", "side", "sz",
+                        "algoId", "instId", "instType", "ordType", "state", "side", "sz",
                         "slTriggerPx", "slOrdPx", "tdMode")})
                 if len(rows) < 100:
                     break
@@ -193,10 +193,52 @@ class Venue:
 
     def market_check(self):
         self.client.load_markets(True)
-        if not any(self.pair(k) in self.client.markets and self.market(k)["spot"]
-                   for k in SYMBOLS):
+        verified = []
+        for k in SYMBOLS:
+            if self.pair(k) not in self.client.markets:
+                continue
+            market = self.client.market(self.pair(k))
+            if market.get("active") is not True or market.get("spot") is not True:
+                continue
+            verified.append(self.spot_rules(k, market))
+        if not verified:
             raise ValueError("无可核验规则的现货交易对")
-        return {"market_rules": "verified"}
+        return {"market_rules": "verified", "pairs": verified}
+
+    def spot_rules(self, k, market):
+        """Shared checks for admission and the actual order's refreshed market."""
+        if market.get("active") is not True or market.get("spot") is not True:
+            raise ValueError(f"{self.pair(k)} 不是可交易的现货交易对")
+        mode = self.client.precisionMode
+        precision = market.get("precision") or {}
+        valid = lambda n: (isinstance(n, (int, float)) and not isinstance(n, bool)
+                           and math.isfinite(n))
+        limits = market.get("limits")
+        if not isinstance(limits, dict):
+            raise ValueError(f"{self.pair(k)} 限额规则不完整，无法完成规则验收")
+        for field, name in (("amount", "数量"), ("price", "价格"), ("cost", "金额")):
+            rule = limits.get(field, {})
+            if not isinstance(rule, dict):
+                raise ValueError(f"{self.pair(k)} {name}限额格式无效，无法完成规则验收")
+            low, high = rule.get("min"), rule.get("max")
+            if ((low is not None and (not valid(low) or low < 0)) or
+                    (high is not None and (not valid(high) or high <= 0))):
+                raise ValueError(f"{self.pair(k)} {name}限额数值无效，无法完成规则验收")
+            if low is not None and high is not None and low > high:
+                raise ValueError(f"{self.pair(k)} {name}上下限矛盾，无法完成规则验收")
+        minimum = limits.get("amount", {}).get("min")
+        if not valid(minimum) or minimum <= 0:
+            raise ValueError(f"{self.pair(k)} 缺少有效的最小下单数量，无法完成规则验收")
+        for field in ("amount", "price"):
+            value = precision.get(field)
+            if (not valid(value) or
+                    not ((mode == ccxt.TICK_SIZE and value > 0) or
+                         (mode == ccxt.DECIMAL_PLACES and value >= 0 and value == int(value)))):
+                raise ValueError(f"{self.pair(k)} 数量或价格精度不完整，无法完成规则验收")
+        cost = limits.get("cost", {}).get("min")
+        return dict(symbol=self.pair(k), min_quantity=minimum,
+                    quantity_precision=precision["amount"], price_precision=precision["price"],
+                    precision_mode=mode, min_notional=cost)
 
     def preflight(self, state):
         """Read-only admission; never send a test order or change permissions."""
@@ -227,7 +269,21 @@ class Venue:
 
     def prepare(self, k, side, amount, holding, reference, leverage):
         pair = self.pair(k)
+        if not self.swap:
+            # Refresh in the order lane, never on every scan or market tick.
+            try:
+                self.client.load_markets(True)
+            except Exception as err:
+                # Preserve regional refusal handling; never show raw responses or keys.
+                if "451" in str(err) or "restricted location" in str(err).lower():
+                    raise
+                detail = ("交易所请求频率受限，请稍后重新核验"
+                          if isinstance(err, ccxt.RateLimitExceeded)
+                          else "请检查交易所连接后重新核验")
+                raise ValueError("交易规则刷新失败，已阻止下单；" + detail) from None
         m = self.market(k)
+        if not self.swap:
+            self.spot_rules(k, m)
         bid, ask, asof = self.quote(k)
         if not 0 < bid <= ask or ask / bid - 1 > 0.003:
             raise ValueError("盘口价差超过 0.3%")
@@ -273,9 +329,9 @@ class Venue:
             (rule.get("min") is not None and val < rule["min"])
             or (rule.get("max") is not None and val > rule["max"])
             for val, rule in [
-                (qty, limits["amount"]),
-                (price, limits["price"]),
-                (qty * contract * price, limits["cost"]),
+                (qty, limits.get("amount", {})),
+                (price, limits.get("price", {})),
+                (qty * contract * price, limits.get("cost", {})),
             ]
         ):
             raise ValueError("订单未通过交易所精度或金额规则")

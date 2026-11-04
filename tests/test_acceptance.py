@@ -26,6 +26,167 @@ def wire_venue():
     return v
 
 
+def test_market_readiness_reports_actual_constraints():
+    v = wire_venue()
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    result = v.market_check()
+    assert result["pairs"] == [dict(symbol="BTC/USDT", min_quantity=.000001,
+        quantity_precision=.000001, price_precision=.01, precision_mode=ccxt.TICK_SIZE,
+        min_notional=None)]
+    v.client.load_markets.assert_called_once_with(True)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("minimum", None), ("minimum", float("nan")), ("amount", 0),
+    ("price", None), ("price", float("inf")), ("amount", True), ("cost", -1),
+])
+def test_market_readiness_rejects_incomplete_rules(field, value):
+    v = wire_venue()
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    m = v.client.market("BTC/USDT")
+    if field == "minimum": m["limits"]["amount"]["min"] = value
+    elif field == "cost": m["limits"]["cost"]["min"] = value
+    else: m["precision"][field] = value
+    with pytest.raises(ValueError, match="无法完成规则验收"):
+        v.market_check()
+
+
+def test_market_readiness_checks_all_active_candidates():
+    v = wire_venue()
+    good = copy.deepcopy(v.client.market("BTC/USDT"))
+    bad = copy.deepcopy(good)
+    bad.update(id="ETH-USDT", symbol="ETH/USDT", base="ETH", baseId="ETH")
+    bad["precision"]["price"] = None
+    v.client.set_markets([good, bad])
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    with pytest.raises(ValueError, match="ETH/USDT"):
+        v.market_check()
+
+
+def test_market_readiness_handles_decimal_places_explicitly():
+    v = wire_venue()
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    v.client.precisionMode = ccxt.DECIMAL_PLACES
+    v.client.market("BTC/USDT")["precision"] = {"amount": 0, "price": 2}
+    assert v.market_check()["pairs"][0]["quantity_precision"] == 0
+    v.client.market("BTC/USDT")["precision"]["price"] = .5
+    with pytest.raises(ValueError, match="精度不完整"):
+        v.market_check()
+
+
+@pytest.mark.parametrize("side", ["BUY", "SELL"])
+@pytest.mark.parametrize("change", ["minimum_missing", "price_missing", "inactive", "minimum_increased"])
+def test_order_rechecks_rules_after_successful_admission(side, change):
+    v = wire_venue()
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    assert v.market_check()["market_rules"] == "verified"
+    changed = copy.deepcopy(v.client.market("BTC/USDT"))
+    if change == "minimum_missing": changed["limits"]["amount"]["min"] = None
+    if change == "price_missing": changed["precision"]["price"] = None
+    if change == "inactive": changed["active"] = False
+    if change == "minimum_increased": changed["limits"]["amount"]["min"] = 1
+    def refresh(reload):
+        assert reload is True
+        v.client.set_markets([changed])
+        return v.client.markets
+    v.client.load_markets.side_effect = refresh
+    v.quote = Mock(return_value=(100, 100.01, time.time()))
+    v.balance = Mock(return_value=(1000, {"BTC": 1}))
+    v.client.fetch_open_orders = Mock(return_value=[])
+    v.client.create_order = Mock()
+    with pytest.raises(ValueError):
+        prepared = v.prepare("BTC", side, 20, .2, 100, 1)
+        v.submit({"symbol": "BTC", "side": side, "client_id": "fixture"}, prepared)
+    v.client.create_order.assert_not_called()
+    if change != "minimum_increased":
+        v.quote.assert_not_called()
+
+
+def test_order_uses_refreshed_quantity_and_price_precision():
+    v = wire_venue()
+    changed = copy.deepcopy(v.client.market("BTC/USDT"))
+    changed["precision"] = {"amount": .03, "price": .5}
+    def refresh(reload):
+        assert reload is True
+        v.client.set_markets([changed])
+        return v.client.markets
+    v.client.load_markets = Mock(side_effect=refresh)
+    v.quote = Mock(return_value=(100, 100.01, time.time()))
+    v.balance = Mock(return_value=(1000, {"BTC": 1}))
+    v.client.fetch_open_orders = Mock(return_value=[])
+    prepared = v.prepare("BTC", "BUY", 20, 0, 100, 1)
+    assert prepared["quantity"] == pytest.approx(.18)
+    assert prepared["price"] == 100
+    v.client.load_markets.assert_called_once_with(True)
+
+
+def test_order_does_not_use_cached_rules_when_refresh_fails():
+    v = wire_venue()
+    v.client.load_markets = Mock(side_effect=ccxt.NetworkError("fixture timeout"))
+    v.quote = Mock()
+    v.client.create_order = Mock()
+    with pytest.raises(ValueError, match="交易规则刷新失败，已阻止下单"):
+        prepared = v.prepare("BTC", "BUY", 20, 0, 100, 1)
+        v.submit({"symbol": "BTC", "side": "BUY", "client_id": "fixture"}, prepared)
+    v.quote.assert_not_called()
+    v.client.create_order.assert_not_called()
+
+
+@pytest.mark.parametrize("field,rule", [
+    ("amount", {"min": .1, "max": .01}),
+    ("price", {"min": 2, "max": 1}),
+    ("cost", {"min": 10, "max": 5}),
+    ("amount", {"min": .000001, "max": float("nan")}),
+    ("price", {"min": 0, "max": float("inf")}),
+    ("cost", {"min": 0, "max": False}),
+    ("amount", {"min": .000001, "max": 0}),
+    ("price", {"min": -1, "max": 10}),
+    ("cost", {"min": "1", "max": 10}),
+    ("price", []),
+])
+def test_invalid_limit_ranges_block_admission_and_order(field, rule):
+    v = wire_venue()
+    v.client.market("BTC/USDT")["limits"][field] = rule
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    v.quote = Mock()
+    v.client.create_order = Mock()
+    with pytest.raises(ValueError, match="无法完成规则验收"):
+        v.market_check()
+    with pytest.raises(ValueError, match="无法完成规则验收"):
+        prepared = v.prepare("BTC", "BUY", 20, 0, 100, 1)
+        v.submit({"symbol": "BTC", "side": "BUY", "client_id": "fixture"}, prepared)
+    v.quote.assert_not_called()
+    v.client.create_order.assert_not_called()
+
+
+@pytest.mark.parametrize("field,high", [("amount", .1), ("price", 99), ("cost", 10)])
+def test_valid_exchange_maximum_still_rejects_oversized_order(field, high):
+    v = wire_venue()
+    v.client.market("BTC/USDT")["limits"][field]["max"] = high
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    assert v.market_check()["market_rules"] == "verified"
+    v.quote = Mock(return_value=(100, 100.01, time.time()))
+    v.balance = Mock(return_value=(1000, {"BTC": 1}))
+    v.client.fetch_open_orders = Mock(return_value=[])
+    v.client.create_order = Mock()
+    with pytest.raises(ValueError, match="精度或金额规则"):
+        prepared = v.prepare("BTC", "BUY", 20, 0, 100, 1)
+        v.submit({"symbol": "BTC", "side": "BUY", "client_id": "fixture"}, prepared)
+    v.client.create_order.assert_not_called()
+
+
+def test_unspecified_optional_limits_are_not_invented():
+    v = wire_venue()
+    limits = v.client.market("BTC/USDT")["limits"]
+    limits.pop("price"); limits.pop("cost")
+    v.client.load_markets = Mock(return_value=v.client.markets)
+    assert v.market_check()["pairs"][0]["min_notional"] is None
+    v.quote = Mock(return_value=(100, 100.01, time.time()))
+    v.balance = Mock(return_value=(1000, {"BTC": 1}))
+    v.client.fetch_open_orders = Mock(return_value=[])
+    assert v.prepare("BTC", "BUY", 20, 0, 100, 1)["quantity"] > 0
+
+
 def row(i):
     return dict(billId=str(1000-i), tradeId=str(1000-i), ordId="123", instId="BTC-USDT",
                 side="buy", fillSz="0.01", fillPx="100", fee="-0.00001", feeCcy="BTC",
@@ -132,7 +293,9 @@ def test_health_is_read_only_and_report_survives_restart(tmp_path):
     v.client.create_order.assert_not_called()
     rt.db.db.close()
     rt=Runtime(tmp_path)
-    assert latest_report(rt,s["id"]) == report
+    restored = latest_report(rt,s["id"])
+    assert restored["requires_recheck"] and any("重启" in r for r in restored["recheck_reasons"])
+    assert restored["checks"] == report["checks"] and not restored["authorizes_trading"]
     assert rt.db.load()["lifecycle_status"] == "CREATED"
     rt.db.db.close()
 

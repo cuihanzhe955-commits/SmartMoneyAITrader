@@ -102,6 +102,49 @@ def exchange_session(rt):
     return s
 
 
+@pytest.mark.parametrize("failure,expected", [
+    ("timeout", "交易规则刷新失败，已阻止下单"),
+    ("rate_limit", "交易所请求频率受限"),
+    ("region", "HTTP 451"),
+])
+def test_rule_refresh_failure_reaches_status_and_order_record(tmp_path, failure, expected):
+    import ccxt
+    from test_acceptance import wire_venue
+    rt = Runtime(tmp_path)
+    try:
+        s = exchange_session(rt)
+        venue = wire_venue()
+        secret = "fixture-private-response-must-not-be-displayed"
+        error = (ccxt.RateLimitExceeded(secret) if failure == "rate_limit" else
+                 ccxt.ExchangeNotAvailable("451 " + secret) if failure == "region" else
+                 ccxt.RequestTimeout(secret))
+        venue.client.load_markets = Mock(side_effect=error)
+        venue.client.create_order = Mock()
+        venue.audit = Mock(return_value={"dedicated_balance_match": True})
+        rt.venue = lambda c: venue
+        with rt.db.db:
+            live.enqueue(rt.db, s, "BTC", "BUY", {"price": 100, "time": int(time.time())}, 10, "fixture")
+            order = live.pending(rt.db, s["id"])
+        rt.dispatch(s, order)
+        current = rt.db.load()
+        stored = json.loads(rt.db.db.execute("SELECT body FROM venue_orders WHERE client_id=?",
+                            (order["client_id"],)).fetchone()[0])
+        assert current["lifecycle_status"] == "PAUSED" and current["needs_check"]
+        assert expected in current["latest"] and secret not in current["latest"]
+        assert stored["stage"] == "REJECTED" and stored["error"] == current["latest"]
+        assert stored["calculation"]["final_amount"] == 0
+        assert not live.pending(rt.db, s["id"])
+        events = rt.db.entries("system_events", s["id"], kind="REJECTED")
+        assert len(events) == 1 and events[0]["summary"] == current["latest"]
+        assert secret not in json.dumps(events)
+        rt.dispatch(current, order)
+        assert len(rt.db.entries("system_events", s["id"], kind="REJECTED")) == 1
+        venue.client.create_order.assert_not_called()
+    finally:
+        rt.shutdown()
+        rt.db.db.close()
+
+
 def test_partial_cancel_race_and_actual_restart(tmp_path):
     rt=Runtime(tmp_path)
     s=exchange_session(rt)
@@ -176,7 +219,10 @@ def test_real_adapter_preflight_fails_closed(failure):
     v.client.privateGetAccountConfig.return_value={"code":"0","data":[{"uid":"dummy","perm":"read_only,trade"+(",withdraw" if failure=="withdraw" else "")}]}
     v.client.privateGetTradeOrdersAlgoPending.return_value={"code":"0","data":[{}] if failure=="algo" else []}
     v.client.markets={"BTC/USDT": {}}
-    v.client.market.return_value={"active":True,"spot":True}
+    import ccxt
+    v.client.precisionMode=ccxt.TICK_SIZE
+    v.client.market.return_value={"active":True,"spot":True,
+        "precision":{"amount":.000001,"price":.01}, "limits":{"amount":{"min":.000001},"cost":{}}}
     balances={"USDT":101 if failure=="different_balance" else 100}
     if failure=="other_asset":balances["BTC"]=1
     v.client.fetch_balance.return_value={"free":balances,"used":{},"total":balances}

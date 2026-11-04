@@ -1,5 +1,8 @@
 """Real UI + API + temporary SQLite; exchange reads use explicitly isolated fixtures."""
 import os
+import json
+import sqlite3
+from contextlib import closing
 import socket
 import subprocess
 import sys
@@ -43,7 +46,7 @@ def run():
     from playwright.sync_api import sync_playwright
     from terminal.runtime import Runtime
     from test_acceptance import remote
-    out = ROOT / "docs" / "phaseC_ui"
+    out = Path(os.environ.get("SMART_MONEY_UI_OUTPUT", ROOT / "docs" / "phaseC_ui"))
     out.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp, socket.socket() as sock:
         rt=Runtime(tmp); remote(rt); rt.db.db.close()
@@ -68,6 +71,16 @@ def run():
                     p.get_by_role("button",name="导出本机检查报告").click()
                 assert download.value.suggested_filename.startswith("local-acceptance-")
                 assert p.request.get(url+"/api/state").json()["state"]["lifecycle_status"] == "CREATED"
+                # Age only the isolated test report and verify automatic UI refresh.
+                with closing(sqlite3.connect(Path(tmp)/"terminal.db")) as db, db:
+                    rid, raw = db.execute("SELECT id,body FROM acceptance_reports ORDER BY rowid DESC LIMIT 1").fetchone()
+                    report = json.loads(raw)
+                    report["finished_at"] = int(time.time()) - 61
+                    db.execute("UPDATE acceptance_reports SET body=? WHERE id=?", (json.dumps(report), rid))
+                p.get_by_role("status").filter(has_text="需要重新核验").wait_for(timeout=12000)
+                p.screenshot(path=str(out/"stale-report.png"),full_page=True)
+                p.get_by_role("button",name="运行只读验收").click()
+                p.get_by_role("status").filter(has_text="只读检查通过").wait_for()
                 for w,h in [(1366,768),(1920,1080)]:
                     p.set_viewport_size({"width":w,"height":h})
                     for theme in ("dark","light"):
