@@ -13,6 +13,8 @@ from events.store import encode
 from execution.identity import digest, scope, position_version
 from execution.protection import positive
 from execution.live import number
+from execution import live
+from events.store import Store
 
 TERMINAL = ("CANCELED", "FAILED")
 
@@ -184,3 +186,80 @@ class HostedStops:
     def exit_blocked(self, client_id):
         # Triggered is NOT filled. Child fills/fees must still reach the ledger.
         return self.get(client_id)["stage"] not in TERMINAL
+
+    def settle_children(self, client_id, receipts):
+        """Atomically apply confirmed child receipts to the EXISTING session book.
+
+        receipts maps exchange order IDs to (CCXT order, complete trade list).
+        No synthetic fill or cash balance. Runtime integration remains disabled.
+        """
+        with self.transaction():
+            parent = self.get(client_id)
+            if parent["stage"] != "TRIGGERED" or set(receipts) != set(parent["children"]):
+                raise ValueError("保护单未确认触发或子订单清单不完整")
+            store = Store.__new__(Store)
+            store.db = self.db
+            state = store.load(parent["scope"][0])
+            if not state or scope(state) != parent["scope"] or state["config"].get("execution") != "demo":
+                raise ValueError("保护成交与当前会话账户不一致")
+            position = state["positions"].get(parent["symbol"])
+            if position and position.get("opening_order") != parent["opening_order"]:
+                raise ValueError("保护成交与持仓归属不一致")
+            before = digest([state["cash"], state["positions"], state["fees"], state["realized"]])
+            child_orders, total = [], number(0)
+            for exchange_id in parent["children"]:
+                report, trades = receipts[exchange_id]
+                requested = number(report.get("amount"))
+                if (str(report.get("id")) != exchange_id or report.get("symbol") != parent["symbol"] + "/USDT"
+                        or report.get("side") != "sell" or requested <= 0):
+                    raise ValueError("保护子订单身份、方向或数量不一致")
+                total += requested
+                key = "hs" + digest([client_id, exchange_id])[:30]
+                rows = self.db.execute("SELECT client_id,body FROM venue_orders WHERE json_extract(body,'$.exchange_id')=?", (exchange_id,)).fetchall()
+                if any(r[0] != key for r in rows):
+                    raise ValueError("保护子订单已被其他委托认领，禁止重复入账")
+                existing = self.db.execute("SELECT body FROM venue_orders WHERE client_id=?", (key,)).fetchone()
+                order = json.loads(existing[0]) if existing else dict(client_id=key, symbol=parent["symbol"],
+                    side="SELL", exchange_id=exchange_id, reference=float(parent["stop_price"]),
+                    prepared=dict(quantity=str(requested), contract=1), reason="交易所保护单触发",
+                    product="spot", source="hosted_stop", parent_stop=client_id,
+                    exchange_client_id=report.get("clientOrderId"))
+                if (order.get("parent_stop") != client_id or number(order["prepared"]["quantity"]) != requested
+                        or order.get("exchange_client_id") != report.get("clientOrderId")):
+                    raise ValueError("保护子订单原始参数发生变化")
+                economics = {}
+                for trade in trades:
+                    trade_key = str(trade.get("id"))
+                    receipt = live.execution(trade, report, order)
+                    if trade_key in economics and economics[trade_key] != receipt:
+                        raise ValueError("保护成交重复标识存在冲突")
+                    economics[trade_key] = receipt
+                proof = digest([report.get("status"), str(number(report.get("filled"))), economics])
+                if order.get("terminal_proof") and order["terminal_proof"] != proof:
+                    raise ValueError("保护子订单终态成交回报发生冲突")
+                child_orders.append((key, order, report, trades, existing, proof))
+            if total > number(parent["quantity"]):
+                raise ValueError("触发子订单总量超过保护预算")
+            complete = True
+            for key, order, report, trades, existing, proof in child_orders:
+                if not existing:
+                    self.db.execute("INSERT INTO venue_orders VALUES(?,?,?,?)", (key, state["id"], "SUBMITTED", encode(order)))
+                # Algo-spawned orders may have no client ID. Their exchange ID is
+                # bound by the confirmed parent's list; preserve any observed ID
+                # above, then use our internal ledger ID for normal settlement.
+                normalized = {**report, "clientOrderId": key, "info": {}}
+                done = live.settle(store, state, order, normalized, trades)
+                if done:
+                    order["terminal_proof"] = proof
+                    live.save(store, order, order["stage"])
+                complete = done and complete
+            parent["children_reconciled"] = complete
+            parent["remaining_quantity"] = str(state["positions"].get(parent["symbol"], {}).get("qty", 0))
+            if before != digest([state["cash"], state["positions"], state["fees"], state["realized"]]):
+                from challenge.manager import snapshot
+                snapshot(store, state)
+            state.update(admitted=False, needs_check=True, recovery_required=True)
+            store.save(state)
+            self._save(parent, "TRIGGERED")
+            return dict(complete=complete, remaining_quantity=parent["remaining_quantity"],
+                        flat=parent["symbol"] not in state["positions"])

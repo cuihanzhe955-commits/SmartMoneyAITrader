@@ -87,6 +87,20 @@ class DemoStops:
         with self.lock:
             return self._query(client_id)
 
+    def settle(self, client_id):
+        """Read spawned orders and fills; commit all receipts in one transaction."""
+        with self.lock:
+            order = self._query(client_id)
+            if order["stage"] != "TRIGGERED":
+                raise ValueError("保护单尚未确认触发")
+            receipts = {}
+            for exchange_id in order["children"]:
+                report = self.venue.client.fetch_order(exchange_id, self.venue.pair(order["symbol"]))
+                trades = self.venue.executions({"symbol": order["symbol"], "side": "SELL"}, report)
+                receipts[exchange_id] = (report, trades)
+            self.guard(order)
+            return self.ledger.settle_children(client_id, receipts)
+
     def cancel(self, client_id):
         with self.lock:
             order = self._query(client_id)
