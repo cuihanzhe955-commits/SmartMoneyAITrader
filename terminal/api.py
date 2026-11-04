@@ -54,6 +54,14 @@ class Acceptance(BaseModel):
     id: int = Field(gt=0)
 
 
+class ProtectionAction(BaseModel):
+    id: int = Field(gt=0)
+    action: Literal["create", "query", "cancel", "finalize"]
+    client_id: str = Field(default="", max_length=32)
+    symbol: str = Field(default="", max_length=16)
+    stop_price: float | None = Field(default=None, gt=0, allow_inf_nan=False)
+
+
 def create_app(path=None):
     @asynccontextmanager
     async def lifespan(app):
@@ -116,6 +124,11 @@ def create_app(path=None):
     @app.get("/api/protection-status")
     def protection_status():
         return rt().hosted_status()
+
+    @app.post("/api/protection-action")
+    def protection_action(x: ProtectionAction):
+        result = rt().hosted_action(x.id, x.action, x.client_id, x.symbol, x.stop_price)
+        return {k: result.get(k) for k in ("client_id", "stage", "released", "quantity", "symbol")}
 
     @app.post("/api/shutdown")
     def shutdown(body: dict):

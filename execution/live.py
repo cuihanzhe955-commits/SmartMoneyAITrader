@@ -13,7 +13,7 @@ OPEN = "stage NOT IN ('FILLED','PARTIAL_CANCELLED','CANCELLED','REJECTED')"
 def hosted_pending(db):
     if not db.db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='hosted_stops'").fetchone():
         return False
-    return bool(db.db.execute("SELECT 1 FROM hosted_stops WHERE stage NOT IN ('CANCELED','FAILED') LIMIT 1").fetchone())
+    return bool(db.db.execute("SELECT 1 FROM hosted_stops WHERE stage NOT IN ('CANCELED','FAILED') AND COALESCE(json_extract(body,'$.released'),0)=0 LIMIT 1").fetchone())
 
 
 def setup(db):

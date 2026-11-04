@@ -376,6 +376,9 @@ export function Settings() {
 
 function LiveChecks() {
   const [busy, setBusy] = useState(false);
+  const [stopSymbol, setStopSymbol] = useState("");
+  const [stopPrice, setStopPrice] = useState("");
+  const [protectionBusy, setProtectionBusy] = useState(false);
   const protection = useQuery({queryKey: ["protection-status"], queryFn: () => api("protection-status"), refetchInterval: 5000});
   const session = useQuery({queryKey: ["acceptance-session"], queryFn: () => api("state")});
   const id = session.data?.state?.id;
@@ -383,6 +386,17 @@ function LiveChecks() {
     queryFn: () => api("account/verification?id=" + id), enabled: !!id, refetchInterval: 5000});
   const report = saved.data?.report;
   const remote = session.data?.state?.config?.execution !== "paper" && !!id;
+  const demo = session.data?.state?.config?.execution === "demo" && session.data?.state?.config?.exchange === "okx" && session.data?.state?.config?.product === "spot";
+  const holdings = Object.keys(session.data?.state?.positions || {});
+  const protect = async (action: string, client_id = "", session_id = id) => {
+    setProtectionBusy(true);
+    try { await run(async () => {
+      await api("protection-action", {id: session_id, action, client_id,
+        symbol: stopSymbol || holdings[0] || "", stop_price: action === "create" ? Number(stopPrice) : null});
+      await protection.refetch(); await session.refetch();
+    }, "模拟保护操作已处理，请核对状态"); }
+    finally { setProtectionBusy(false); }
+  };
   return <Panel title="实盘验收 · 只读健康检查" cap="LIVE READINESS">
     <div className="pad">
       <p>核验账户权限、专用预算、现货规则、盘口时效及未核对订单。检查不会下单、启动机器人或赋予交易授权。</p>
@@ -390,11 +404,20 @@ function LiveChecks() {
         <strong>托管保护维护</strong>
         {protection.isPending ? <p>正在读取维护状态…</p> : protection.isError ? <p>维护状态读取失败，请检查本地服务</p> : <>
           <p>{protection.data?.running ? "恢复维护运行中" : "恢复维护未运行"} · 仅 OKX 模拟环境恢复；自动创建未开启</p>
+          {demo && <div className="buttons">
+            <select aria-label="模拟保护持仓" value={stopSymbol || holdings[0] || ""} onChange={e => setStopSymbol(e.target.value)}><option value="" disabled>选择实际持仓</option>{holdings.map(k => <option key={k}>{k}</option>)}</select>
+            <input aria-label="模拟保护止损价" type="number" min="0" step="any" placeholder="止损触发价" value={stopPrice} onChange={e => setStopPrice(e.target.value)} />
+            <button disabled={protectionBusy || !holdings.length || !Number.isFinite(Number(stopPrice)) || Number(stopPrice) <= 0 || protection.data?.blocks_orders} onClick={() => protect("create")}>创建模拟保护</button>
+          </div>}
           {protection.data?.error && <p>{protection.data.error}</p>}
           {protection.data?.blocks_orders && <p>保护单待核对，普通委托和账户切换已阻断</p>}
           {!protection.data?.orders?.length ? <p>暂无托管保护记录；当前不代表已获得交易所保护</p> :
-            <table><thead><tr><th>币种</th><th>实际记录状态</th><th>数量</th><th>核对结果</th></tr></thead><tbody>
-              {protection.data.orders.map((o: any, i: number) => <tr key={i}><td>{o.symbol}</td><td>{({PLANNED:"待发送",SENDING:"提交待确认",UNKNOWN:"状态未知",ACCEPTED:"请求已受理",LIVE:"待触发记录",CANCEL_PENDING:"撤销待确认",TRIGGERED:"已触发 · 待验收",CANCELED:"已取消",FAILED:"触发失败"} as Record<string,string>)[o.stage] || o.stage}</td><td>{o.quantity}</td><td>{o.maintenance_error || (o.children_reconciled ? "子订单已核对，账户仍需验收" : "等待核对")}</td></tr>)}
+            <table><thead><tr><th>币种</th><th>实际记录状态</th><th>数量</th><th>核对结果</th><th>模拟操作</th></tr></thead><tbody>
+              {protection.data.orders.map((o: any, i: number) => <tr key={i}><td>{o.symbol}</td><td>{o.released ? "核对完成 · 已释放" : ({PLANNED:"待发送",SENDING:"提交待确认",UNKNOWN:"状态未知",ACCEPTED:"请求已受理",LIVE:"待触发记录",CANCEL_PENDING:"撤销待确认",TRIGGERED:"已触发 · 待验收",CANCELED:"已取消",FAILED:"触发失败"} as Record<string,string>)[o.stage] || o.stage}</td><td>{o.quantity}</td><td>{o.maintenance_error || (o.released ? "账户已核对，恢复交易前重新验收" : o.children_reconciled ? "子订单已核对，账户仍需验收" : "等待核对")}</td><td>{!o.released && <>
+                <button disabled={protectionBusy || o.stage === "PLANNED"} onClick={() => protect("query", o.client_id, o.session_id)}>查询原单</button>
+                {["PLANNED", "LIVE"].includes(o.stage) && <button disabled={protectionBusy} onClick={() => protect("cancel", o.client_id, o.session_id)}>撤销模拟保护</button>}
+                {(["CANCELED", "FAILED"].includes(o.stage) || o.children_reconciled) && <button disabled={protectionBusy} onClick={() => protect("finalize", o.client_id, o.session_id)}>核对账户并释放</button>}
+              </>}</td></tr>)}
             </tbody></table>}
         </>}
       </div>

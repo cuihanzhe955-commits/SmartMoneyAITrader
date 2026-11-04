@@ -25,11 +25,15 @@ class StopMaintenance:
                 failed = False
                 try:
                     if order["stage"] == "TRIGGERED":
-                        self.service.settle(cid)
+                        result = self.service.settle(cid)
+                        if isinstance(result, dict) and result.get("complete") is True:
+                            self.service.finalize(cid)
                     else:
                         current = self.service.reconcile(cid)
                         if current["stage"] == "TRIGGERED":
-                            self.service.settle(cid)
+                            result = self.service.settle(cid)
+                            if isinstance(result, dict) and result.get("complete") is True:
+                                self.service.finalize(cid)
                 except Exception:
                     failed = True
                 self.service.ledger.maintenance_result(cid, self.clock(), failed)

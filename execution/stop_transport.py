@@ -1,4 +1,4 @@
-"""Explicit demo-only hosted stop service; not enabled in Runtime or the UI."""
+"""Demo-only hosted stops; explicit UI writes and independent read-only recovery."""
 import threading
 import time
 from contextlib import nullcontext
@@ -106,6 +106,10 @@ class DemoStops:
 
     def cancel(self, client_id):
         with self.lock:
+            local = self.ledger.get(client_id)
+            if local["stage"] == "PLANNED":
+                self.guard(local)
+                return self.ledger.begin_cancel(client_id)
             order = self._query(client_id)
             if order["stage"] in TERMINAL:
                 return order
@@ -119,3 +123,19 @@ class DemoStops:
             except Exception:
                 self.ledger.uncertain(client_id)
                 raise ValueError("保护单撤销结果未确认，必须继续查原单") from None
+
+    def finalize(self, client_id):
+        """Read-only external audit before releasing a completed demo intent."""
+        with self.lock:
+            order = self.ledger.get(client_id)
+            if order.get("released"):
+                return order
+            if order["stage"] not in TERMINAL and not (order["stage"] == "TRIGGERED" and order.get("children_reconciled")):
+                raise ValueError("保护单生命周期尚未终结")
+            state = self.guard(order)
+            started = time.time()
+            if self.venue.audit_spot(state).get("dedicated_balance_match") is not True or self.venue.algo_inventory():
+                raise ValueError("账户余额或未结条件单尚未核对，不能释放")
+            self.guard(order)
+            with self.commit_lock if self.commit_lock is not None else nullcontext():
+                return self.ledger.release_checked(client_id, state, started)

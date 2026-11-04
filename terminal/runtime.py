@@ -107,11 +107,55 @@ class Runtime:
             if self.db.db.execute("SELECT 1 FROM sqlite_master WHERE name='hosted_stops'").fetchone():
                 for raw, in self.db.db.execute("SELECT body FROM hosted_stops ORDER BY rowid DESC LIMIT 50"):
                     order = json.loads(raw)
-                    rows.append({k: order.get(k) for k in ("symbol", "stage", "quantity", "remaining_quantity",
-                        "last_check", "next_check", "maintenance_error", "children_reconciled")})
+                    row = {k: order.get(k) for k in ("client_id", "symbol", "stage", "quantity", "remaining_quantity",
+                        "last_check", "next_check", "maintenance_error", "children_reconciled", "released")}
+                    row["session_id"] = order["scope"][0]
+                    rows.append(row)
             return dict(mode="demo_recovery_only", automatic_creation=False, real_funds_verified=False,
                         running=any(t.name == "smart-money-hosted" and t.is_alive() for t in self.threads),
                         error=self.hosted_error, orders=rows, blocks_orders=live.hosted_pending(self.db))
+
+    def hosted_action(self, cid, action, client_id="", symbol="", stop_price=None):
+        from execution.hosted import HostedStops
+        from execution.stop_recovery import RuntimeStops
+        if not self.order_mutex.acquire(blocking=False):
+            raise ValueError("订单通道正在核对，请稍后重试")
+        try:
+            with self.lock:
+                s = self.db.load(cid)
+                if not s or s["config"].get("execution") != "demo" or s["config"].get("exchange") != "okx" or s["config"].get("product") != "spot":
+                    raise ValueError("保护操作只开放 OKX 现货模拟账户")
+                self.check_binding(s)
+                if self.hosted_ledger is None:
+                    self.hosted_ledger = HostedStops(self.root / "terminal.db")
+                ledger = self.hosted_ledger
+                if action != "create":
+                    if ledger.get(client_id)["scope"][0] != cid:
+                        raise ValueError("保护单不属于所选会话")
+            router = RuntimeStops(self, ledger)
+            if action == "create":
+                with self.lock:
+                    if live.unresolved(self.db) or live.hosted_pending(self.db):
+                        raise ValueError("先核对原普通订单与保护单，禁止重复创建")
+                    if symbol not in s["positions"]:
+                        raise ValueError("只能保护本策略实际持仓")
+                if not self.admit(s):
+                    raise ValueError("启动核验期间状态变化，请重试")
+                with self.lock:
+                    current = self.db.load(cid)
+                    generation = ledger.db.execute("SELECT COALESCE(MAX(json_extract(body,'$.generation')),0)+1 FROM hosted_stops").fetchone()[0]
+                    order = ledger.plan(current, symbol, stop_price, generation=generation)
+                return router.service(order["client_id"]).create(order["client_id"])
+            service = router.service(client_id)
+            if action == "query":
+                return service.reconcile(client_id)
+            if action == "cancel":
+                return service.cancel(client_id)
+            if action == "finalize":
+                return service.finalize(client_id)
+            raise ValueError("不支持的保护操作")
+        finally:
+            self.order_mutex.release()
 
     def hosted_tick(self):
         if self.exit.is_set() or not self.order_mutex.acquire(blocking=False):
@@ -122,9 +166,10 @@ class Runtime:
                     return
                 if self.hosted_ledger is None:
                     from execution.hosted import HostedStops
+                    self.hosted_ledger = HostedStops(self.root / "terminal.db")
+                if self.hosted_lane is None:
                     from execution.stop_maintenance import StopMaintenance
                     from execution.stop_recovery import RuntimeStops
-                    self.hosted_ledger = HostedStops(self.root / "terminal.db")
                     self.hosted_lane = StopMaintenance(RuntimeStops(self, self.hosted_ledger))
             self.hosted_lane.once()
             self.hosted_error = None
@@ -238,6 +283,8 @@ class Runtime:
             raise ValueError("当前会话已变更")
         c = s["config"]
         p = live.pending(self.db, cid)
+        if cmd in ("start", "resume", "use_rules") and live.hosted_pending(self.db):
+            raise ValueError("托管保护单尚未核对，完成原单与账户核对后再恢复普通交易")
         if (
             cmd in ("start", "resume", "use_rules")
             and c["execution"] == "live"
@@ -303,7 +350,7 @@ class Runtime:
         if cmd in ("start", "resume") and c["execution"] != "paper":
             self.check_binding(s)
             s.update(admitted=False, recovery_required=True, needs_check=True,
-                     latest="等待账户、规则、保护与账本预检")
+                     hosted_review_required=False, latest="等待账户、规则、保护与账本预检")
         if cmd in ("stop", "end") and s["positions"] and c["execution"] != "paper":
             s["latest"] = "交易所持仓仍在。本地止损随会话结束而停止，请核对或接管仓位"
             self.db.record("system_events", s, "PROTECTION_OFF", s["latest"])
@@ -448,6 +495,8 @@ class Runtime:
         with self.lock:
             s = self.db.load()
             if not s or s["lifecycle_status"] in DONE | {"CREATED"}:
+                return
+            if s.get("hosted_review_required"):
                 return
             c = s["config"]
             now = market_time(s)

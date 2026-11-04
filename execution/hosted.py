@@ -1,12 +1,13 @@
-"""Durable hosted-stop lifecycle foundation. No network writes or live activation.
+"""Durable demo hosted-stop lifecycle, receipts and verified release.
 
 Use an independent SQLite connection to the existing ledger, never a second
-trading balance. Callers must reconcile spawned orders through execution.live;
-a triggered stop remains blocking until that integration is implemented.
+trading balance. Spawned orders pass through execution.live; releasing an
+intent additionally requires fresh external account reconciliation.
 """
 import json
 import sqlite3
 import threading
+import time
 from contextlib import contextmanager
 
 from events.store import encode
@@ -29,11 +30,16 @@ class HostedStops:
         self.lock = threading.RLock()
         self.db.execute("PRAGMA synchronous=FULL")
         with self.db:
+            self.db.execute("BEGIN IMMEDIATE")
             self.db.execute("""CREATE TABLE IF NOT EXISTS hosted_stops(
                 client_id TEXT PRIMARY KEY, slot TEXT NOT NULL,
                 stage TEXT NOT NULL, body TEXT NOT NULL)""")
+            index = self.db.execute("SELECT sql FROM sqlite_master WHERE name='hosted_stop_slot'").fetchone()
+            if index and "released" not in index[0]:
+                self.db.execute("DROP INDEX hosted_stop_slot")
             self.db.execute("""CREATE UNIQUE INDEX IF NOT EXISTS hosted_stop_slot
-                ON hosted_stops(slot) WHERE stage NOT IN ('CANCELED','FAILED')""")
+                ON hosted_stops(slot) WHERE stage NOT IN ('CANCELED','FAILED')
+                AND COALESCE(json_extract(body,'$.released'),0)=0""")
             self.db.execute("""CREATE TABLE IF NOT EXISTS hosted_stop_events(
                 id INTEGER PRIMARY KEY, client_id TEXT NOT NULL, stage TEXT NOT NULL,
                 body TEXT NOT NULL)""")
@@ -62,7 +68,9 @@ class HostedStops:
         self.db.execute("INSERT INTO hosted_stop_events(client_id,stage,body) VALUES(?,?,?)",
                         (order["client_id"], stage, body))
 
-    def plan(self, state, symbol, stop_price):
+    def plan(self, state, symbol, stop_price, generation=0):
+        if not isinstance(generation, int) or isinstance(generation, bool) or not 0 <= generation <= 1000000:
+            raise ValueError("保护替换代次必须为有效非负整数")
         c = state["config"]
         if (c.get("exchange"), c.get("product"), c.get("execution")) != ("okx", "spot", "demo"):
             raise ValueError("托管保护生命周期仍在模拟环境验收，禁止启用真实资金")
@@ -72,18 +80,20 @@ class HostedStops:
             raise ValueError("缺少账户绑定、持仓归属或有效保护数量与价格")
         # One outstanding stop per account/environment/instrument, across sessions.
         slot = digest([c["exchange"], c["execution"], c["product"], state["account_ref"], symbol])
-        client = "sp" + digest([scope(state), symbol, position["opening_order"], str(qty), str(price)])[:30]
+        identity = [scope(state), symbol, position["opening_order"], str(qty), str(price)]
+        client = "sp" + digest(identity + ([generation] if generation else []))[:30]
         order = dict(client_id=client, slot=slot, scope=scope(state), symbol=symbol,
                      quantity=str(qty), stop_price=str(price), portfolio_version=position_version(state),
                      opening_order=position["opening_order"], stage="PLANNED", exchange_id=None,
-                     children=[], exchange_time=0, last_observation=None, cancel_requested=False)
+                     children=[], exchange_time=0, last_observation=None, cancel_requested=False,
+                     generation=generation, released=False)
         with self.transaction():
             if self.db.execute("SELECT 1 FROM hosted_stops WHERE client_id=?", (client,)).fetchone():
                 existing = self.get(client)
-                if existing["stage"] in TERMINAL:
+                if existing["stage"] in TERMINAL or existing.get("released"):
                     raise ValueError("相同保护意图已终结；替换代次尚未验收，禁止自动重建")
                 return existing
-            if self.db.execute("SELECT 1 FROM hosted_stops WHERE slot=? AND stage NOT IN ('CANCELED','FAILED')", (slot,)).fetchone():
+            if self.db.execute("SELECT 1 FROM hosted_stops WHERE slot=? AND stage NOT IN ('CANCELED','FAILED') AND COALESCE(json_extract(body,'$.released'),0)=0", (slot,)).fetchone():
                 raise ValueError("原保护单尚未终结或触发成交待核对，禁止重复创建或替换")
             self.db.execute("INSERT INTO hosted_stops VALUES(?,?,?,?)", (client, slot, "PLANNED", encode(order)))
             self._save(order, "PLANNED")
@@ -185,16 +195,56 @@ class HostedStops:
 
     def exit_blocked(self, client_id):
         # Triggered is NOT filled. Child fills/fees must still reach the ledger.
-        return self.get(client_id)["stage"] not in TERMINAL
+        order = self.get(client_id)
+        return order["stage"] not in TERMINAL and not order.get("released")
 
     def due(self, now, limit=4):
         """Bounded recovery queue. Never auto-send a planned intent."""
         with self.lock:
             rows = self.db.execute("""SELECT body FROM hosted_stops
                 WHERE stage NOT IN ('PLANNED','CANCELED','FAILED')
+                AND COALESCE(json_extract(body,'$.released'),0)=0
                 AND COALESCE(json_extract(body,'$.next_check'),0)<=?
                 ORDER BY COALESCE(json_extract(body,'$.next_check'),0),rowid LIMIT ?""", (now, limit)).fetchall()
         return [json.loads(row[0]) for row in rows]
+
+    def release_checked(self, client_id, checked_state, checked_at):
+        """Release a reconciled intent after a fresh dedicated-account audit.
+
+        Caller holds the runtime order lane and supplies the exact audited book.
+        This never restores trading permission; residual positions stay paused.
+        """
+        with self.transaction():
+            order = self.get(client_id)
+            store = Store.__new__(Store); store.db = self.db
+            current = store.load(order["scope"][0])
+            if (not current or scope(current) != order["scope"] or scope(checked_state) != order["scope"]
+                    or position_version(current) != position_version(checked_state)
+                    or not 0 <= time.time() - checked_at <= 10):
+                raise ValueError("账户核对期间账本变化或检查过期，禁止释放保护记录")
+            if order["stage"] not in TERMINAL and not (order["stage"] == "TRIGGERED" and order.get("children_reconciled")):
+                raise ValueError("保护单或触发子订单尚未终结")
+            if order.get("released"):
+                return order
+            if order["stage"] == "TRIGGERED":
+                for child in order["children"]:
+                    key = "hs" + digest([client_id, child])[:30]
+                    row = self.db.execute("SELECT stage,body FROM venue_orders WHERE client_id=?", (key,)).fetchone()
+                    if not row or row[0] not in live.FINAL or not json.loads(row[1]).get("terminal_proof"):
+                        raise ValueError("保护子订单终态证据缺失")
+            position = current["positions"].get(order["symbol"])
+            if position and position.get("opening_order") != order["opening_order"]:
+                raise ValueError("剩余持仓归属发生变化")
+            order.update(released=True, released_at=checked_at,
+                         remaining_quantity=str(position["qty"] if position else 0))
+            current.update(admitted=False, local_armed=False, needs_check=True, recovery_required=True, hosted_review_required=True,
+                           lifecycle_status=current["lifecycle_status"] if current["lifecycle_status"] in ("COMPLETED", "STOPPED") else "PAUSED",
+                           latest="保护单与账户已核对，恢复交易或替换保护前请重新验收")
+            store.save(current)
+            store.record("system_events", current, "HOSTED_RELEASED", current["latest"], order["symbol"],
+                         dict(remaining_quantity=order["remaining_quantity"]))
+            self._save(order, order["stage"])
+            return order
 
     def maintenance_result(self, client_id, now, failed):
         with self.transaction():
@@ -209,7 +259,7 @@ class HostedStops:
         """Atomically apply confirmed child receipts to the EXISTING session book.
 
         receipts maps exchange order IDs to (CCXT order, complete trade list).
-        No synthetic fill or cash balance. Runtime integration remains disabled.
+        No synthetic fill or cash balance. Caller serializes with the order lane.
         """
         with self.transaction():
             parent = self.get(client_id)

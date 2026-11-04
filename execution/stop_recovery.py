@@ -24,3 +24,6 @@ class RuntimeStops:
 
     def settle(self, client_id):
         return self.service(client_id).settle(client_id)
+
+    def finalize(self, client_id):
+        return self.service(client_id).finalize(client_id)
