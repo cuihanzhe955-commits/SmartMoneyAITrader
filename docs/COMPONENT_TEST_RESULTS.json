@@ -1,0 +1,98 @@
+{
+  "phase": "D",
+  "acceptance_scope": "component POCs, conditional adoption decisions and current Windows dependency review",
+  "stable": false,
+  "real_funds_verified": false,
+  "rollback_base": "177b49b",
+  "python_tests": {
+    "passed": 495,
+    "failed": 0,
+    "seconds": 55.95,
+    "command": "python -X utf8 -B tests/run_offline.py",
+    "warnings": [
+      "existing Starlette TestClient/httpx deprecation"
+    ]
+  },
+  "frontend_build": {
+    "passed": true,
+    "command": "npm --prefix frontend run build",
+    "warnings": [
+      "existing third-party use-client directives",
+      "bundle size warning"
+    ]
+  },
+  "node_chart": {
+    "normalization_points": 100000,
+    "elapsed_ms": 213.8757,
+    "limit_ms": 2000,
+    "replay_causal": true
+  },
+  "browser_replay": {
+    "browser_version": "156.0.8078.80",
+    "canvas_failure_fallback": true,
+    "replay_network_error": true,
+    "archive_minutes": 1440,
+    "ledger_fills": 272,
+    "replay_read_only": true,
+    "synthetic_input_points": 100000,
+    "visible_points": 86401,
+    "first_render_ms": 2119.7666999996727,
+    "render_budget_ms": 5000,
+    "poll_updates": 2,
+    "page_errors": []
+  },
+  "browser_regressions": {
+    "indicator_research": true,
+    "discovery": true,
+    "monitor_pool": true,
+    "sizes": [
+      "1366x768",
+      "1920x1080"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ]
+  },
+  "clean_environment": {
+    "dependency_verification": true,
+    "pip_check": true,
+    "server_started": true,
+    "graceful_shutdown": true,
+    "isolated_database": true,
+    "historical_replay_candles": 240,
+    "account_access": false,
+    "orders_submitted": false
+  },
+  "indicator_reference": {
+    "reference": {
+      "wrapper": "0.8.3",
+      "c_library": "b'0.8.3 (Oct 28 2026 21:46:52)'",
+      "numpy": "2.5.4"
+    },
+    "datasets": 13,
+    "values_compared": 11752,
+    "max_absolute_error": {
+      "ema9": 7.275957614183426e-12,
+      "ema21": 7.275957614183426e-12,
+      "rsi": 3.552713678800501e-14,
+      "atr": 5.684341886080802e-14
+    },
+    "production_engine_changed": false
+  },
+  "dependency_review": {
+    "production_python": 38,
+    "research_python": 2,
+    "npm_locked": 185,
+    "active_python_advisories": 0,
+    "active_research_advisories": 0,
+    "active_npm_advisories": 0
+  },
+  "carried_work": [
+    "asynchronous market scheduling",
+    "dynamic paper entry activation",
+    "multi-exchange account and order isolation",
+    "real-account and real-money acceptance deferred by user"
+  ],
+  "historical_observation": "Windows Proactor close callback not observed in this graceful browser cleanup run; historical observation retained"
+}

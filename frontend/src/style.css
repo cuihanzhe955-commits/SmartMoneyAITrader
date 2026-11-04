@@ -271,6 +271,7 @@ h3 {
   grid-template-columns: repeat(3, 1fr);
 }
 .charts {
+  align-items: start;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
 }
 .panel header,

@@ -1,0 +1,2201 @@
+{
+  "checked_at": "2026-11-04T14:30:42.224623+00:00",
+  "scope": "Windows CPython 3.12 x64 production dependency closure and complete npm lockfile; known-advisory lookup, not proof of absence",
+  "requirements_sha256": "cdb514f0bbb1ec5be55e9484eeb94cc2abf486f629376deed0dd92cf84cef63b",
+  "npm_lock_sha256": "16dcf329a1664e86ef074572e9b9dc135993fa8034ad3d15e1fdac8463bec349",
+  "python": [
+    {
+      "name": "aiohappyeyeballs",
+      "version": "2.7.1",
+      "license": "PSF-2.0",
+      "source": "https://pypi.org/pypi/aiohappyeyeballs/2.7.1/json",
+      "license_files": [
+        {
+          "file": "aiohappyeyeballs-2.7.1.dist-info/licenses/LICENSE",
+          "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "aiohttp",
+      "version": "3.14.5",
+      "license": "Apache-2.0 AND MIT",
+      "source": "https://pypi.org/pypi/aiohttp/3.14.5/json",
+      "license_files": [
+        {
+          "file": "aiohttp-3.14.5.dist-info/licenses/LICENSE.txt",
+          "sha256": "2e4be5fc6c4c72a466fcb665d726e049a6891981fe536c4f04b6366749461d23"
+        },
+        {
+          "file": "aiohttp-3.14.5.dist-info/licenses/vendor/llhttp/LICENSE",
+          "sha256": "628168d68bb5a8a17e0bbefb3bd74e326e1edc20583d76f52f457c82c921867d"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "aiohttp-fast-zlib",
+      "version": "0.3.0",
+      "license": "Apache-2.0",
+      "source": "https://pypi.org/pypi/aiohttp-fast-zlib/0.3.0/json",
+      "license_files": [
+        {
+          "file": "aiohttp_fast_zlib-0.3.0.dist-info/LICENSE",
+          "sha256": "2239851dc9c731ffd006ad2144185730f67d9f543394d9229e6ed6695d25df9e"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "aiosignal",
+      "version": "1.4.0",
+      "license": "Apache 2.0",
+      "source": "https://pypi.org/pypi/aiosignal/1.4.0/json",
+      "license_files": [
+        {
+          "file": "aiosignal-1.4.0.dist-info/licenses/LICENSE",
+          "sha256": "6fd5243e92dd7f98ec69c7ac377728e74905709ff527a5bf98d6d0263c04f5b6"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "annotated-doc",
+      "version": "0.0.5",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/annotated-doc/0.0.5/json",
+      "license_files": [
+        {
+          "file": "annotated_doc-0.0.5.dist-info/licenses/LICENSE",
+          "sha256": "fff170779a6acbf65abdb405c087f1cee1786691e4a96a4034517e4a504a0cdf"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/annotated-types/0.8.0/json",
+      "license_files": [
+        {
+          "file": "annotated_types-0.8.0.dist-info/licenses/LICENSE",
+          "sha256": "fe1049884b1a0d9342901e88e07f32925d24b3121d9972b6a6805fb9824b095d"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.1",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/anyio/4.15.1/json",
+      "license_files": [
+        {
+          "file": "anyio-4.15.1.dist-info/licenses/LICENSE",
+          "sha256": "5361ac9dc58f2ef5fd2e9b09c68297c17f04950909bbc8023bdb82eacf22c2b0"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "attrs",
+      "version": "26.1.0",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/attrs/26.1.0/json",
+      "license_files": [
+        {
+          "file": "attrs-26.1.0.dist-info/licenses/LICENSE",
+          "sha256": "882115c95dfc2af1eeb6714f8ec6d5cbcabf667caff8729f42420da63f714e9f"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "ccxt",
+      "version": "4.5.91",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/ccxt/4.5.91/json",
+      "license_files": [
+        {
+          "file": "ccxt-4.5.91.dist-info/licenses/LICENSE.txt",
+          "sha256": "1086fddb6d4084c1d5ef1175ff9e524c574a4c5b27255258911a58d8b9efa39c"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "certifi",
+      "version": "2026.10.23",
+      "license": "MPL-2.0",
+      "source": "https://pypi.org/pypi/certifi/2026.10.23/json",
+      "license_files": [
+        {
+          "file": "certifi-2026.10.23.dist-info/licenses/LICENSE",
+          "sha256": "e93716da6b9c0d5a4a1df60fe695b370f0695603d21f6f83f053e42cfc10caf7"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "cffi",
+      "version": "2.0.0",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/cffi/2.0.0/json",
+      "license_files": [
+        {
+          "file": "cffi-2.0.0.dist-info/licenses/LICENSE",
+          "sha256": "5ba24ddc57067f9249add644c3afc41a5d6dc37e23433ef759d95df370b0af63"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "charset-normalizer",
+      "version": "3.4.7",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/charset-normalizer/3.4.7/json",
+      "license_files": [
+        {
+          "file": "charset_normalizer-3.4.7.dist-info/licenses/LICENSE",
+          "sha256": "18577485d3704f1a479ded8e573c0976cfed315fd2fd17983fa988da4c2f70d1"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "click",
+      "version": "8.1.7",
+      "license": "BSD-3-Clause",
+      "source": "https://pypi.org/pypi/click/8.1.7/json",
+      "license_files": [
+        {
+          "file": "click-8.1.7.dist-info/LICENSE.rst",
+          "sha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "coincurve",
+      "version": "21.0.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://pypi.org/pypi/coincurve/21.0.0/json",
+      "license_files": [
+        {
+          "file": "coincurve-21.0.0.dist-info/licenses/LICENSE-APACHE",
+          "sha256": "e5ab9ad15b5ff88d8bd024427c4cf7a286c7abd6261900278759ced964718753"
+        },
+        {
+          "file": "coincurve-21.0.0.dist-info/licenses/LICENSE-MIT",
+          "sha256": "e419b699aab22817b595f2a2b446f1ecf8cb824a1f8b7ce2268b06d62fcf3890"
+        },
+        {
+          "file": "coincurve-21.0.0.dist-info/licenses/LICENSE-cffi",
+          "sha256": "04b80f5b077bbed68808cfebadeb5e3523f2a8c9a96495c587bd96df1eac2a33"
+        },
+        {
+          "file": "coincurve-21.0.0.dist-info/licenses/NOTICE",
+          "sha256": "674d159af51c060b189880617651f326b509691bae25ed969503d53de9fb4cb4"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6",
+      "license": "See license files",
+      "source": "https://pypi.org/pypi/colorama/0.4.6/json",
+      "license_files": [
+        {
+          "file": "colorama-0.4.6.dist-info/licenses/LICENSE.txt",
+          "sha256": "cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "cryptography",
+      "version": "50.0.2",
+      "license": "Apache-2.0 OR BSD-3-Clause",
+      "source": "https://pypi.org/pypi/cryptography/50.0.2/json",
+      "license_files": [
+        {
+          "file": "cryptography-50.0.2.dist-info/licenses/LICENSE",
+          "sha256": "3e0c7c091a948b82533ba98fd7cbb40432d6f1a9acbf85f5922d2f99a93ae6bb"
+        },
+        {
+          "file": "cryptography-50.0.2.dist-info/licenses/LICENSE.APACHE",
+          "sha256": "aac73b3148f6d1d7111dbca32099f68d26c644c6813ae1e4f05f6579aa2663fe"
+        },
+        {
+          "file": "cryptography-50.0.2.dist-info/licenses/LICENSE.BSD",
+          "sha256": "602c4c7482de6479dd2e9793cda275e5e63d773dacd1eca689232ab7008fb4fb"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "fastapi",
+      "version": "0.162.0",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/fastapi/0.162.0/json",
+      "license_files": [
+        {
+          "file": "fastapi-0.162.0.dist-info/licenses/LICENSE",
+          "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "frozenlist",
+      "version": "1.8.0",
+      "license": "Apache-2.0",
+      "source": "https://pypi.org/pypi/frozenlist/1.8.0/json",
+      "license_files": [
+        {
+          "file": "frozenlist-1.8.0.dist-info/licenses/LICENSE",
+          "sha256": "6fd5243e92dd7f98ec69c7ac377728e74905709ff527a5bf98d6d0263c04f5b6"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/h11/0.16.0/json",
+      "license_files": [
+        {
+          "file": "h11-0.16.0.dist-info/licenses/LICENSE.txt",
+          "sha256": "37db5bb85926db28a427a25867f10b1232003aea1be69ccb851138adb8e6f361"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "idna",
+      "version": "3.18",
+      "license": "BSD-3-Clause",
+      "source": "https://pypi.org/pypi/idna/3.18/json",
+      "license_files": [
+        {
+          "file": "idna-3.18.dist-info/licenses/LICENSE.md",
+          "sha256": "1a9a4f0e3d479a27240ddd59a9137a66ab4a0f9dfdc8ca6188cc0bfd85187f04"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "multidict",
+      "version": "6.9.1",
+      "license": "Apache License 2.0",
+      "source": "https://pypi.org/pypi/multidict/6.9.1/json",
+      "license_files": [
+        {
+          "file": "multidict-6.9.1.dist-info/licenses/LICENSE",
+          "sha256": "2e4be5fc6c4c72a466fcb665d726e049a6891981fe536c4f04b6366749461d23"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "opentelemetry-api",
+      "version": "1.45.2",
+      "license": "Apache-2.0",
+      "source": "https://pypi.org/pypi/opentelemetry-api/1.45.2/json",
+      "license_files": [
+        {
+          "file": "opentelemetry_api-1.45.2.dist-info/licenses/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "orjson",
+      "version": "3.13.0",
+      "license": "MPL-2.0 AND (Apache-2.0 OR MIT)",
+      "source": "https://pypi.org/pypi/orjson/3.13.0/json",
+      "license_files": [
+        {
+          "file": "orjson-3.13.0.dist-info/licenses/LICENSE-APACHE",
+          "sha256": "7cfd738c53d61c79f07e348f622bf7707c9084237054d37fbe07788a75f5881c"
+        },
+        {
+          "file": "orjson-3.13.0.dist-info/licenses/LICENSE-MIT",
+          "sha256": "36516aefdc84c5d5a1e7485425913a22dbda69eb1930c5e84d6ae4972b5194b9"
+        },
+        {
+          "file": "orjson-3.13.0.dist-info/licenses/LICENSE-MPL-2.0",
+          "sha256": "9303ea1cfbf049945652668089d753fb1a7e1f2e52c680615c3d2cea7515c118"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "propcache",
+      "version": "0.5.2",
+      "license": "Apache-2.0",
+      "source": "https://pypi.org/pypi/propcache/0.5.2/json",
+      "license_files": [
+        {
+          "file": "propcache-0.5.2.dist-info/licenses/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "file": "propcache-0.5.2.dist-info/licenses/NOTICE",
+          "sha256": "56d6ac6c8105c0a51304c21db060e361af9a8ea0af9a75c239c28b5d13693838"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "pycparser",
+      "version": "3.0",
+      "license": "BSD-3-Clause",
+      "source": "https://pypi.org/pypi/pycparser/3.0/json",
+      "license_files": [
+        {
+          "file": "pycparser-3.0.dist-info/licenses/LICENSE",
+          "sha256": "0c846399369ea76ddd7b5c44fe6d16497415fcf015f5cbb508c24bf98b81c5b1"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "pydantic",
+      "version": "2.14.2",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/pydantic/2.14.2/json",
+      "license_files": [
+        {
+          "file": "pydantic-2.14.2.dist-info/licenses/LICENSE",
+          "sha256": "a9e186f3ca16b5eef84318e7a701721351a00cb7b8ae3a4394b67b49e3529ef3"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "pydantic-core",
+      "version": "2.50.2",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/pydantic-core/2.50.2/json",
+      "license_files": [
+        {
+          "file": "pydantic_core-2.50.2.dist-info/licenses/LICENSE",
+          "sha256": "fbe7f615f18d135c07000e5a86325db27f42c7729699ef166ac1f7a3f4586bf4"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "pywin32",
+      "version": "312",
+      "license": "PSF",
+      "source": "https://pypi.org/pypi/pywin32/312/json",
+      "license_files": [
+        {
+          "file": "adodbapi/license.txt",
+          "sha256": "5ea2f23c7f00c3006bacf267183e816d8d4b6dc95ea57a4ddb0ff81de6d8719e"
+        },
+        {
+          "file": "pythonwin/License.txt",
+          "sha256": "a74d826efb242db087b850348e20abbfd591b51e2081f2048735290913872924"
+        },
+        {
+          "file": "pythonwin/pywin/idle/LICENSE.txt",
+          "sha256": "a0fa1e7b8a4230055685e796548ac084a6c0eea395294574093bba72efd9191b"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/adodbapi/license.txt",
+          "sha256": "5ea2f23c7f00c3006bacf267183e816d8d4b6dc95ea57a4ddb0ff81de6d8719e"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/com/License.txt",
+          "sha256": "fad39c18fc3825fa278db1c86fd52cf88d7c525b3c2fbf7817fa383cbae4d423"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/com/win32comext/mapi/src/MAPIStubLibrary/LICENSE",
+          "sha256": "1c4cf44d2fb8bf2d10214d6da80cc9e05502824cc4460f35be4c7bcb4cde53da"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/pythonwin/License.txt",
+          "sha256": "a74d826efb242db087b850348e20abbfd591b51e2081f2048735290913872924"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/pythonwin/Scintilla/License.txt",
+          "sha256": "57ec79bbeab4fd1cf7460a7ad450d2ab01471810459aeae9e75e4c66b472095f"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/pythonwin/pywin/idle/LICENSE.txt",
+          "sha256": "a0fa1e7b8a4230055685e796548ac084a6c0eea395294574093bba72efd9191b"
+        },
+        {
+          "file": "pywin32-312.dist-info/licenses/win32/License.txt",
+          "sha256": "a74d826efb242db087b850348e20abbfd591b51e2081f2048735290913872924"
+        },
+        {
+          "file": "win32/License.txt",
+          "sha256": "a74d826efb242db087b850348e20abbfd591b51e2081f2048735290913872924"
+        },
+        {
+          "file": "win32com/License.txt",
+          "sha256": "fad39c18fc3825fa278db1c86fd52cf88d7c525b3c2fbf7817fa383cbae4d423"
+        },
+        {
+          "file": "win32comext/License.txt",
+          "sha256": "fad39c18fc3825fa278db1c86fd52cf88d7c525b3c2fbf7817fa383cbae4d423"
+        },
+        {
+          "file": "win32comext/mapi/NOTICE.md",
+          "sha256": "dedf997c8f5568a0e0aff57d009f501226ea30c401323d67912b6a8f8735a825"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2",
+      "license": "Apache-2.0",
+      "source": "https://pypi.org/pypi/requests/2.34.2/json",
+      "license_files": [
+        {
+          "file": "requests-2.34.2.dist-info/licenses/LICENSE",
+          "sha256": "09e8a9bcec8067104652c168685ab0931e7868f9c8284b66f5ae6edae5f1130b"
+        },
+        {
+          "file": "requests-2.34.2.dist-info/licenses/NOTICE",
+          "sha256": "f5110972dedad2b4e9d314518daf3b7d72d6e02e499acd802181de6f74571dcc"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "starlette",
+      "version": "1.10.0",
+      "license": "BSD-3-Clause",
+      "source": "https://pypi.org/pypi/starlette/1.10.0/json",
+      "license_files": [
+        {
+          "file": "starlette-1.10.0.dist-info/licenses/LICENSE.md",
+          "sha256": "dcb95677a02240243187e964f941847d19b17821cf99e5afae684fab328c19bf"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "typing-extensions",
+      "version": "4.16.0",
+      "license": "PSF-2.0",
+      "source": "https://pypi.org/pypi/typing-extensions/4.16.0/json",
+      "license_files": [
+        {
+          "file": "typing_extensions-4.16.0.dist-info/licenses/LICENSE",
+          "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.4",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/typing-inspection/0.4.4/json",
+      "license_files": [
+        {
+          "file": "typing_inspection-0.4.4.dist-info/licenses/LICENSE",
+          "sha256": "804b59b25f2c31bd278f9202a19ae49a3945aa2664387e2d0a128c7cacc61ec3"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "urllib3",
+      "version": "2.8.0",
+      "license": "MIT",
+      "source": "https://pypi.org/pypi/urllib3/2.8.0/json",
+      "license_files": [
+        {
+          "file": "urllib3-2.8.0.dist-info/licenses/LICENSE.txt",
+          "sha256": "130e3a64d5fdd5d096a752694634a7d9df284469de86e5732100268041e3d686"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.54.0",
+      "license": "BSD-3-Clause",
+      "source": "https://pypi.org/pypi/uvicorn/0.54.0/json",
+      "license_files": [
+        {
+          "file": "uvicorn-0.54.0.dist-info/licenses/LICENSE.md",
+          "sha256": "efe1acf3e62fb99c288b0ec73e5a773b7268ef4320fe757ea994214e4b63c371"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "websockets",
+      "version": "17.4",
+      "license": "BSD-3-Clause",
+      "source": "https://pypi.org/pypi/websockets/17.4/json",
+      "license_files": [
+        {
+          "file": "websockets-17.4.dist-info/licenses/LICENSE",
+          "sha256": "0f44514998aca209d3482d10204a8adf2aa4296ff157a36a5c0922f2280632d3"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "winloop",
+      "version": "0.6.3",
+      "license": "MIT License",
+      "source": "https://pypi.org/pypi/winloop/0.6.3/json",
+      "license_files": [
+        {
+          "file": "winloop-0.6.3.dist-info/licenses/LICENSE-APACHE",
+          "sha256": "bbad9ce8a39e4277765b1d752d776fc4c50862d810590e00240298c0f67f6473"
+        },
+        {
+          "file": "winloop-0.6.3.dist-info/licenses/LICENSE-MIT",
+          "sha256": "ab0bcddf75d17b94ec3b6f39bc0cd1d11c141b60316c3ac073b0341702734a9d"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "yarl",
+      "version": "1.25.1",
+      "license": "Apache-2.0",
+      "source": "https://pypi.org/pypi/yarl/1.25.1/json",
+      "license_files": [
+        {
+          "file": "yarl-1.25.1.dist-info/licenses/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "file": "yarl-1.25.1.dist-info/licenses/NOTICE",
+          "sha256": "56d6ac6c8105c0a51304c21db060e361af9a8ea0af9a75c239c28b5d13693838"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "zlib-ng",
+      "version": "1.0.0",
+      "license": "PSF-2.0",
+      "source": "https://pypi.org/pypi/zlib-ng/1.0.0/json",
+      "license_files": [
+        {
+          "file": "zlib_ng-1.0.0.dist-info/licenses/LICENSE",
+          "sha256": "5706b0005f6b3b1386d1b20535ae91a545d80d9e2555a1e774004ca8c79115b0"
+        },
+        {
+          "file": "zlib_ng/zlib-ng/LICENSE.md",
+          "sha256": "6c9f0d975b41afaa34d22f55bb8986ce69e5cb7ad327cb2b28820cd425edf5ee"
+        }
+      ],
+      "vulnerabilities": []
+    }
+  ],
+  "npm": [
+    {
+      "path": "node_modules/@jridgewell/gen-mapping",
+      "version": "0.3.13",
+      "license": "MIT",
+      "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
+      "integrity_source": "node_modules/@jridgewell/gen-mapping",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@jridgewell/remapping",
+      "version": "2.3.5",
+      "license": "MIT",
+      "integrity": "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==",
+      "integrity_source": "node_modules/@jridgewell/remapping",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@jridgewell/resolve-uri",
+      "version": "3.1.2",
+      "license": "MIT",
+      "integrity": "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==",
+      "integrity_source": "node_modules/@jridgewell/resolve-uri",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@jridgewell/sourcemap-codec",
+      "version": "1.6.0",
+      "license": "MIT",
+      "integrity": "sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==",
+      "integrity_source": "node_modules/@jridgewell/sourcemap-codec",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@jridgewell/trace-mapping",
+      "version": "0.3.31",
+      "license": "MIT",
+      "integrity": "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==",
+      "integrity_source": "node_modules/@jridgewell/trace-mapping",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@oxc-project/types",
+      "version": "0.156.0",
+      "license": "MIT",
+      "integrity": "sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==",
+      "integrity_source": "node_modules/@oxc-project/types",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/primitive",
+      "version": "1.2.0",
+      "license": "MIT",
+      "integrity": "sha512-KABY+VMIRPJL+Vyzv/335FEhXXD/xDv8BMb1kl48/aXJZMH0LtHCTx5ga5RnxaEP3nZHtmTLf1P9vanmFX46bw==",
+      "integrity_source": "node_modules/@radix-ui/primitive",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-compose-refs",
+      "version": "1.1.5",
+      "license": "MIT",
+      "integrity": "sha512-+48PbAAbq3didjJxa+OaWY2ZwgAKsNiRGyeHKszblZMQ+kcpd9pAaT11cMkGEie0vsOi3QdeTE6d5Fe3Gn61kA==",
+      "integrity_source": "node_modules/@radix-ui/react-compose-refs",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-context",
+      "version": "1.3.0",
+      "license": "MIT",
+      "integrity": "sha512-v5AYEocMISkbJ+1fTXzZpiFv7NRr3D2WiYbLIKf+FkmJ8VkP6d503eV2n34MFussHXY1pcoq3yfJiQH77dc4Mg==",
+      "integrity_source": "node_modules/@radix-ui/react-context",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-dialog",
+      "version": "1.3.1",
+      "license": "MIT",
+      "integrity": "sha512-+0E4qvVTwjAWra9sEhJ+9BTsvHE00zkUuNw1VGh7S+Gc13dfYk+S1PVQdchWDj+XYHhAai7Z7IpzXVDCGsDplg==",
+      "integrity_source": "node_modules/@radix-ui/react-dialog",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-dismissable-layer",
+      "version": "1.2.1",
+      "license": "MIT",
+      "integrity": "sha512-KIfDcAsx+oVylFZ4xryVKusJUrLLhTQmfnJW4kwk4Km5myvhHCrj04hnWWUC166+xD4DHdH8tQGylwYX1h6+Pg==",
+      "integrity_source": "node_modules/@radix-ui/react-dismissable-layer",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-focus-guards",
+      "version": "1.2.0",
+      "license": "MIT",
+      "integrity": "sha512-MPm5R0iRGUDrDnPNxmLBkv+X7pN4XKzt+MbWJEuJQsH3NFH4omrbpXpucyYCCKTSt+na/ZxGhEWQrWTZ0285cA==",
+      "integrity_source": "node_modules/@radix-ui/react-focus-guards",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-focus-scope",
+      "version": "1.3.1",
+      "license": "MIT",
+      "integrity": "sha512-ugeMhbXt4y5S2T1GnIqbWDKEN962PDwnX1fN0eKOOgf5f63Dh2mn8F1FUySlgW0iF6GiVsRF32DzuDIWTUyQJg==",
+      "integrity_source": "node_modules/@radix-ui/react-focus-scope",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-id",
+      "version": "1.1.4",
+      "license": "MIT",
+      "integrity": "sha512-TMQp2llA+RYn7JcjnrMnz7wN4pcVttPZnRZo52PLQsoLVKzNlVwUeHmfePgTgRluXFvlD3GD5g5MOVVTJCO0qA==",
+      "integrity_source": "node_modules/@radix-ui/react-id",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-portal",
+      "version": "1.2.0",
+      "license": "MIT",
+      "integrity": "sha512-StX7xXnaRU41VvFtMm9zlhVGz8XF6GmWWTXftkQaY+tqVkbs/R9UmAp5mLzHHapk5hM9RMZQvO/3usyIP/g42g==",
+      "integrity_source": "node_modules/@radix-ui/react-portal",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-presence",
+      "version": "1.1.11",
+      "license": "MIT",
+      "integrity": "sha512-Z7/atlkab36Z8hm+V8zYc79r0W+tiOB1o0tun1By94JyadkekLQmtEAnBSP9XKXBNQsStoStS4+gX10JpS5akA==",
+      "integrity_source": "node_modules/@radix-ui/react-presence",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-primitive",
+      "version": "2.2.0",
+      "license": "MIT",
+      "integrity": "sha512-HCTSPMNqv55Qk0IX4geJbpyXazmqulcimwuyjxTkKi29v+QZbG2Zho9BnbBq4YS2PF+KlNb2CXoLz66uUmblkg==",
+      "integrity_source": "node_modules/@radix-ui/react-primitive",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-slot",
+      "version": "1.5.0",
+      "license": "MIT",
+      "integrity": "sha512-tyYd9ddPXAysAbdbD9eYxgwpCSv6f3PncqVSNKQFSR5lcJVLz3cb/pANDoYrLiHBpXv7skortyUgGUWsYuPPFQ==",
+      "integrity_source": "node_modules/@radix-ui/react-slot",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-use-callback-ref",
+      "version": "1.1.5",
+      "license": "MIT",
+      "integrity": "sha512-Y5GBf4NKeADoXI1geiMlMuMoURT3k9MizzzKhGb/m55H94aGigZ01PIpkvsO6lML13BA6XYAXSJ6gza7vTn5nw==",
+      "integrity_source": "node_modules/@radix-ui/react-use-callback-ref",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-use-controllable-state",
+      "version": "1.3.0",
+      "license": "MIT",
+      "integrity": "sha512-TAcBI7bw2ljYCbv4+zuTSd6zICu8pRt6SDN2vJ/Z06K2MXh6I9WYFe/A9ovlFDtR5HVHGm5iDxDoABm/++dbKg==",
+      "integrity_source": "node_modules/@radix-ui/react-use-controllable-state",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-use-effect-event",
+      "version": "0.0.5",
+      "license": "MIT",
+      "integrity": "sha512-7cshFL8HGS/7HEiHH+9kL9HBwp2sa9yX18Knwek6KYWmXwM7pegMgta2AXMQKI+rq3JnfSj9x8wYqFMTdG1Jgg==",
+      "integrity_source": "node_modules/@radix-ui/react-use-effect-event",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@radix-ui/react-use-layout-effect",
+      "version": "1.1.4",
+      "license": "MIT",
+      "integrity": "sha512-K20DkRkUwDnxEYMBPcg3Y6voLkEy5p5QQmszZgLngKKiC7dzBR/aEuK3w1qlx2JWDUNH6FluahYdgR3BP+QbYw==",
+      "integrity_source": "node_modules/@radix-ui/react-use-layout-effect",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@reduxjs/toolkit",
+      "version": "2.13.0",
+      "license": "MIT",
+      "integrity": "sha512-f6jwVRfwW30+tnllz4YcsHHpPYYOE7abcHkyUCovD+P7DyhdAI5prz2Fh/8TLhakjpN+7aIEion1s5L/tvlYlA==",
+      "integrity_source": "node_modules/@reduxjs/toolkit",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@rolldown/binding-android-arm-eabi",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-ia3DwAs0OsMGS7+IConptSiyk9pEXkOx/AbJ2n/lAGxH3QkWQus1t8d7gnAT38FCU2sQu8lUbeR6AiZFv4JxaA==",
+      "integrity_source": "node_modules/@rolldown/binding-android-arm-eabi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-android-arm64",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-kx5wBiMB6E7TEvpl2B9gjLU004BkvEm2Dr941BFjx/SontPwSzNuQUIoVKxHHoSjpFIfHMmcguyLOtyn0hObRg==",
+      "integrity_source": "node_modules/@rolldown/binding-android-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-darwin-arm64",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-qslZrXnKJU4cUpjoAmtAo/KQM9e2IRMlmpig6Zpwj+8KWxW8v+nkAf9216Bsek9lOC1jvg2yCjygCFo2f83msQ==",
+      "integrity_source": "node_modules/@rolldown/binding-darwin-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-darwin-x64",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-FdF+y48ND13eAyM2mQn+85kvAqNlvRWROy2rhgA463X/0Gv4vGtazZtfaF1mRBLscYvtOlh4QnLjOWiFzX69OQ==",
+      "integrity_source": "node_modules/@rolldown/binding-darwin-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-freebsd-x64",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-ddjqFM5e95AgLbUPtKIS7V1KTVlA0RUgCVr5mn+/IEhsdy3pr+Vuj/HZ7nlMN2FyxIwUktOH1LEPIQXO1v9y1Q==",
+      "integrity_source": "node_modules/@rolldown/binding-freebsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-arm-gnueabihf",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-tHdKWbFkFBI687iim3LIyIvyL7j66VvQYkDPss5Stn/qyE2tWkR1YD0dXmXPFKKqT/o5ZEJVsaRsWS2meQwGOA==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-arm-gnueabihf",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-arm64-gnu",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-FJiLGAblPBMlBEdbOqw6kW6QcXDWAf/oJu7gYs9ZJZwmg+K+/zjFLxPTIY9izJUzxzc24FHvmseyA0IvJSl17w==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-arm64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-arm64-musl",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-hrJpblMsrQ58U9veWpbXzkhV5zStunds6HWLprqq1qauvgBr1E6P+24kLj6lSLI9vjRn/RYpjprhkHQPKGWpNg==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-arm64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-ppc64-gnu",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-qJd/dC6j6CwLG9/s/RP2nb1RZ0GIgj7Ioj7x/SYa3RzjVrlzrmH0fhIOpfvqQDeIsdP0loi+kHaMhJzY1PBIaA==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-ppc64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-s390x-gnu",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-Vx7Xg5uUJuNcujJjI70OICaH0EYj80BtOLZTSN7uOYg8QOLlyKnaG0IW7Fn/J0IpJsaKzmDKMhOQv1JBM9m9vg==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-s390x-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-x64-gnu",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-TNKhgE3uJTsTzatUSSYt0Kgo+Oa2uSlSjz4r1aEIea7HX6ULBym4fAlYUhG1i6pjNf2njfCUAfKwr6C3E9Xg1w==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-x64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-x64-musl",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-7chXdpjXZ8qG0+mIxECN3cT9kvhZ3/oZhMX6Pp876P7CDrIy8nJswva6Mq357JR7eYXfuskwZxMeV1SzoZdHrA==",
+      "integrity_source": "node_modules/@rolldown/binding-linux-x64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-openharmony-arm64",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-Kwjt+7uNTJK5/MDkGWGVO2KQPnj8yAV75dMpfwyHZrJSXWHrniOB0aUEWlVYf3H1hOqFLIStLdM5QXq6bnKmOQ==",
+      "integrity_source": "node_modules/@rolldown/binding-openharmony-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-win32-arm64-msvc",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-/LH6WfjDRXXJz/p5xl4TmU+jpcnwcxbKEQBW/GZE0JHfN0lGIyTtsUEGaQ/q/GikkGJ2yLKe6pwm7AnEWO8pdw==",
+      "integrity_source": "node_modules/@rolldown/binding-win32-arm64-msvc",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@rolldown/binding-win32-x64-msvc",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-1lv1KvX0Z871zfk7vw+dnXMMnHNyDwMzWG8Kv3HxDXMOhzCX4SHc7HK319fInP0i+0p9D8brkfzL7pJOaGl+tw==",
+      "integrity_source": "node_modules/@rolldown/binding-win32-x64-msvc",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@rolldown/pluginutils",
+      "version": "1.0.1",
+      "license": "MIT",
+      "integrity": "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==",
+      "integrity_source": "node_modules/@rolldown/pluginutils",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@standard-schema/spec",
+      "version": "1.1.0",
+      "license": "MIT",
+      "integrity": "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==",
+      "integrity_source": "node_modules/@standard-schema/spec",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@standard-schema/utils",
+      "version": "0.3.0",
+      "license": "MIT",
+      "integrity": "sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==",
+      "integrity_source": "node_modules/@standard-schema/utils",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@tailwindcss/node",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-/T8IKEsf9VTU6tLjgC7+sv2mOPtQxzE2jMw7u4Tt40Tx+QSZxpzh95/H6cMKoja9XuW7iMdLJYBB0o9G1CaAgg==",
+      "integrity_source": "node_modules/@tailwindcss/node",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-krXjAikiaFSPaK/FkAQT5UTx3VormQaiZ5hBFlJZ9UFQGB/rwg1MZIhHAG9smMQRTdyJxP6Qt5MwMtdyU5FWrA==",
+      "integrity_source": "node_modules/@tailwindcss/oxide",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-android-arm64",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-Y85A2gmPSkl5Ve5qR86GL4HT509cFqQh1aes9p3sSkyTPwt0Pppf3GkwGe4JPACcRYjgJIEhQgM6dBClnr0NYw==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-android-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-darwin-arm64",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-BiaWatpBcERQFDlOjRDpIVXuFK5PJez5SA4JMg6VYZdBYU+qKfV/vqjcIs+IYmtitf1xYQZTwXvU/8y4lfZUGw==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-darwin-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-darwin-x64",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-fAeUqfV5ndhxRwai8cXGzdLvul9utWOmeTkv69unv4ZXixjn61Z+p9lCWdwOwA3TYboG3BwdVuN/RDjhBRl0mw==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-darwin-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-freebsd-x64",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-iyf5bV6+wnAlflVeEy7R25dupxTNECZN5QMI0qNT6eT+EgaGdZcKhGkr5SdoaWiLJ3spLqIY9VCeSGrwmtg4kw==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-freebsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-linux-arm-gnueabihf",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-aAYUprJAJQWWbRrPvtjdroZ56Md+JM8pMiopS6xGEwDfLhqj+2ver2p4nU4Mb3CRqcMmNBjo8KkUgcxhkzVQGQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-linux-arm-gnueabihf",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-linux-arm64-gnu",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-nDxldcEENOxZRzC2uu9jrutZdAAQtb+8WWDCSnWL1zvBk1+FN+x6MtDViPB5AJMfttVCUhehGWus3XBPgatM/w==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-linux-arm64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-linux-arm64-musl",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-Md44bD6veX/PC5iyF8cDVnw4HBIANZepRZZ7a8DQOvkfo5WUBwcp6iAuCUz23u+4SUkhJlD3eL7hNdW8ezd/kA==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-linux-arm64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-linux-x64-gnu",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-tx7us1muwOKAKWao2v/GaafFeQboE6aj88vC6ziN2NCGcRm8gWUhwjzg+YdVB1e4boAtdtma4L43onunI6NS4w==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-linux-x64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-linux-x64-musl",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-SJxX60smvHgasZoBy11dX6YRjXJFovwWBoedhbQPOBzgFWBHGB+TVPWB9BxzR7TTxU8FQZAI2AyiNCMzFm8Img==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-linux-x64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@emnapi/core",
+      "version": "1.11.1",
+      "license": "MIT",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@emnapi/runtime",
+      "version": "1.11.1",
+      "license": "MIT",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@emnapi/wasi-threads",
+      "version": "1.2.2",
+      "license": "MIT",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@napi-rs/wasm-runtime",
+      "version": "1.1.4",
+      "license": "MIT",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/@tybys/wasm-util",
+      "version": "0.10.2",
+      "license": "MIT",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-wasm32-wasi/node_modules/tslib",
+      "version": "2.8.1",
+      "license": "0BSD",
+      "integrity": "sha512-jx1+rPhY/5Ympkktd656HBWEBLxP7dH06losBLjjf5vgCODXvi9KhtftWcMIwTFIDqBr7cRnQkdLnAG+IOlGvQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-win32-arm64-msvc",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-3rc292Ca2ceK6Ulcc/bAVnTs/3nDtoPhyEKlgPv+yQJQi/JS/AMJlqzxvlDacL1nekbrcf6bTqp/jV4qgnPxNQ==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-win32-arm64-msvc",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@tailwindcss/oxide-win32-x64-msvc",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-yJ0pwIVc/nYeGoV02WtsN8KYyLQv7kyI2wDnkezyJlGGjkd4QLwDGAwl47YpPJeuI0M0ObaXGSPjvWDPeTPggw==",
+      "integrity_source": "node_modules/@tailwindcss/oxide-win32-x64-msvc",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@tailwindcss/vite",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw==",
+      "integrity_source": "node_modules/@tailwindcss/vite",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@tanstack/query-core",
+      "version": "5.105.1",
+      "license": "MIT",
+      "integrity": "sha512-B/rNlZoZ54w1dlddiUt9oEe1SLM+37c00SKLJEg9YH+7as3Y54P81o9Fh+2ujZ36tXPnQJ5oVe7AcyEWkyFhPg==",
+      "integrity_source": "node_modules/@tanstack/query-core",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@tanstack/react-query",
+      "version": "5.105.1",
+      "license": "MIT",
+      "integrity": "sha512-qcu+/+PtBOjW8qU4/0l47QVmNG7hPOWsCLzP0bTRhE1X7HYa757C4732wXTUH0QhCjTV1yedX8onsCiEwlNYrA==",
+      "integrity_source": "node_modules/@tanstack/react-query",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-array",
+      "version": "3.2.2",
+      "license": "MIT",
+      "integrity": "sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw==",
+      "integrity_source": "node_modules/@types/d3-array",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-color",
+      "version": "3.1.3",
+      "license": "MIT",
+      "integrity": "sha512-iO90scth9WAbmgv7ogoq57O9YpKmFBbmoEoCHDB2xMBY0+/KVrqAaCDyCE16dUspeOvIxFFRI+0sEtqDqy2b4A==",
+      "integrity_source": "node_modules/@types/d3-color",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-ease",
+      "version": "3.0.2",
+      "license": "MIT",
+      "integrity": "sha512-NcV1JjO5oDzoK26oMzbILE6HW7uVXOHLQvHshBUW4UMdZGfiY6v5BeQwh9a9tCzv+CeefZQHJt5SRgK154RtiA==",
+      "integrity_source": "node_modules/@types/d3-ease",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-interpolate",
+      "version": "3.0.4",
+      "license": "MIT",
+      "integrity": "sha512-mgLPETlrpVV1YRJIglr4Ez47g7Yxjl1lj7YKsiMCb27VJH9W8NVM6Bb9d8kkpG/uAQS5AmbA48q2IAolKKo1MA==",
+      "integrity_source": "node_modules/@types/d3-interpolate",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-path",
+      "version": "3.1.1",
+      "license": "MIT",
+      "integrity": "sha512-VMZBYyQvbGmWyWVea0EHs/BwLgxc+MKi1zLDCONksozI4YJMcTt8ZEuIR4Sb1MMTE8MMW49v0IwI5+b7RmfWlg==",
+      "integrity_source": "node_modules/@types/d3-path",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-scale",
+      "version": "4.0.9",
+      "license": "MIT",
+      "integrity": "sha512-dLmtwB8zkAeO/juAMfnV+sItKjlsw2lKdZVVy6LRr0cBmegxSABiLEpGVmSJJ8O08i4+sGR6qQtb6WtuwJdvVw==",
+      "integrity_source": "node_modules/@types/d3-scale",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-shape",
+      "version": "3.2.0",
+      "license": "MIT",
+      "integrity": "sha512-kVd74ta9eof3eJOvbNd1vGKS/XERRyQbT26Og63hIsvDO84cjD5gEOhsXf26w3FSoNlPVz84DOFcKv/oou+fMw==",
+      "integrity_source": "node_modules/@types/d3-shape",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-time",
+      "version": "3.0.4",
+      "license": "MIT",
+      "integrity": "sha512-yuzZug1nkAAaBlBBikKZTgzCeA+k1uy4ZFwWANOfKw5z5LRhV0gNA7gNkKm7HoK+HRN0wX3EkxGk0fpbWhmB7g==",
+      "integrity_source": "node_modules/@types/d3-time",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/d3-timer",
+      "version": "3.0.2",
+      "license": "MIT",
+      "integrity": "sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw==",
+      "integrity_source": "node_modules/@types/d3-timer",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/react",
+      "version": "19.3.0",
+      "license": "MIT",
+      "integrity": "sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==",
+      "integrity_source": "node_modules/@types/react",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/react-dom",
+      "version": "19.3.0",
+      "license": "MIT",
+      "integrity": "sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q==",
+      "integrity_source": "node_modules/@types/react-dom",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@types/use-sync-external-store",
+      "version": "0.0.6",
+      "license": "MIT",
+      "integrity": "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==",
+      "integrity_source": "node_modules/@types/use-sync-external-store",
+      "installed": true
+    },
+    {
+      "path": "node_modules/@typescript/typescript-aix-ppc64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==",
+      "integrity_source": "node_modules/@typescript/typescript-aix-ppc64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-darwin-arm64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==",
+      "integrity_source": "node_modules/@typescript/typescript-darwin-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-darwin-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==",
+      "integrity_source": "node_modules/@typescript/typescript-darwin-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-freebsd-arm64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==",
+      "integrity_source": "node_modules/@typescript/typescript-freebsd-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-freebsd-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==",
+      "integrity_source": "node_modules/@typescript/typescript-freebsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-arm",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-arm",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-arm64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-loong64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-loong64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-mips64el",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-mips64el",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-ppc64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-ppc64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-riscv64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-riscv64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-s390x",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-s390x",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-linux-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==",
+      "integrity_source": "node_modules/@typescript/typescript-linux-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-netbsd-arm64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==",
+      "integrity_source": "node_modules/@typescript/typescript-netbsd-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-netbsd-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==",
+      "integrity_source": "node_modules/@typescript/typescript-netbsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-openbsd-arm64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==",
+      "integrity_source": "node_modules/@typescript/typescript-openbsd-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-openbsd-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==",
+      "integrity_source": "node_modules/@typescript/typescript-openbsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-sunos-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==",
+      "integrity_source": "node_modules/@typescript/typescript-sunos-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-win32-arm64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==",
+      "integrity_source": "node_modules/@typescript/typescript-win32-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/@typescript/typescript-win32-x64",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==",
+      "integrity_source": "node_modules/@typescript/typescript-win32-x64",
+      "installed": true
+    },
+    {
+      "path": "node_modules/aria-hidden",
+      "version": "1.2.6",
+      "license": "MIT",
+      "integrity": "sha512-ik3ZgC9dY/lYVVM++OISsaYDeg1tb0VtP5uL3ouh1koGOaUMDPpbFIei4JkFimWUFPn90sbMNMXQAIVOlnYKJA==",
+      "integrity_source": "node_modules/aria-hidden",
+      "installed": true
+    },
+    {
+      "path": "node_modules/clsx",
+      "version": "2.1.1",
+      "license": "MIT",
+      "integrity": "sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==",
+      "integrity_source": "node_modules/clsx",
+      "installed": true
+    },
+    {
+      "path": "node_modules/csstype",
+      "version": "3.2.3",
+      "license": "MIT",
+      "integrity": "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==",
+      "integrity_source": "node_modules/csstype",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-array",
+      "version": "3.2.4",
+      "license": "ISC",
+      "integrity": "sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==",
+      "integrity_source": "node_modules/d3-array",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-color",
+      "version": "3.1.0",
+      "license": "ISC",
+      "integrity": "sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==",
+      "integrity_source": "node_modules/d3-color",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-ease",
+      "version": "3.0.1",
+      "license": "BSD-3-Clause",
+      "integrity": "sha512-wR/XK3D3XcLIZwpbvQwQ5fK+8Ykds1ip7A2Txe0yxncXSdq1L9skcG7blcedkOX+ZcgxGAmLX1FrRGbADwzi0w==",
+      "integrity_source": "node_modules/d3-ease",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-format",
+      "version": "3.1.2",
+      "license": "ISC",
+      "integrity": "sha512-AJDdYOdnyRDV5b6ArilzCPPwc1ejkHcoyFarqlPqT7zRYjhavcT3uSrqcMvsgh2CgoPbK3RCwyHaVyxYcP2Arg==",
+      "integrity_source": "node_modules/d3-format",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-interpolate",
+      "version": "3.0.1",
+      "license": "ISC",
+      "integrity": "sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g==",
+      "integrity_source": "node_modules/d3-interpolate",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-path",
+      "version": "3.1.0",
+      "license": "ISC",
+      "integrity": "sha512-p3KP5HCf/bvjBSSKuXid6Zqijx7wIfNW+J/maPs+iwR35at5JCbLUT0LzF1cnjbCHWhqzQTIN2Jpe8pRebIEFQ==",
+      "integrity_source": "node_modules/d3-path",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-scale",
+      "version": "4.0.2",
+      "license": "ISC",
+      "integrity": "sha512-GZW464g1SH7ag3Y7hXjf8RoUuAFIqklOAq3MRl4OaWabTFJY9PN/E1YklhXLh+OQ3fM9yS2nOkCoS+WLZ6kvxQ==",
+      "integrity_source": "node_modules/d3-scale",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-shape",
+      "version": "3.2.0",
+      "license": "ISC",
+      "integrity": "sha512-SaLBuwGm3MOViRq2ABk3eLoxwZELpH6zhl3FbAoJ7Vm1gofKx6El1Ib5z23NUEhF9AsGl7y+dzLe5Cw2AArGTA==",
+      "integrity_source": "node_modules/d3-shape",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-time",
+      "version": "3.1.0",
+      "license": "ISC",
+      "integrity": "sha512-VqKjzBLejbSMT4IgbmVgDjpkYrNWUYJnbCGo874u7MMKIWsILRX+OpX/gTk8MqjpT1A/c6HY2dCA77ZN0lkQ2Q==",
+      "integrity_source": "node_modules/d3-time",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-time-format",
+      "version": "4.1.0",
+      "license": "ISC",
+      "integrity": "sha512-dJxPBlzC7NugB2PDLwo9Q8JiTR3M3e4/XANkreKSUxF8vvXKqm1Yfq4Q5dl8budlunRVlUUaDUgFt7eA8D6NLg==",
+      "integrity_source": "node_modules/d3-time-format",
+      "installed": true
+    },
+    {
+      "path": "node_modules/d3-timer",
+      "version": "3.0.1",
+      "license": "ISC",
+      "integrity": "sha512-ndfJ/JxxMd3nw31uyKoY2naivF+r29V+Lc0svZxe1JvvIRmi8hUsrMvdOwgS1o6uBHmiz91geQ0ylPP0aj1VUA==",
+      "integrity_source": "node_modules/d3-timer",
+      "installed": true
+    },
+    {
+      "path": "node_modules/decimal.js-light",
+      "version": "2.5.1",
+      "license": "MIT",
+      "integrity": "sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg==",
+      "integrity_source": "node_modules/decimal.js-light",
+      "installed": true
+    },
+    {
+      "path": "node_modules/detect-libc",
+      "version": "2.1.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==",
+      "integrity_source": "node_modules/detect-libc",
+      "installed": true
+    },
+    {
+      "path": "node_modules/detect-node-es",
+      "version": "1.1.0",
+      "license": "MIT",
+      "integrity": "sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==",
+      "integrity_source": "node_modules/detect-node-es",
+      "installed": true
+    },
+    {
+      "path": "node_modules/enhanced-resolve",
+      "version": "5.26.0",
+      "license": "MIT",
+      "integrity": "sha512-9vhedylFonb2YGogzUKX6+Ja72gOJbN1QHAqdrvqLwhdl/QWbKopzoUC9EbQNVsAns/bx/4uyqalrQAoy1IByw==",
+      "integrity_source": "node_modules/enhanced-resolve",
+      "installed": true
+    },
+    {
+      "path": "node_modules/es-toolkit",
+      "version": "1.53.1",
+      "license": "MIT",
+      "integrity": "sha512-VhMc6IXmexu8iYFfL2aaAww6IvJTdHlqBLruLoEUs33YD4IcP5DdZcLOybMsMmmLsiy1c8PsiLsrM0DdIuuRUA==",
+      "integrity_source": "node_modules/es-toolkit",
+      "installed": true
+    },
+    {
+      "path": "node_modules/eventemitter3",
+      "version": "5.0.4",
+      "license": "MIT",
+      "integrity": "sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==",
+      "integrity_source": "node_modules/eventemitter3",
+      "installed": true
+    },
+    {
+      "path": "node_modules/fancy-canvas",
+      "version": "2.1.0",
+      "license": "MIT",
+      "integrity": "sha512-nifxXJ95JNLFR2NgRV4/MxVP45G9909wJTEKz5fg/TZS20JJZA6hfgRVh/bC9bwl2zBtBNcYPjiBE4njQHVBwQ==",
+      "integrity_source": "node_modules/fancy-canvas",
+      "installed": true
+    },
+    {
+      "path": "node_modules/fdir",
+      "version": "6.5.0",
+      "license": "MIT",
+      "integrity": "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==",
+      "integrity_source": "node_modules/fdir",
+      "installed": true
+    },
+    {
+      "path": "node_modules/framer-motion",
+      "version": "14.9.0",
+      "license": "MIT",
+      "integrity": "sha512-g1hZu8WoTwgsoVAaqEEcefhvR03cKGtkmrKaRrWpXhnM3LGR8jl1u2qyJ1PMVlO7LKQHE8TTRQYUlMmnrY4L+g==",
+      "integrity_source": "node_modules/framer-motion",
+      "installed": true
+    },
+    {
+      "path": "node_modules/fsevents",
+      "version": "2.3.3",
+      "license": "MIT",
+      "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==",
+      "integrity_source": "node_modules/fsevents",
+      "installed": false
+    },
+    {
+      "path": "node_modules/get-nonce",
+      "version": "1.0.1",
+      "license": "MIT",
+      "integrity": "sha512-FJhYRoDaiatfEkUK8HKlicmu/3SGFD51q3itKDGoSTysQJBnfOcxU5GxnhE1E6soB76MbT0MBtnKJuXyAx+96Q==",
+      "integrity_source": "node_modules/get-nonce",
+      "installed": true
+    },
+    {
+      "path": "node_modules/graceful-fs",
+      "version": "4.2.11",
+      "license": "ISC",
+      "integrity": "sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==",
+      "integrity_source": "node_modules/graceful-fs",
+      "installed": true
+    },
+    {
+      "path": "node_modules/immer",
+      "version": "11.2.9",
+      "license": "MIT",
+      "integrity": "sha512-IQ4UEtXjZjyefyWjtLEDXUSrF6T2hwjKPi6BIJl3bY/2XXW24d6cNGdXJSBOA/+KNnuiXkZY6DR0C3efolhitA==",
+      "integrity_source": "node_modules/immer",
+      "installed": true
+    },
+    {
+      "path": "node_modules/internmap",
+      "version": "2.0.3",
+      "license": "ISC",
+      "integrity": "sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg==",
+      "integrity_source": "node_modules/internmap",
+      "installed": true
+    },
+    {
+      "path": "node_modules/jiti",
+      "version": "2.7.0",
+      "license": "MIT",
+      "integrity": "sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==",
+      "integrity_source": "node_modules/jiti",
+      "installed": true
+    },
+    {
+      "path": "node_modules/lightningcss",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-NXYBzinNrblfraPGyrbPoD19C1h9lfI/1mzgWYvXUTe414Gz/X1FD2XBZSZM7rRTrMA8JL3OtAaGifrIKhQ5yQ==",
+      "integrity_source": "node_modules/lightningcss",
+      "installed": true
+    },
+    {
+      "path": "node_modules/lightningcss-android-arm64",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==",
+      "integrity_source": "node_modules/lightningcss-android-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-darwin-arm64",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-RzeG9Ju5bag2Bv1/lwlVJvBE3q6TtXskdZLLCyfg5pt+HLz9BqlICO7LZM7VHNTTn/5PRhHFBSjk5lc4cmscPQ==",
+      "integrity_source": "node_modules/lightningcss-darwin-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-darwin-x64",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-U+QsBp2m/s2wqpUYT/6wnlagdZbtZdndSmut/NJqlCcMLTWp5muCrID+K5UJ6jqD2BFshejCYXniPDbNh73V8w==",
+      "integrity_source": "node_modules/lightningcss-darwin-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-freebsd-x64",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-JCTigedEksZk3tHTTthnMdVfGf61Fky8Ji2E4YjUTEQX14xiy/lTzXnu1vwiZe3bYe0q+SpsSH/CTeDXK6WHig==",
+      "integrity_source": "node_modules/lightningcss-freebsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm-gnueabihf",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-x6rnnpRa2GL0zQOkt6rts3YDPzduLpWvwAF6EMhXFVZXD4tPrBkEFqzGowzCsIWsPjqSK+tyNEODUBXeeVHSkw==",
+      "integrity_source": "node_modules/lightningcss-linux-arm-gnueabihf",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm64-gnu",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-0nnMyoyOLRJXfbMOilaSRcLH3Jw5z9HDNGfT/gwCPgaDjnx0i8w7vBzFLFR1f6CMLKF8gVbebmkUN3fa/kQJpQ==",
+      "integrity_source": "node_modules/lightningcss-linux-arm64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm64-musl",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-UpQkoenr4UJEzgVIYpI80lDFvRmPVg6oqboNHfoH4CQIfNA+HOrZ7Mo7KZP02dC6LjghPQJeBsvXhJod/wnIBg==",
+      "integrity_source": "node_modules/lightningcss-linux-arm64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-linux-x64-gnu",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-V7Qr52IhZmdKPVr+Vtw8o+WLsQJYCTd8loIfpDaMRWGUZfBOYEJeyJIkqGIDMZPwPx24pUMfwSxxI8phr/MbOA==",
+      "integrity_source": "node_modules/lightningcss-linux-x64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-linux-x64-musl",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-bYcLp+Vb0awsiXg/80uCRezCYHNg1/l3mt0gzHnWV9XP1W5sKa5/TCdGWaR/zBM2PeF/HbsQv/j2URNOiVuxWg==",
+      "integrity_source": "node_modules/lightningcss-linux-x64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-win32-arm64-msvc",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-8SbC8BR40pS6baCM8sbtYDSwEVQd4JlFTOlaD3gWGHfThTcABnNDBda6eTZeqbofalIJhFx0qKzgHJmcPTnGdw==",
+      "integrity_source": "node_modules/lightningcss-win32-arm64-msvc",
+      "installed": false
+    },
+    {
+      "path": "node_modules/lightningcss-win32-x64-msvc",
+      "version": "1.32.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-Amq9B/SoZYdDi1kFrojnoqPLxYhQ4Wo5XiL8EVJrVsB8ARoC1PWW6VGtT0WKCemjy8aC+louJnjS7U18x3b06Q==",
+      "integrity_source": "node_modules/lightningcss-win32-x64-msvc",
+      "installed": true
+    },
+    {
+      "path": "node_modules/lightweight-charts",
+      "version": "5.2.1",
+      "license": "Apache-2.0",
+      "integrity": "sha512-IVwoK1RLFiLPubaKIjNbtjWLnpPMqiABSrTay6whmNa8L1+19292VtHJ+BWyPUuLCwF0tcQlhEWd1CLB2a1nsQ==",
+      "integrity_source": "node_modules/lightweight-charts",
+      "installed": true
+    },
+    {
+      "path": "node_modules/lucide-react",
+      "version": "1.66.0",
+      "license": "ISC",
+      "integrity": "sha512-8zjbi/Us+ETXqfBwmXF/FHrWGIqOdE6zT1yUdRJLQVoptomSkB0zdFWVIM667t9K8djWDaXdkBkqi2qVTuDNiw==",
+      "integrity_source": "node_modules/lucide-react",
+      "installed": true
+    },
+    {
+      "path": "node_modules/magic-string",
+      "version": "0.30.21",
+      "license": "MIT",
+      "integrity": "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==",
+      "integrity_source": "node_modules/magic-string",
+      "installed": true
+    },
+    {
+      "path": "node_modules/motion",
+      "version": "14.9.0",
+      "license": "MIT",
+      "integrity": "sha512-Oc+jjq/AyhwsnEUaAq2xEu/SsfKTphgsXqoxddTSLzgTdXZc6FwHcp9RLGSECccTykN1/p3gWUN4kMJAamm+1g==",
+      "integrity_source": "node_modules/motion",
+      "installed": true
+    },
+    {
+      "path": "node_modules/motion-dom",
+      "version": "14.9.0",
+      "license": "MIT",
+      "integrity": "sha512-wGjKbNDMHd75aLStkxLCKZ+T8/wusZHklmNLK1Ak68UrdBt2X8I4yweYR/0WonxGnBsw6oloDTIV8pN+UTvzzA==",
+      "integrity_source": "node_modules/motion-dom",
+      "installed": true
+    },
+    {
+      "path": "node_modules/motion-utils",
+      "version": "14.7.0",
+      "license": "MIT",
+      "integrity": "sha512-woO0/Nb7ys75f94fjvQi/6leiHGvZUYkeHUPEZ3vxsV+9OpEVhkxp01x8MlRwX0zt31EqgXsKDAoBoJLC148Tw==",
+      "integrity_source": "node_modules/motion-utils",
+      "installed": true
+    },
+    {
+      "path": "node_modules/nanoid",
+      "version": "3.3.20",
+      "license": "MIT",
+      "integrity": "sha512-uKdg2G3GNCKQn9byYOpxbGqrT2fGO5KRt5J/8b3pok8rT6qxGWF6hxMyJiEYtAf+FVyYuD9hRaDqX5uPFYJ4ZQ==",
+      "integrity_source": "node_modules/nanoid",
+      "installed": true
+    },
+    {
+      "path": "node_modules/picocolors",
+      "version": "1.1.1",
+      "license": "ISC",
+      "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==",
+      "integrity_source": "node_modules/picocolors",
+      "installed": true
+    },
+    {
+      "path": "node_modules/picomatch",
+      "version": "4.0.7",
+      "license": "MIT",
+      "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+      "integrity_source": "node_modules/picomatch",
+      "installed": true
+    },
+    {
+      "path": "node_modules/postcss",
+      "version": "8.5.32",
+      "license": "MIT",
+      "integrity": "sha512-LJlKCCAUFKOuZxipUdYw1NzIITEsPcgyOG9LkvRJvuKj/bRzbuRY0ARXvL0pWGpsZvn8jku+LMep2eU0seHp8g==",
+      "integrity_source": "node_modules/postcss",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react",
+      "version": "19.3.1",
+      "license": "MIT",
+      "integrity": "sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==",
+      "integrity_source": "node_modules/react",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react-dom",
+      "version": "19.3.1",
+      "license": "MIT",
+      "integrity": "sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ==",
+      "integrity_source": "node_modules/react-dom",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react-is",
+      "version": "19.3.1",
+      "license": "MIT",
+      "integrity": "sha512-RRieF6IyxQBkcK6pP8xOHprLTPW6QjRkbGdImtqNme+/hYVwCZkLQLdlZGOhUqXwkS9IEynaGvPJtv6XB/cz0Q==",
+      "integrity_source": "node_modules/react-is",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react-redux",
+      "version": "9.3.1",
+      "license": "MIT",
+      "integrity": "sha512-vxMLT0lalUjbZPkoTepWyKAZbjIIFssNx/CEL9lTfwQBU6XpkGSmCNdcCIrkOBUgB68uftZMnbXVb6DwGnhRKQ==",
+      "integrity_source": "node_modules/react-redux",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react-remove-scroll",
+      "version": "2.7.2",
+      "license": "MIT",
+      "integrity": "sha512-Iqb9NjCCTt6Hf+vOdNIZGdTiH1QSqr27H/Ek9sv/a97gfueI/5h1s3yRi1nngzMUaOOToin5dI1dXKdXiF+u0Q==",
+      "integrity_source": "node_modules/react-remove-scroll",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react-remove-scroll-bar",
+      "version": "2.3.8",
+      "license": "MIT",
+      "integrity": "sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==",
+      "integrity_source": "node_modules/react-remove-scroll-bar",
+      "installed": true
+    },
+    {
+      "path": "node_modules/react-style-singleton",
+      "version": "2.2.3",
+      "license": "MIT",
+      "integrity": "sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==",
+      "integrity_source": "node_modules/react-style-singleton",
+      "installed": true
+    },
+    {
+      "path": "node_modules/recharts",
+      "version": "3.10.1",
+      "license": "MIT",
+      "integrity": "sha512-QXFrvt6IVcw7eeZCoyXTwkIJAX3Dv1nyVhMicXJ47GsGDDpcN8z6o644DibE9XjpBTThtsomLKnTV6lc+cVFUA==",
+      "integrity_source": "node_modules/recharts",
+      "installed": true
+    },
+    {
+      "path": "node_modules/redux",
+      "version": "5.0.1",
+      "license": "MIT",
+      "integrity": "sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==",
+      "integrity_source": "node_modules/redux",
+      "installed": true
+    },
+    {
+      "path": "node_modules/redux-thunk",
+      "version": "3.1.0",
+      "license": "MIT",
+      "integrity": "sha512-NW2r5T6ksUKXCabzhL9z+h206HQw/NJkcLm1GPImRQ8IzfXwRGqjVhKJGauHirT0DAuyy6hjdnMZaRoAcy0Klw==",
+      "integrity_source": "node_modules/redux-thunk",
+      "installed": true
+    },
+    {
+      "path": "node_modules/reselect",
+      "version": "5.2.0",
+      "license": "MIT",
+      "integrity": "sha512-AgZ3UOZm3YndfrJ4OYjgrT7bmCm/1iqkjvEfH/oYjzh6PD2qw4QuT3jjnXIrpdt4MTpMXclMT3lXbmRY+XRakw==",
+      "integrity_source": "node_modules/reselect",
+      "installed": true
+    },
+    {
+      "path": "node_modules/rolldown",
+      "version": "1.2.16",
+      "license": "MIT",
+      "integrity": "sha512-bWvlMpFKiTfDKfnK7FC2MPgPeWCf/Kpwsq49ApdW+FQaBZb6O6dZ4MAPbPUjp7hYQrw/RobqCzn64BRrQecGHw==",
+      "integrity_source": "node_modules/rolldown",
+      "installed": true
+    },
+    {
+      "path": "node_modules/scheduler",
+      "version": "0.28.0",
+      "license": "MIT",
+      "integrity": "sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==",
+      "integrity_source": "node_modules/scheduler",
+      "installed": true
+    },
+    {
+      "path": "node_modules/source-map-js",
+      "version": "1.2.2",
+      "license": "BSD-3-Clause",
+      "integrity": "sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==",
+      "integrity_source": "node_modules/source-map-js",
+      "installed": true
+    },
+    {
+      "path": "node_modules/tailwindcss",
+      "version": "4.3.3",
+      "license": "MIT",
+      "integrity": "sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==",
+      "integrity_source": "node_modules/tailwindcss",
+      "installed": true
+    },
+    {
+      "path": "node_modules/tapable",
+      "version": "2.3.3",
+      "license": "MIT",
+      "integrity": "sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==",
+      "integrity_source": "node_modules/tapable",
+      "installed": true
+    },
+    {
+      "path": "node_modules/tiny-invariant",
+      "version": "1.3.3",
+      "license": "MIT",
+      "integrity": "sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==",
+      "integrity_source": "node_modules/tiny-invariant",
+      "installed": true
+    },
+    {
+      "path": "node_modules/tinyglobby",
+      "version": "0.2.17",
+      "license": "MIT",
+      "integrity": "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==",
+      "integrity_source": "node_modules/tinyglobby",
+      "installed": true
+    },
+    {
+      "path": "node_modules/tslib",
+      "version": "2.9.1",
+      "license": "0BSD",
+      "integrity": "sha512-a4Ux9VKuIMHsOS7ENbEq6hK2ZGYIT27Rtl0E4eD9KqwxhKiQeMZE/9xb3IdYwWaSOyIBQLExhQgXDTYoiCxnWA==",
+      "integrity_source": "node_modules/tslib",
+      "installed": true
+    },
+    {
+      "path": "node_modules/typescript",
+      "version": "7.0.2",
+      "license": "Apache-2.0",
+      "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+      "integrity_source": "node_modules/typescript",
+      "installed": true
+    },
+    {
+      "path": "node_modules/use-callback-ref",
+      "version": "1.3.3",
+      "license": "MIT",
+      "integrity": "sha512-jQL3lRnocaFtu3V00JToYz/4QkNWswxijDaCVNZRiRTO3HQDLsdu1ZtmIUvV4yPp+rvWm5j0y0TG/S61cuijTg==",
+      "integrity_source": "node_modules/use-callback-ref",
+      "installed": true
+    },
+    {
+      "path": "node_modules/use-sidecar",
+      "version": "1.1.3",
+      "license": "MIT",
+      "integrity": "sha512-Fedw0aZvkhynoPYlA5WXrMCAMm+nSWdZt6lzJQ7Ok8S6Q+VsHmHpRWndVRJ8Be0ZbkfPc5LRYH+5XrzXcEeLRQ==",
+      "integrity_source": "node_modules/use-sidecar",
+      "installed": true
+    },
+    {
+      "path": "node_modules/use-sync-external-store",
+      "version": "1.7.0",
+      "license": "MIT",
+      "integrity": "sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A==",
+      "integrity_source": "node_modules/use-sync-external-store",
+      "installed": true
+    },
+    {
+      "path": "node_modules/victory-vendor",
+      "version": "37.4.1",
+      "license": "MIT AND ISC AND BSD-3-Clause",
+      "integrity": "sha512-geV4p2GVfVM9lgm9ZRS3pvsbAPS+BUGhM9W9nPzPHTKi+/+KjNrFXdgP6KkG+XspNZuvcXmchcrtklfuQ4gniw==",
+      "integrity_source": "node_modules/victory-vendor",
+      "installed": true
+    },
+    {
+      "path": "node_modules/vite",
+      "version": "8.3.5",
+      "license": "MIT",
+      "integrity": "sha512-z1YpjieJ9g0ebTmQpLBv/oq9E3F9EIlOe+7LahW8SrE3LTiG3udBRUXQOlYXP9b+IC2q2phHeVxj9xGlw34OEQ==",
+      "integrity_source": "node_modules/vite",
+      "installed": true
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss",
+      "installed": true
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-android-arm64",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-android-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-darwin-arm64",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-Sciaz8eenNTKn9b3t7+xr0ipTp9YxKQY4npwQ3mrRuL0BAVHBLyZxofhaKBAVtzmtRZ/zTyo0/to4B1uWG/Djg==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-darwin-arm64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-darwin-x64",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-darwin-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-freebsd-x64",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-freebsd-x64",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-linux-arm-gnueabihf",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-linux-arm-gnueabihf",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-linux-arm64-gnu",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-linux-arm64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-linux-arm64-musl",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-linux-arm64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-linux-x64-gnu",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-ar+Ju7LmcN0Jo4FpL4hpFybwNG9/3A/Br5KW2n2jyODg3MEZXaDYADdemoNS+BDNfMgKvylJLj4S5tyRActuAg==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-linux-x64-gnu",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-linux-x64-musl",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-linux-x64-musl",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-win32-arm64-msvc",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-win32-arm64-msvc",
+      "installed": false
+    },
+    {
+      "path": "node_modules/vite/node_modules/lightningcss-win32-x64-msvc",
+      "version": "1.33.0",
+      "license": "MPL-2.0",
+      "integrity": "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA==",
+      "integrity_source": "node_modules/vite/node_modules/lightningcss-win32-x64-msvc",
+      "installed": true
+    },
+    {
+      "path": "node_modules/zustand",
+      "version": "5.0.16",
+      "license": "MIT",
+      "integrity": "sha512-Uv7e327ihlCfayfja3hDc0M64Upev1LWBKpRobdK4NyovDDPeeX4imWXc/wzC1yc6fkYPoAY/ncKVPAs2jrtQw==",
+      "integrity_source": "node_modules/zustand",
+      "installed": true
+    }
+  ],
+  "python_active_advisories": 0,
+  "npm_advisories": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "npm_audit_sha256": "36bb5a4b4d43c38d088baa219d177458ce497e05306bab504007aeb22a7e46ff",
+  "research": [
+    {
+      "name": "numpy",
+      "version": "2.5.4",
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "source": "https://pypi.org/pypi/numpy/2.5.4/json",
+      "license_files": [
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/LICENSE.txt",
+          "sha256": "a804dff0ead9fadc5293456410bcbfc32bf024be9c4513459663fb7b442d2341"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/_core/include/numpy/libdivide/LICENSE.txt",
+          "sha256": "d544761558b510866c21f7e8a2d5716fca76e0b98117e3b6b86314db7244d150"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/_core/src/common/pythoncapi-compat/COPYING",
+          "sha256": "aea41976c720f91bd19725c16916a1ace40eb1ea42620d340e587a5de4bbcea0"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/_core/src/highway/LICENSE",
+          "sha256": "d208152e2777ffd0126eacc1bd21c0320d69e4e6b622d21a2a12a47e8ef73763"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/_core/src/npysort/x86-simd-sort/LICENSE.md",
+          "sha256": "a732977853530066790c42817087f4829b518dd98d340c916acbfd227e39d3cb"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/_core/src/umath/svml/LICENSE",
+          "sha256": "585483905b13d4b42f800c55ba99e89d6e2e33ccd5f503e201c07531d148ff41"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/fft/pocketfft/LICENSE.md",
+          "sha256": "8db000e158c162e7249787852d8c69764706502ccee725c06641b31c1e95c8af"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/linalg/lapack_lite/LICENSE.txt",
+          "sha256": "19060ef465e1797d682ee0fc3081bd25ab1395e995e43d25c9d13c95d9a3cd6b"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/ma/LICENSE",
+          "sha256": "d78dbb208b80d92b4d333e41a4baae50d12444f46e53199fa7726a91de6e2da7"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/LICENSE.md",
+          "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/src/distributions/LICENSE.md",
+          "sha256": "cf5619f25b112d5ce7c896efffc8e610bcb345dfadcc19f2c1460aa48fff2c9e"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/src/mt19937/LICENSE.md",
+          "sha256": "92c10699884321f1c2947fe2a70ab23b0fbf1507f756d89dd08f38c61fc3d4fa"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/src/pcg64/LICENSE.md",
+          "sha256": "41190663b77bee5302386495a07b7eabfbfa571aa0ae2f11da6764162062fc4f"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/src/philox/LICENSE.md",
+          "sha256": "322ac46d870c8aeead6c53adcccc839296fb3c8e456eae155081297daf7f8013"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/src/sfc64/LICENSE.md",
+          "sha256": "28cad82ce1379dc529df30da78ec012d7d0d1d576b03ddcb93388aee53659f59"
+        },
+        {
+          "file": "numpy-2.5.4.dist-info/licenses/numpy/random/src/splitmix64/LICENSE.md",
+          "sha256": "454ec7350e478e037061850b67395753b425b1cb0a34bbc26290b020bf89d763"
+        },
+        {
+          "file": "numpy/_core/include/numpy/random/LICENSE.txt",
+          "sha256": "d544761558b510866c21f7e8a2d5716fca76e0b98117e3b6b86314db7244d150"
+        },
+        {
+          "file": "numpy/ma/LICENSE",
+          "sha256": "d78dbb208b80d92b4d333e41a4baae50d12444f46e53199fa7726a91de6e2da7"
+        },
+        {
+          "file": "numpy/random/LICENSE.md",
+          "sha256": "b4bc2f4fa1c95778f1ed3dd8f14706bece399475b978f9f34b5d3cd72521b48a"
+        }
+      ],
+      "vulnerabilities": []
+    },
+    {
+      "name": "ta-lib",
+      "version": "0.8.3",
+      "license": "See license files",
+      "source": "https://pypi.org/pypi/ta-lib/0.8.3/json",
+      "license_files": [
+        {
+          "file": "ta_lib-0.8.3.dist-info/licenses/LICENSE",
+          "sha256": "c62694ec6b052e93d8f6c252385db1f3f4f3ade9a975536ac6c6a1631059ec8f"
+        }
+      ],
+      "vulnerabilities": []
+    }
+  ],
+  "research_active_advisories": 0,
+  "research_requirements_sha256": "cb509ab40e146ffffff79c66ca403f46a62ddc2feceafe7994bdaeedc219a2ae",
+  "research_checked_at": "2026-11-04T14:58:57.041935+00:00"
+}

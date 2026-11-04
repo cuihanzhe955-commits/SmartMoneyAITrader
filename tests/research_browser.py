@@ -86,6 +86,8 @@ def run():
                 data=page.request.get(url+"/api/state").json()["state"]
                 assert data["lifecycle_status"]=="PAUSED" and data["config"]["engine"]=="rules"
                 assert not errors,errors
+                for context in browser.contexts:
+                    for tab in context.pages:tab.goto("about:blank")
                 browser.close()
             print("PASS archive indicator research, JSON export, paused theme and same-length chart update; 2 sizes x 2 themes")
         finally:proc.terminate();proc.wait(15)

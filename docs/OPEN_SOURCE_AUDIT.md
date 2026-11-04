@@ -1,41 +1,42 @@
-# D 阶段组件审查与采用边界
+# D 阶段组件与依赖审查
 
-日期：2026-11-04。开发检查点，非 Stable；未访问真实交易账户或提交订单。
+更新：2026-11-04。**D 的组件 POC 与采用评审已验收**；参见 [最终决定](COMPONENT_DECISIONS.md)、[验收记录](PHASE_D_RESULTS.md)。本结论不代表 v1.0 Stable 或真实交易验收。
 
-| 组件 | 本轮实际版本 / 许可 | 实际动作 | 采用结论与剩余门槛 |
-|---|---|---|---|
-| CCXT | 4.5.91 / MIT | 保留原适配器；三所原生客户端在拦截 HTTP 下验证现货 IOC 签名、K 线、余额、精度与异常不重发 | 保留依赖；不据此启用 Gate 或声称平台联调通过。市场发现研究已完成 [D3](PHASE_D3_DISCOVERY.md)；实际执行接入与平台返回仍需逐项验收；协议对照见 [D2](PHASE_D2_CCXT.md) |
-| TA-Lib Python / C | 0.8.3 / BSD-2-Clause、BSD-3-Clause | 独立 Windows CPython 3.12 wheel 实测；13 组数据、11,752 个指标值对照 | 仅研究依赖；不替换生产策略。不在源码包分发 wheel 或原生库 |
-| NumPy | 2.5.4 / BSD-3-Clause | 与 TA-Lib 隔离 POC 配合；研究依赖固定版本 | 生产程序无需安装；其他 Python/Windows 架构尚未验证 |
-| Pydantic AI | 未安装；上游 MIT | 评估现有 Provider 双角色、Pydantic 严格 Schema 及既有异步故障测试 | 条件引入项暂不采用。现有流程足够本轮需要，避免增加第二套调度框架；不声称执行了该库兼容 POC |
-| Lightweight Charts | 5.2.1 / Apache-2.0 + NOTICE | 拆分独立 React 净值组件、数据整理、主题与同长度刷新修复 | 保留已有依赖；保留图内署名、可见链接、LICENSE 与 NOTICE。性能压力、完整 K 线与交易回放仍待后续验收 |
+## 当前分发与采用范围
 
-## 指标兼容性
+- CCXT4.5.91（MIT）、Pydantic2.14.2（MIT）、Lightweight Charts5.2.1（Apache-2.0 + NOTICE）保持现有版本。
+- TA-Lib Python0.8.3（BSD-2-Clause）/C0.8.3（BSD-3-Clause）及 NumPy2.5.4 只用于可选研究参考，未替换生产策略，不捆绑原生库；相应上游许可见官方库及其发行文件。
+- Pydantic AI 按主计划的条件引入条款决定不安装；Freqtrade、Hummingbot、Jesse 仅研究，不复制代码。具体理由及研究提交见最终决定。
+- CCXT、图表的原有许可文件在 `third_party/`；[THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) 收集当前 Windows 已安装依赖的许可文本和文件哈希。上游版权、MPL/Apache/BSD/MIT 等表达式保留，不把全部依赖误标成单一许可。
 
-原 RSI 是最近 14 次涨跌幅汇总、ATR 是最近 14 次真实波幅均值；原 EMA 使用最近 60 根首价作为初始化。研究模块使用 Wilder RSI/ATR 和均值初始化 EMA，因此不能默认为等价替换。
+## 版本与兼容性
 
-标准实现仅供研究；当前策略仍执行原口径。参考值来自实际 TA-Lib 0.8.3 原生库（该版本横盘 RSI 返回 50），包含预热空值、单调、横盘、冲击和随机序列，以及项目所附八币种公开历史归档。最大绝对误差：EMA 7.28e-12、RSI 3.56e-14、ATR 5.69e-14。比较不证明任何盈利优势。
+`requirements.txt` 精确固定38个现有 Windows 生产依赖，未升级版本；`requirements-research.txt` 固定2个可选研究依赖。前端直接版本和全部解析结果由 package.json/package-lock.json 固定，包含185个锁定节点（含其他平台可选项）。
 
-可选研究环境：在独立虚拟环境安装 `requirements-research.txt`，运行：
+本轮在两个独立 Windows CPython3.12 x64 虚拟环境成功安装；生产导入、pip check、真实启动器依赖检查通过。`requirements-win-py312.lock` 记录实际验证的 wheel SHA256，已通过38个包的哈希校验下载及离线全新安装。它不宣称验证其他 Python/CPU/操作系统；跨环境及正式 EXE 的完整分发审查仍在 I 阶段。
+
+## 已知漏洞及来源检查
+
+[DEPENDENCY_AUDIT.json](DEPENDENCY_AUDIT.json) 对应当前依赖输入哈希，记录38个生产包、2个研究包和185个 npm 锁定节点。Python 查询 PyPI 当前版本漏洞回报，npm 执行完整 npm audit：本轮活动公告均为0。该结论仅是相应日期和公开公告源的结果，不是无漏洞或全部原生供应链都经过安全认证的证明。
+
+npm 包的 SRI 被检查；内嵌 inBundle 子依赖继承其父归档 SRI，不伪造单独归档哈希。已安装的114个 npm 节点及 Python 生产包共收集182份许可文件、114份去重文本。未安装的平台可选包只列元数据，未来如被实际分发需重新审查。三个 npm 包没有本地许可文本，分别使用所属 rolldown 包的许可或可核验上游仓库文本，来源在通知文件中注明。
+
+源码导出时，如果组件审查存在但其输入哈希过期、结果缺失或含未关闭公告，构建会拒绝沿用旧验收结论；同时保留原有敏感文件白名单及二次扫描。
+
+## 指标参考复测
+
+当前标准实现再次与实际 TA-Lib0.8.3、NumPy2.5.4 对照：13组、11,752个值一致，预热空值位置一致；最大绝对误差 EMA7.28e-12、RSI3.56e-14、ATR5.69e-14。该版本横盘 RSI 返回50。原 RSI 汇总、ATR均值及首价初始化 EMA 的执行口径保持不变，研究对照不证明盈利优势。
+
+## 可复现开发命令
 
 ```powershell
-python scripts/verify_indicator_reference.py --reference-path <研究环境的site-packages> --output <报告.json> --golden <参考值.json>
+# 经过本轮验证的 Windows CPython3.12 x64 环境
+python -m pip install --require-hashes -r requirements-win-py312.lock
+python -m pip check
+npm --prefix frontend ci
+npm --prefix frontend audit --json > npm-audit.json
+python scripts/audit_components.py --npm-audit npm-audit.json --research-path <研究环境site-packages> --output docs/DEPENDENCY_AUDIT.json
+python scripts/verify_indicator_reference.py --reference-path <研究环境site-packages> --output indicator-report.json --golden indicator-golden.json
 ```
 
-本轮 Windows wheel：`ta_lib-0.8.3-cp312-cp312-win_amd64.whl`；SHA256：`233d78abdd31df3ab91c04dccd4aaa0fdb127c3ab1cce0765476526adf27344b`。生产代码不导入 TA-Lib；日常使用研究面板无需安装它。已提交的参考向量支持离线回归。
-
-## 供应链与许可
-
-- 前端直接依赖固定为现有 lockfile 的精确版本，未升级解析版本；使用 `npm ci` 重现。2026-11-04 `npm audit --omit=dev --json` 返回 0 条已知漏洞。这不覆盖所有 Python 依赖，也不是无漏洞证明。
-- CCXT、Lightweight Charts 的许可证文本保留在 `third_party/`。图表在 UI 中保留 TradingView 链接；重分发应继续保留许可与 NOTICE。
-- TA-Lib/NumPy 为可选研究下载，不随源码导出原生二进制。未来如捆绑为 EXE，必须另行审查所有实际分发库及 C 运行时许可。
-- Freqtrade、Hummingbot、Jesse 仍是参考候选，本轮未复制或集成其代码，不据此宣称完成架构研究。
-- 本轮没有对全部 Python 间接依赖作漏洞扫描，没有证明跨版本 ABI 兼容。D 阶段是部分完成，不关闭整体阶段门槛。
-
-## 官方来源
-
-- [CCXT 源码与许可](https://github.com/ccxt/ccxt)
-- [TA-Lib Python](https://github.com/TA-Lib/ta-lib-python)、[C 库](https://github.com/TA-Lib/ta-lib)、[PyPI 元数据](https://pypi.org/pypi/TA-Lib/0.8.3/json)
-- [NumPy 许可](https://github.com/numpy/numpy/blob/main/LICENSE.txt)
-- [Pydantic AI](https://github.com/pydantic/pydantic-ai)
-- [Lightweight Charts](https://github.com/tradingview/lightweight-charts)、[5.2.1 NOTICE](https://github.com/tradingview/lightweight-charts/blob/v5.2.1/NOTICE)
+日常启动不需要运行审计命令，也不需要安装 TA-Lib。开发审查不读取 API 密钥、不连接交易账户。

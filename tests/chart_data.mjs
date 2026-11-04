@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {prepareCurve} from "../frontend/src/chart-data.ts";
+import {prepareCurve,replayCurve} from "../frontend/src/chart-data.ts";
 const d={state:{start:100,t:300,config:{capital:10}},curve:[[200,11],[100,10],[200,12],[400,99],[250,NaN]],fills:[{t:200,kind:"BUY"},{t:100,kind:"SELL"},{t:250,kind:"BUY"}]};
 const result=prepareCurve(d,1);
 assert.deepEqual(result.points,[{time:100,value:10},{time:200,value:12}]);
@@ -12,3 +12,14 @@ assert.equal(prepareCurve({state:{start:100,t:100,config:{capital:10}},curve:[[2
 assert.equal(prepareCurve({...d,state:{...d.state,t:5000}},1).points.length,0);
 assert.equal(prepareCurve(null,1).points.length,0);
 console.log("PASS chart normalization: sorted unique times, same-length updates, future/NaN rejection, marker alignment, fallback and range");
+
+assert.equal(prepareCurve({...d,fills:[null,undefined,...d.fills]},1).markers.length,2);
+const past=replayCurve(result,150);
+assert.deepEqual(past.points,[{time:100,value:10}]);
+assert.deepEqual(past.markers.map(m=>m.time),[100]);
+assert.equal(replayCurve(result,null),result);
+const start=performance.now();
+const large={state:{start:100,t:100099,config:{capital:10}},curve:Array.from({length:100000},(_,i)=>[100+i,10+i*.001]),fills:[]};
+const normalized=prepareCurve(large,48);const elapsed=performance.now()-start;
+assert.equal(normalized.points.length,100000);assert.ok(elapsed<2000,"100k normalization exceeds 2-second test budget");
+console.log(JSON.stringify({normalization_points:100000,elapsed_ms:elapsed,limit_ms:2000,replay_causal:true}));

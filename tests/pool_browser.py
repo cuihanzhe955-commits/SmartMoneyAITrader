@@ -69,6 +69,8 @@ def run():
                 state=page.request.get(url+"/api/state").json()["state"]
                 assert "NEW" in state["positions"] and not state["scan_pool"]["discovery_execution_enabled"]
                 assert state["lifecycle_status"]=="PAUSED" and not errors,errors
+                for context in browser.contexts:
+                    for tab in context.pages:tab.goto("about:blank")
                 browser.close()
             print("PASS monitor pool UI: retained holdings, candidate errors, counts, paused simulation; 2 sizes x 2 themes")
         finally:proc.terminate();proc.wait(15)

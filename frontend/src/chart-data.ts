@@ -16,8 +16,13 @@ export function prepareCurve(d: any, hours: number): {points: Point[]; markers: 
   const points = [...values].filter(([t]) => t >= d.state.t - hours * 3600).sort((a,b) => a[0]-b[0]).map(([time,value]) => ({time,value}));
   const times = new Set(points.map(p => p.time));
   const markers: TradeMark[] = (Array.isArray(d.fills) ? d.fills : [])
-    .filter((f: any) => timestamp(f.t) && times.has(f.t) && ["BUY","SELL"].includes(f.kind))
+    .filter((f: any) => f && typeof f === "object" && timestamp(f.t) && times.has(f.t) && ["BUY","SELL"].includes(f.kind))
     .sort((a: any,b: any) => a.t-b.t)
     .map((f: any) => ({time: f.t, position: f.kind === "BUY" ? "belowBar" : "aboveBar", color: f.kind === "BUY" ? "#39cb9b" : "#f0798c", shape: "circle", size: .5}));
   return {points, markers, rejected};
+}
+
+export function replayCurve(data: ReturnType<typeof prepareCurve>, cutoff: number|null) {
+  if (cutoff === null) return data;
+  return {...data, points:data.points.filter(p=>p.time<=cutoff), markers:data.markers.filter(m=>m.time<=cutoff)};
 }

@@ -81,6 +81,8 @@ def run():
                 page.screenshot(path=str(out/"discovery-network-error.png"),full_page=True)
                 assert page.request.get(url+"/api/state").json()["state"] is None
                 assert not errors,errors
+                for context in browser.contexts:
+                    for tab in context.pages:tab.goto("about:blank")
                 browser.close()
             print("PASS discovery UI: filters, budget details, no-session mutation, loading, empty, error, 2 sizes x 2 themes")
         finally:proc.terminate();proc.wait(15)

@@ -178,6 +178,12 @@ def create_app(path=None):
     def research_markets(query: DiscoveryQuery):
         return app.state.discovery.run(query)
 
+    @app.get("/api/replay")
+    def replay_view(session_id: int, symbol: str, as_of: int):
+        from terminal.replay import replay
+        with rt().lock:
+            return replay(rt().db, session_id, symbol, as_of)
+
     @app.post("/api/credentials")
     def keys(x: Credentials):
         values = {
