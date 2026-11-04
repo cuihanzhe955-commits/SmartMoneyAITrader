@@ -10,7 +10,8 @@ from execution import live
 from execution.venue import Venue
 from ai.coordinator import Coordinator, expired
 from execution.identity import digest, scope, position_version
-from market.feeds import historical, START
+from market.feeds import historical, START, SYMBOLS
+from market.pool import plan as monitor_plan
 from market.imports import parse_csv, window
 from ai.provider import Provider
 from terminal.settings import Vault, AIConfig
@@ -391,6 +392,9 @@ class Runtime:
             return window(self.dataset(c["dataset"]), t)
         if c["source"] == "history":
             return historical(t)
+        pool = c.get("_monitor_pool")
+        if pool:
+            return self.venue(c).bars(pool["monitor"], required=pool["required"])
         return self.venue(c).bars()
 
     def loop(self, lane, step, period):
@@ -550,11 +554,18 @@ class Runtime:
             if early:
                 t = now
             identity = (s["id"], s.get("revision", 0), position_version(s))
+            pool = None
+            if c["source"] == "public":
+                order = live.pending(self.db, s["id"])
+                pending_symbols = list(s.get("paper_pending", {}))
+                if order:
+                    pending_symbols.append(order["symbol"])
+                pool = monitor_plan(SYMBOLS, s["positions"], pending_symbols)
         try:
             if remote and (s.get("needs_check") or not s.get("admitted")):
                 if has_pending or not self.admit(s) or paused:
                     return
-            bars = self.feed(c, t)
+            bars = self.feed({**c, "_monitor_pool": pool} if pool else c, t)
             account = None
             if remote and not has_pending:
                 self.check_binding(s)
@@ -569,6 +580,10 @@ class Runtime:
                 return
             if c["source"] == "public":
                 t = market_time(cur)
+            if pool:
+                cur["scan_pool"] = {**pool, "source": "fixed", "requested_candidates": c["candidates"],
+                                    "fetched_count": len(bars), "errors": getattr(bars, "errors", {}),
+                                    "checked_at": t, "discovery_execution_enabled": False}
             if reason and remote:
                 if cur.get("latest") != reason:
                     self.db.record("system_events", cur, "RECONCILE", reason)
@@ -591,7 +606,10 @@ class Runtime:
             if remote:
                 block |= not protection_ready(cur)
             scan(self.db, cur, t, bars, manage=t < cur["deadline"],
-                 advice=advice, block_entries=block, order_pending=has_pending)
+                 advice=advice, block_entries=block, order_pending=has_pending,
+                 entry_symbols=pool["entries"] if pool else None)
+            if pool:
+                cur["scan_pool"]["valid_count"] = len(cur["radar"]) if cur.get("feed_valid") else 0
             if reason:
                 cur["latest"] = reason
                 self.db.record("system_events", cur, "ERROR", reason)

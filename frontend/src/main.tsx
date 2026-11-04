@@ -77,6 +77,16 @@ function Events({ rows }: { rows: Row[] }) {
 function RadarTable({ s }: { s: Row }) {
   return (
     <Panel title="候选机会排名" cap="OPPORTUNITY SCORE">
+      {s.scan_pool && <div className="pad" data-monitor-pool>
+        <p>{s.scan_pool.source === "fixed" ? "固定入场池" : s.scan_pool.source} {s.scan_pool.entry_count} 币 · 配置候选数 {s.scan_pool.requested_candidates} ·
+          必须监控 {s.scan_pool.required_count} 币 · 计划监控 {s.scan_pool.monitor_count} 币 ·
+          本轮取得行情 {s.scan_pool.fetched_count} 币 · 通过行情校验 {s.scan_pool.valid_count ?? "—"} 币</p>
+        {Object.entries(s.scan_pool.retained || {}).map(([symbol, why]) =>
+          <p key={symbol}>{symbol} · 因{(why as string[]).join("、")}保留监控；不在入场池时只管理原仓或原单。</p>)}
+        {Object.entries(s.scan_pool.errors || {}).map(([symbol, error]) =>
+          <p key={symbol}>{symbol} · {String(error)}</p>)}
+        <small>最近扫描尝试 {time(s.scan_pool.checked_at)} UTC。动态发现结果尚未自动用于开仓；持仓与原单不受候选落选影响。</small>
+      </div>}
       <Table
         heads={["交易对", "评分", "动量", "相对量能", "RSI", "策略信号"]}
         rows={s.radar.map((m: Row) => [

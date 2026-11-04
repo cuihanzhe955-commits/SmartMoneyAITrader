@@ -180,8 +180,9 @@ def protective_exit(position, price, config):
     return ""
 
 
-def scan(db, s, t, rows=None, manage=True, *, advice=None, block_entries=False, order_pending=False):
+def scan(db, s, t, rows=None, manage=True, *, advice=None, block_entries=False, order_pending=False, entry_symbols=None):
     c = s["config"]
+    allowed_entries = None if entry_symbols is None else set(entry_symbols)
     s["t"] = t
     s["heartbeat"] = int(time.time())
     s["current_activity"] = "SCANNING"
@@ -251,12 +252,17 @@ def scan(db, s, t, rows=None, manage=True, *, advice=None, block_entries=False, 
     from execution.paper_queue import drain, cancel
 
     if manage:
+        if allowed_entries is not None:
+            for symbol, order in list(s.get("paper_pending", {}).items()):
+                if order["side"] == "BUY" and symbol not in allowed_entries:
+                    cancel(db, s, symbol, "交易对已退出入场候选池，撤回模拟买单")
         drain(db, s, ranked, block_buys=block_entries or order_pending)
     elif s["breaker"]:
         for k in list(s.get("paper_pending", {})):
             cancel(db, s, k, "回撤熔断")
     ordered = sorted(ranked, key=lambda m: m["symbol"] not in s["positions"])
-    candidates = {m["symbol"] for m in ranked[: int(c["candidates"])]}
+    entry_ranked = ranked if allowed_entries is None else [m for m in ranked if m["symbol"] in allowed_entries]
+    candidates = {m["symbol"] for m in entry_ranked[: int(c["candidates"])]}
     for m in ordered if manage else []:
         k = m["symbol"]
         p = s["positions"].get(k)

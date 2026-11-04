@@ -13,6 +13,12 @@ def finite_number(value):
     return type(value) in (int, float) and math.isfinite(value)
 
 
+class MarketBatch(dict):
+    def __init__(self):
+        super().__init__()
+        self.errors = {}
+
+
 class Venue:
     def __init__(self, name, product, env, keys=None):
         self.name = name
@@ -67,18 +73,38 @@ class Venue:
             raise ValueError("标的不在可交易范围")
         return m
 
-    def bars(self):
-        result = {}
-        for k in SYMBOLS:
+    def bars(self, symbols=None, required=()):
+        from market.pool import plan
+        selection = plan(SYMBOLS if symbols is None else symbols, required)
+        result = MarketBatch()
+        for k in selection["monitor"]:
             pair = self.pair(k)
             if pair not in self.client.markets:
+                if k in selection["required"]:
+                    raise ValueError("持仓或在途委托交易对无法监控：" + k)
+                result.errors[k] = "交易对不可用"
                 continue
-            rows = self.client.fetch_ohlcv(pair, "1m", limit=245)
-            result[k] = [
-                (int(t) // 1000 + 60, o, h, l, c, v * c)
-                for t, o, h, l, c, v in rows
-                if t / 1000 + 60 <= time.time()
-            ]
+            try:
+                rows = self.client.fetch_ohlcv(pair, "1m", limit=245)
+                closed = [
+                    (int(t) // 1000 + 60, o, h, l, c, v * c)
+                    for t, o, h, l, c, v in rows
+                    if t / 1000 + 60 <= time.time()
+                ]
+                if not closed:
+                    raise ValueError("缺少有效收盘线")
+                result[k] = closed
+            except Exception as err:
+                if (isinstance(err, (ccxt.AuthenticationError, ccxt.PermissionDenied)) or
+                        "451" in str(err) or "restricted location" in str(err).lower()):
+                    raise
+                if k in selection["required"]:
+                    raise ValueError("持仓或在途委托行情无法核验：" + k) from None
+                result.errors[k] = type(err).__name__ + " · 本轮行情不可用"
+                if isinstance(err, ccxt.RateLimitExceeded):
+                    for rest in selection["monitor"][selection["monitor"].index(k)+1:]:
+                        result.errors[rest] = "本轮限频，尚未请求"
+                    break
         return result
 
     def balance(self):
