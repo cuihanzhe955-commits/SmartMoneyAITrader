@@ -4,9 +4,9 @@
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-C1%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-C2%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前公开版本：v1.0 · C1 开发检查点（2026-11-03）。** 尚非 Stable/生产就绪版本。已记录的离线回归、历史模拟与 Mock 验证 **不等同于真实资金交易验收**；真实成交闭环与交易所托管保护单生命周期尚未完成验证。
+> **当前公开版本：v1.0 · C2 开发检查点（2026-11-04）。** 最新隔离离线回归 317 项通过；模拟保护单生命周期、恢复与核对界面已有测试证据，详见 [C2 验收记录](docs/PHASE_C2_DIAGNOSTICS.md)。尚非 Stable/生产就绪版本；平台 demo 联调与真实资金验收尚未通过。此前沟通百分比为无固定权重的工程估算，正式状态见 [阶段与验收口径](docs/PROGRESS_STATUS.md)。
 
 ## 项目概览
 
@@ -50,7 +50,7 @@ flowchart LR
 
 详细验证证据与限制参见 [实盘验证状态](docs/LIVE_TRADING_VERIFICATION.md)，**不要将 Mock、只读检查或历史回放结果当作实盘验收报告**。
 
-**最新本地进展（开发者报告；尚未同步源码，2026-11-03）**：项目总体完成度约 **25%**，处于 **C 阶段（第 3/9 阶段）**。本地已完善**旧验收报告失效提示**：界面定期刷新报告状态，进程重启、报告超过 **60 秒**，或账户、配置、持仓发生变化后，将提示 **「需要重新核验」**，过期报告不会恢复交易授权。开发者反馈本轮相关 **103 项测试通过、0 失败**，前端构建及浏览器验证通过；**以上是尚未上传的本地修改及其测试结果，不是当前 GitHub 源码的可复验结论**。本地已保存并暂停后续工作；本轮未生成新发布包或阶段日志。
+**历史本地进展（2026-11-03，后续已同步；非当前进度）**：项目总体完成度约 **25%**，处于 **C 阶段（第 3/9 阶段）**。本地已完善**旧验收报告失效提示**：界面定期刷新报告状态，进程重启、报告超过 **60 秒**，或账户、配置、持仓发生变化后，将提示 **「需要重新核验」**，过期报告不会恢复交易授权。开发者反馈本轮相关 **103 项测试通过、0 失败**，前端构建及浏览器验证通过；**以上是尚未上传的本地修改及其测试结果，不是当前 GitHub 源码的可复验结论**。本地已保存并暂停后续工作；本轮未生成新发布包或阶段日志。
 
 **测试口径说明**：上表 **106 项**是此前 C1 公开检查点的历史回归记录；本轮 **103 项**属于不同的本地验证范围，**不能直接视为测试数量下降，也不能混用为同一份验收报告**。
 
@@ -183,7 +183,7 @@ npm run build
 
 > [!NOTE]
 > **ChatGPT 订阅代充协助服务 · ¥135 CNY**
-> 
+>
 > 该服务由开发者个人提供，**不是 OpenAI 官方服务或授权代理**，价格不代表官方订阅定价。购买前请确认具体套餐、期限、交付方式、退款规则和适用地区；请勿向他人提供账户密码或验证码。
 
 **购买咨询 / 联系开发者**

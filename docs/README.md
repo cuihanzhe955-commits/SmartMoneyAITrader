@@ -1,13 +1,13 @@
 # 项目文档导航
 
-> 适用范围：Smart Money AI Trader 公开仓库。文档状态以具体版本、日期和测试证据为准。  
+> 适用范围：Smart Money AI Trader 公开仓库。文档状态以具体版本、日期和测试证据为准。
 > 本页是**文档入口**，不是新的开发计划，也不代表功能已通过验收。
 
 ## 建议阅读顺序
 
 1. **首次了解项目**：[仓库首页](../README.md) → [v1.0 公开路线图](V1_ROADMAP.md)。
 2. **希望运行软件**：[完整使用说明](../使用说明.md) → [Windows 快速启动](WINDOWS_QUICK_START.md)。
-3. **需要判断当前真实完成度**：[C1 工程验收记录](PHASE_C1_RESULTS.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)。
+3. **需要判断当前真实完成度**：[阶段与验收口径](PROGRESS_STATUS.md) → [C2 工程验收记录](PHASE_C2_DIAGNOSTICS.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)；[C1 记录](PHASE_C1_RESULTS.md)保留为历史证据。
 4. **查看尚未采用的新想法**：[产品决策池](PRODUCT_DECISION_POOL.md)。
 
 ## 文档按职责划分
