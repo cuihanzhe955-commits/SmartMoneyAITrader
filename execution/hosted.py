@@ -66,7 +66,7 @@ class HostedStops:
         self.db.execute("UPDATE hosted_stops SET stage=?,body=? WHERE client_id=?",
                         (stage, body, order["client_id"]))
         self.db.execute("INSERT INTO hosted_stop_events(client_id,stage,body) VALUES(?,?,?)",
-                        (order["client_id"], stage, body))
+                        (order["client_id"], stage, encode({**order, "recorded_at": time.time()})))
 
     def plan(self, state, symbol, stop_price, generation=0):
         if not isinstance(generation, int) or isinstance(generation, bool) or not 0 <= generation <= 1000000:

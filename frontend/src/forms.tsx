@@ -374,6 +374,52 @@ export function Settings() {
   return q.data ? <><LiveChecks /><Config data={q.data} /></> : <p>读取配置…</p>;
 }
 
+function protectionNumber(value: any) {
+  if (value == null || value === "" || !Number.isFinite(Number(value))) return "未知";
+  return Number(value).toLocaleString("zh-CN", { maximumSignificantDigits: 12 });
+}
+
+function ProtectionDetails({ order }: { order: any }) {
+  const [open, setOpen] = useState(false);
+  const [before, setBefore] = useState(0);
+  const query = useQuery({queryKey: ["protection-report", order.client_id, before], enabled: open, refetchInterval: open ? 5000 : false,
+    queryFn: () => api("protection-report?id=" + order.session_id + "&client_id=" + encodeURIComponent(order.client_id) + "&before=" + before)});
+  const report = query.data;
+  return <div>
+    <button aria-expanded={open} onClick={() => setOpen(!open)}>核对时间线</button>
+    {open && <div aria-label="保护单核对时间线" style={{maxWidth: 420, whiteSpace: "normal", overflowWrap: "anywhere"}}>
+      {query.isPending ? <p>正在读取本机记录…</p> : query.isError ? <p>时间线读取失败，请重新查询</p> : <>
+        <p>{report.guidance}</p>
+        <p>{report.evidence_scope}</p>
+        <p>界面数值适度舍入；导出报告保留原始数值。</p>
+        {report.children?.map((child: any, i: number) => <p key={i}>
+          子订单 {i+1} · {child.stage} · {child.receipt
+            ? "已核对成交量 " + protectionNumber(child.receipt.qty) + "，成交金额 " + protectionNumber(child.receipt.nominal) + " USDT，手续费折算 " + protectionNumber(child.receipt.fee) + " USDT，已实现盈亏 " + protectionNumber(child.receipt.pnl) + " USDT"
+            : "尚无可核验成交，不计作已成交"}
+        </p>)}
+        {report.children_truncated && <p>子订单明细超过本页上限，请分批核对；此页不代表完整清单。</p>}
+        <ol>{report.events.map((e: any) => <li key={e.id}>
+          {e.recorded_at ? new Date(e.recorded_at * 1000).toLocaleString() : "历史记录时间未保存"} · {e.label}
+          {" · 数量 " + protectionNumber(e.quantity) + " · 触发价 " + protectionNumber(e.stop_price)}
+          {e.remaining_quantity != null && " · 剩余 " + protectionNumber(e.remaining_quantity)}
+          {e.cancel_attempts > 0 && " · 撤销提交 " + e.cancel_attempts + "/3"}
+          {e.released && " · 已核对释放"}
+          {e.maintenance_failed && " · 维护未确认"}
+        </li>)}</ol>
+        <div className="buttons">
+          {report.has_more && <button onClick={() => setBefore(report.next_before)}>更早记录</button>}
+          {before > 0 && <button onClick={() => setBefore(0)}>最近记录</button>}
+          <button onClick={() => query.refetch()}>刷新时间线</button>
+          <button onClick={() => {
+            const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type:"application/json"}));
+            const link = document.createElement("a"); link.href = url; link.download = "protection-page-" + order.client_id + ".json"; link.click(); URL.revokeObjectURL(url);
+          }}>导出本页核对报告</button>
+        </div>
+      </>}
+    </div>}
+  </div>;
+}
+
 function LiveChecks() {
   const [busy, setBusy] = useState(false);
   const [stopSymbol, setStopSymbol] = useState("");
@@ -412,14 +458,14 @@ function LiveChecks() {
           {protection.data?.error && <p>{protection.data.error}</p>}
           {protection.data?.blocks_orders && <p>保护单待核对，普通委托和账户切换已阻断</p>}
           {protection.data?.review_required && <p>保护交接后普通交易保持暂停，恢复前必须重新验收。</p>}
-          {protection.data?.handover?.map((p: any) => <p key={p.symbol}>待接管持仓：{p.symbol} · 剩余数量 {p.quantity}。可为实际剩余持仓创建下一代模拟保护。</p>)}
+          {protection.data?.handover?.map((p: any) => <p key={p.symbol}>待接管持仓：{p.symbol} · 剩余数量 {protectionNumber(p.quantity)}。可为实际剩余持仓创建下一代模拟保护。</p>)}
           {!protection.data?.orders?.length ? <p>暂无托管保护记录；当前不代表已获得交易所保护</p> :
-            <table><thead><tr><th>币种</th><th>实际记录状态</th><th>原保护数量</th><th>核对结果与剩余持仓</th><th>模拟操作</th></tr></thead><tbody>
-              {protection.data.orders.map((o: any, i: number) => <tr key={i}><td>{o.symbol}</td><td>{o.released ? "核对完成 · 已释放" : ({PLANNED:"待发送",SENDING:"提交待确认",UNKNOWN:"状态未知",ACCEPTED:"请求已受理",LIVE:"待触发记录",CANCEL_PENDING:"撤销待确认",TRIGGERED:"已触发 · 待验收",CANCELED:"已取消",FAILED:"触发失败"} as Record<string,string>)[o.stage] || o.stage}</td><td>{o.quantity}</td><td>{o.remaining_quantity != null && <div>成交核对后剩余 {o.remaining_quantity}</div>}{o.needs_attention && <strong>需要处理 · </strong>}{o.maintenance_error || (o.stale ? "记录已过期，请重新查原单" : o.released ? "账户已核对，恢复交易前重新验收" : o.children_reconciled ? "子订单已核对，账户仍需验收" : "等待核对")}</td><td>{!o.released && <>
+            <table className="protection-table"><thead><tr><th>币种</th><th>实际记录状态</th><th>原保护数量</th><th>核对结果与剩余持仓</th><th>模拟操作</th></tr></thead><tbody>
+              {protection.data.orders.map((o: any) => <tr key={o.client_id}><td>{o.symbol}</td><td>{o.released ? "核对完成 · 已释放" : ({PLANNED:"待发送",SENDING:"提交待确认",UNKNOWN:"状态未知",ACCEPTED:"请求已受理",LIVE:"待触发记录",CANCEL_PENDING:"撤销待确认",TRIGGERED:"已触发 · 待验收",CANCELED:"已取消",FAILED:"触发失败"} as Record<string,string>)[o.stage] || o.stage}</td><td>{protectionNumber(o.quantity)}</td><td>{o.remaining_quantity != null && <div>成交核对后剩余 {protectionNumber(o.remaining_quantity)}</div>}{o.needs_attention && <strong>需要处理 · </strong>}{o.maintenance_error || (o.stale ? "记录已过期，请重新查原单" : o.released ? "账户已核对，恢复交易前重新验收" : o.children_reconciled ? "子订单已核对，账户仍需验收" : "等待核对")}</td><td>{!o.released && <>
                 {(o.cancel_attempts || 0) > 0 && <small>撤销提交 {o.cancel_attempts}/3 次 · 重试前查询原单</small>}<button disabled={protectionBusy || o.stage === "PLANNED"} onClick={() => protect("query", o.client_id, o.session_id)}>查询原单</button>
                 {["PLANNED", "LIVE", "CANCEL_PENDING"].includes(o.stage) && <button disabled={protectionBusy || (o.cancel_attempts || 0) >= 3 || (o.cancel_retry_after || 0) > Date.now()/1000} onClick={() => protect("cancel", o.client_id, o.session_id)}>{o.stage === "CANCEL_PENDING" ? "查单后重试撤销" : "撤销模拟保护"}</button>}
                 {(["CANCELED", "FAILED"].includes(o.stage) || o.children_reconciled) && <button disabled={protectionBusy} onClick={() => protect("finalize", o.client_id, o.session_id)}>核对账户并释放</button>}
-              </>}</td></tr>)}
+              </>}<ProtectionDetails order={o} /></td></tr>)}
             </tbody></table>}
         </>}
       </div>

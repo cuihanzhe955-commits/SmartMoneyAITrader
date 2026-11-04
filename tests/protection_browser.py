@@ -38,7 +38,15 @@ def serve():
         return {"code":"0","data":[dict(sCode="0",algoId=o["algoId"])]}
     v.client.privatePostTradeOrderAlgo=Mock(side_effect=create)
     v.client.privatePostTradeCancelAlgos=Mock(side_effect=cancel)
-    v.lookup_stop=Mock(side_effect=lambda cid: orders[cid].copy())
+    def lookup(cid):
+        order=orders[cid]
+        if Path(os.environ["SMART_MONEY_RUNTIME"],"trigger-fixture").exists() and order["state"]=="live":
+            order.update(state="effective",uTime="1002",ordIdList=["fixture-child"],actualSz=order["sz"])
+        return order.copy()
+    v.lookup_stop=Mock(side_effect=lookup)
+    v.client.fetch_order=Mock(return_value=dict(id="fixture-child",symbol="BTC/USDT",side="sell",amount=.1,filled=.04,status="canceled"))
+    v.executions=Mock(return_value=[dict(id="fixture-fill",order="fixture-child",symbol="BTC/USDT",side="sell",amount=.04,price=89,
+                                        fee=dict(currency="USDT",cost=.00356))])
     def guard(event,args):
         if event in ("socket.connect","socket.connect_ex","socket.sendto"):
             address=args[-1]
@@ -89,6 +97,13 @@ def run():
                 page.get_by_label("模拟保护止损价").fill("90")
                 page.get_by_role("button",name="创建模拟保护",exact=True).click()
                 page.get_by_role("cell",name="待触发记录",exact=True).wait_for(timeout=15000)
+                page.get_by_role("button",name="核对时间线",exact=True).click()
+                timeline=page.get_by_label("保护单核对时间线")
+                timeline.get_by_text("本机记录，不代替平台账户联调或实盘验收",exact=True).wait_for()
+                assert timeline.get_by_text("发送前已持久化",exact=False).count()>0
+                with page.expect_download() as download:
+                    timeline.get_by_role("button",name="导出本页核对报告",exact=True).click()
+                assert download.value.suggested_filename.startswith("protection-page-")
                 for width,height in [(1366,768),(1920,1080)]:
                     page.set_viewport_size({"width":width,"height":height})
                     for theme in ("dark","light"):
@@ -96,6 +111,7 @@ def run():
                             page.get_by_label("切换主题").click()
                         assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
                         page.screenshot(path=str(out/("hosted-"+str(width)+"-"+theme+".png")),full_page=True)
+                page.get_by_role("button",name="核对时间线",exact=True).click()
                 page.get_by_role("button",name="撤销模拟保护",exact=True).click()
                 page.get_by_role("cell",name="已取消",exact=True).wait_for(timeout=15000)
                 page.get_by_role("button",name="核对账户并释放",exact=True).click()
@@ -109,6 +125,29 @@ def run():
                 status=page.request.get(url+"/api/protection-status").json()
                 assert len(status["orders"])==2 and status["blocks_orders"]
                 page.screenshot(path=str(out/"replacement.png"),full_page=True)
+                Path(temp,"trigger-fixture").touch()
+                # Wait for the actual background task to settle the fixture child.
+                page.wait_for_function("""async () => {
+                    const s=await (await fetch('/api/protection-status')).json();
+                    return s.orders.length===2 && s.orders.every(o=>o.released);
+                }""",timeout=15000)
+                page.get_by_role("cell",name="核对完成 · 已释放",exact=True).nth(1).wait_for(timeout=10000)
+                latest=page.request.get(url+"/api/protection-status").json()["orders"][0]
+                proof=page.request.get(url+"/api/protection-report?id="+str(latest["session_id"])+"&client_id="+latest["client_id"]).json()
+                assert proof["children"][0]["receipt"]["qty"]==.04
+                page.get_by_role("button",name="核对时间线",exact=True).first.click()
+                timeline=page.get_by_label("保护单核对时间线").first
+                try:
+                    timeline.get_by_text("已核对成交量 0.04",exact=False).wait_for(timeout=12000)
+                except Exception:
+                    page.screenshot(path=str(out/"timeline-failure.png"),full_page=True)
+                    (out/"timeline-failure.html").write_text(page.content(),encoding="utf8")
+                    raise
+                final=page.request.get(url+"/api/state").json()["state"]
+                assert abs(final["positions"]["BTC"]["qty"]-.06)<1e-12
+                assert abs(final["cash"]-(90+3.56-.00356))<1e-10
+                assert final["hosted_review_required"] and final["lifecycle_status"]=="PAUSED"
+                page.screenshot(path=str(out/"partial-fill-handover.png"),full_page=True)
                 assert not errors,errors
                 browser.close()
             print("PASS browser create/query/cancel/release/replacement; 2 sizes x 2 themes; fixture exchange only")

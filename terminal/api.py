@@ -130,6 +130,10 @@ def create_app(path=None):
         result = rt().hosted_action(x.id, x.action, x.client_id, x.symbol, x.stop_price)
         return {k: result.get(k) for k in ("client_id", "stage", "released", "quantity", "symbol")}
 
+    @app.get("/api/protection-report")
+    def protection_report(id: int, client_id: str, before: int = 0):
+        return rt().hosted_report(id, client_id, before)
+
     @app.post("/api/shutdown")
     def shutdown(body: dict):
         if not hasattr(app.state, "request_shutdown"):

@@ -383,6 +383,9 @@ th {
   padding: 8px 12px;
   border-bottom: 1px solid var(--edge);
 }
+.protection-table td {
+  vertical-align: top;
+}
 td:nth-child(4) {
   white-space: normal;
 }

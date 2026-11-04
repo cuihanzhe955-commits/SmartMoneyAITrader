@@ -169,6 +169,15 @@ class Runtime:
         finally:
             self.order_mutex.release()
 
+    def hosted_report(self, cid, client_id, before=0):
+        from execution.protection_report import report
+        with self.lock:
+            self.db.db.execute("SAVEPOINT protection_report_view")
+            try:
+                return report(self.db, cid, client_id, before)
+            finally:
+                self.db.db.execute("RELEASE protection_report_view")
+
     def hosted_tick(self):
         if self.exit.is_set() or not self.order_mutex.acquire(blocking=False):
             return
