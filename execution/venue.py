@@ -205,6 +205,28 @@ class Venue:
             raise ValueError("无可核验规则的现货交易对")
         return {"market_rules": "verified", "pairs": verified}
 
+    def lookup_stop(self, client_id):
+        """Read one original algo by its client ID, including after a timeout.
+
+        No pending-list absence inference, ownership adoption or write operation.
+        Full position/parameter checks belong to the hosted lifecycle ledger.
+        """
+        if self.name != "okx" or self.swap:
+            raise ValueError("当前仅实现 OKX 现货保护单只读查询")
+        if not isinstance(client_id, str) or not client_id.isascii() or not client_id.isalnum() or len(client_id) > 32:
+            raise ValueError("保护单客户端标识无效")
+        response = self.client.privateGetTradeOrderAlgo({"algoClOrdId": client_id})
+        rows = response.get("data") if isinstance(response, dict) else None
+        if (not isinstance(response, dict) or response.get("code") != "0"
+                or not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict)
+                or rows[0].get("algoClOrdId") != client_id
+                or not isinstance(rows[0].get("algoId"), str) or not rows[0]["algoId"].strip()):
+            raise ValueError("保护单查询结果未确认，禁止根据空清单重新提交")
+        return {k: rows[0].get(k) for k in (
+            "algoId", "algoClOrdId", "instId", "instType", "tdMode", "side", "ordType", "state",
+            "sz", "slTriggerPx", "slOrdPx", "slTriggerPxType", "tpTriggerPx", "tgtCcy",
+            "ordIdList", "actualSz", "uTime", "failCode")}
+
     def spot_rules(self, k, market):
         """Shared checks for admission and the actual order's refreshed market."""
         if market.get("active") is not True or market.get("spot") is not True:

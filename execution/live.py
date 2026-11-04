@@ -72,11 +72,30 @@ def number(value):
     raise ValueError("交易所回报含无效数值")
 
 
+def receipt_symbol(o):
+    return o["symbol"] + "/USDT" + (":USDT" if o.get("product") == "swap" else "")
+
+
+def check_receipt_identity(order, o):
+    """Reject conflicting identities even when a transport has already checked them.
+
+    Older adapters may omit optional fields; they must still verify identity in
+    lookup. An explicit contradiction must never reach the funds ledger.
+    """
+    info = order.get("info") or {}
+    original = info.get("origClientOrderId") if isinstance(info, dict) else None
+    clients = [v for v in (order.get("clientOrderId"), original) if v not in (None, "")]
+    if ((clients and o["client_id"] not in clients)
+            or (order.get("symbol") is not None and order["symbol"] != receipt_symbol(o))
+            or (order.get("side") is not None and order["side"] != o["side"].lower())):
+        raise ValueError("订单回报的客户端标识、交易对或方向与本地意图不一致")
+
+
 def execution(trade, order, o):
     if (not str(trade.get("id") or "").strip() and trade.get("id") != 0
             or str(trade.get("order")) != str(order["id"])
             or trade.get("side") != o["side"].lower()
-            or (trade.get("symbol") and trade["symbol"] != order.get("symbol"))):
+            or (trade.get("symbol") is not None and trade["symbol"] != receipt_symbol(o))):
         raise ValueError("成交标识、交易对或方向不一致")
     qty, price = number(trade.get("amount")), number(trade.get("price"))
     fees = trade.get("fees") or ([trade["fee"]] if trade.get("fee") else [])
@@ -140,11 +159,14 @@ def apply_receipt(s, o, row):
 
 def settle(db, s, o, order, trades):
     """Caller owns one transaction for receipts, ledger, position snapshot and order."""
-    persisted = db.db.execute("SELECT stage FROM venue_orders WHERE client_id=?", (o["client_id"],)).fetchone()
+    persisted = db.db.execute("SELECT stage,challenge_id FROM venue_orders WHERE client_id=?", (o["client_id"],)).fetchone()
     if not persisted:
         raise ValueError("本地订单意图缺失")
+    if persisted[1] != s["id"]:
+        raise ValueError("订单与当前会话不一致")
     if persisted[0] in FINAL:
         return True
+    check_receipt_identity(order, o)
     status = order.get("status")
     if status not in ("open", "closed", "expired", "canceled", "rejected") or not order.get("id"):
         raise ValueError("交易所订单身份或状态未知")
