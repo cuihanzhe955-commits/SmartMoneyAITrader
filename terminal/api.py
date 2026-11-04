@@ -22,6 +22,7 @@ from risk.limits import equity
 from events.store import encode
 from ai.provider import Provider
 from risk.parameters import RECOMMENDED
+from market.discovery import Discovery, DiscoveryQuery
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -67,6 +68,7 @@ def create_app(path=None):
     async def lifespan(app):
         rt = Runtime(path or os.environ.get("SMART_MONEY_RUNTIME", ROOT / "runtime"))
         app.state.rt = rt
+        app.state.discovery = Discovery()
         # Enforce one scheduler per ledger even when the app starts on a second port.
         import msvcrt
 
@@ -80,6 +82,7 @@ def create_app(path=None):
             rt.shutdown()
             rt.db.db.close()
             owner.close()
+            app.state.discovery.close()
 
     app = FastAPI(
         title="Smart Money AI Trader", lifespan=lifespan, docs_url=None, redoc_url=None
@@ -170,6 +173,10 @@ def create_app(path=None):
     def research_indicators(symbol: str = "BTC", offset_minute: int = 0):
         from strategy.research import compare
         return compare(symbol, offset_minute)
+
+    @app.post("/api/research/markets")
+    def research_markets(query: DiscoveryQuery):
+        return app.state.discovery.run(query)
 
     @app.post("/api/credentials")
     def keys(x: Credentials):

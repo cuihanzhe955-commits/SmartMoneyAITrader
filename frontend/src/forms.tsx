@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {MarketResearch} from "./market-research";
 import { useQuery } from "@tanstack/react-query";
 import { Field, Panel, api, run, useUI, txt, Row } from "./shared";
 const strategies = [
@@ -681,6 +682,7 @@ export function Lab({ onUseTemplate }: { onUseTemplate: (challenge: boolean) => 
         </div>
       </div>
     </Panel>
+    <MarketResearch />
     <IndicatorResearch />
     <Panel title="组合策略预设" cap="STRATEGY MIX">
       <div className="pad">

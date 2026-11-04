@@ -236,39 +236,8 @@ class Venue:
             "ordIdList", "actualSz", "uTime", "failCode")}
 
     def spot_rules(self, k, market):
-        """Shared checks for admission and the actual order's refreshed market."""
-        if market.get("active") is not True or market.get("spot") is not True:
-            raise ValueError(f"{self.pair(k)} 不是可交易的现货交易对")
-        mode = self.client.precisionMode
-        precision = market.get("precision") or {}
-        valid = lambda n: (isinstance(n, (int, float)) and not isinstance(n, bool)
-                           and math.isfinite(n))
-        limits = market.get("limits")
-        if not isinstance(limits, dict):
-            raise ValueError(f"{self.pair(k)} 限额规则不完整，无法完成规则验收")
-        for field, name in (("amount", "数量"), ("price", "价格"), ("cost", "金额")):
-            rule = limits.get(field, {})
-            if not isinstance(rule, dict):
-                raise ValueError(f"{self.pair(k)} {name}限额格式无效，无法完成规则验收")
-            low, high = rule.get("min"), rule.get("max")
-            if ((low is not None and (not valid(low) or low < 0)) or
-                    (high is not None and (not valid(high) or high <= 0))):
-                raise ValueError(f"{self.pair(k)} {name}限额数值无效，无法完成规则验收")
-            if low is not None and high is not None and low > high:
-                raise ValueError(f"{self.pair(k)} {name}上下限矛盾，无法完成规则验收")
-        minimum = limits.get("amount", {}).get("min")
-        if not valid(minimum) or minimum <= 0:
-            raise ValueError(f"{self.pair(k)} 缺少有效的最小下单数量，无法完成规则验收")
-        for field in ("amount", "price"):
-            value = precision.get(field)
-            if (not valid(value) or
-                    not ((mode == ccxt.TICK_SIZE and value > 0) or
-                         (mode == ccxt.DECIMAL_PLACES and value >= 0 and value == int(value)))):
-                raise ValueError(f"{self.pair(k)} 数量或价格精度不完整，无法完成规则验收")
-        cost = limits.get("cost", {}).get("min")
-        return dict(symbol=self.pair(k), min_quantity=minimum,
-                    quantity_precision=precision["amount"], price_precision=precision["price"],
-                    precision_mode=mode, min_notional=cost)
+        from execution.market_rules import spot_rules
+        return spot_rules(market, self.client.precisionMode, self.pair(k))
 
     def preflight(self, state):
         """Read-only admission; never send a test order or change permissions."""

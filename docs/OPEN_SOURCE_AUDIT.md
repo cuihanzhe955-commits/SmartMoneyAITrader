@@ -4,7 +4,7 @@
 
 | 组件 | 本轮实际版本 / 许可 | 实际动作 | 采用结论与剩余门槛 |
 |---|---|---|---|
-| CCXT | 4.5.91 / MIT | 保留原适配器；三所原生客户端在拦截 HTTP 下验证现货 IOC 签名、K 线、余额、精度与异常不重发 | 保留依赖；不据此启用 Gate 或声称平台联调通过。市场发现、完整规则及实际平台返回仍需逐项验收；新增离线证据见 [D2](PHASE_D2_CCXT.md) |
+| CCXT | 4.5.91 / MIT | 保留原适配器；三所原生客户端在拦截 HTTP 下验证现货 IOC 签名、K 线、余额、精度与异常不重发 | 保留依赖；不据此启用 Gate 或声称平台联调通过。市场发现研究已完成 [D3](PHASE_D3_DISCOVERY.md)；实际执行接入与平台返回仍需逐项验收；协议对照见 [D2](PHASE_D2_CCXT.md) |
 | TA-Lib Python / C | 0.8.3 / BSD-2-Clause、BSD-3-Clause | 独立 Windows CPython 3.12 wheel 实测；13 组数据、11,752 个指标值对照 | 仅研究依赖；不替换生产策略。不在源码包分发 wheel 或原生库 |
 | NumPy | 2.5.4 / BSD-3-Clause | 与 TA-Lib 隔离 POC 配合；研究依赖固定版本 | 生产程序无需安装；其他 Python/Windows 架构尚未验证 |
 | Pydantic AI | 未安装；上游 MIT | 评估现有 Provider 双角色、Pydantic 严格 Schema 及既有异步故障测试 | 条件引入项暂不采用。现有流程足够本轮需要，避免增加第二套调度框架；不声称执行了该库兼容 POC |
