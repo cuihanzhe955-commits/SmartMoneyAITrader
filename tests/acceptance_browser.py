@@ -65,6 +65,9 @@ def run():
                 errors=[]; p.on("pageerror",lambda e:errors.append(str(e)))
                 p.goto(url)
                 p.locator("aside").get_by_role("button",name="设置",exact=True).click()
+                p.get_by_label("托管保护维护状态").get_by_text("暂无托管保护记录；当前不代表已获得交易所保护",exact=True).wait_for()
+                status = p.request.get(url+"/api/protection-status").json()
+                assert status["mode"] == "demo_recovery_only" and not status["automatic_creation"]
                 p.get_by_role("button",name="运行只读验收").click()
                 p.get_by_role("status").filter(has_text="只读检查通过").wait_for()
                 with p.expect_download() as download:

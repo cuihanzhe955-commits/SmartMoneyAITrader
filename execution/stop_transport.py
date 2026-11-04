@@ -1,6 +1,7 @@
 """Explicit demo-only hosted stop service; not enabled in Runtime or the UI."""
 import threading
 import time
+from contextlib import nullcontext
 
 from execution.hosted import TERMINAL
 from execution.identity import scope
@@ -8,9 +9,10 @@ from execution.live import number
 
 
 class DemoStops:
-    def __init__(self, ledger, venue, read_state):
+    def __init__(self, ledger, venue, read_state, commit_lock=None):
         self.ledger, self.venue, self.read_state = ledger, venue, read_state
         self.lock = threading.Lock()
+        self.commit_lock = commit_lock
 
     def guard(self, order):
         v, s = self.venue, self.read_state()
@@ -99,7 +101,8 @@ class DemoStops:
                 trades = self.venue.executions({"symbol": order["symbol"], "side": "SELL"}, report)
                 receipts[exchange_id] = (report, trades)
             self.guard(order)
-            return self.ledger.settle_children(client_id, receipts)
+            with self.commit_lock if self.commit_lock is not None else nullcontext():
+                return self.ledger.settle_children(client_id, receipts)
 
     def cancel(self, client_id):
         with self.lock:

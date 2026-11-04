@@ -53,6 +53,9 @@ class Runtime:
         self.health_mutex = threading.Lock()
         self.background = False
         self.threads = []
+        self.hosted_ledger = None
+        self.hosted_lane = None
+        self.hosted_error = None
         with self.db.db:
             self.db.db.execute("BEGIN IMMEDIATE")
             live.setup(self.db)
@@ -80,7 +83,7 @@ class Runtime:
                 self.db.save(state)
         self.background = True
         for name, callback, period in (("market", self.tick, .04), ("orders", self.order_tick, .25),
-                                       ("protection", self.protection_tick, 2)):
+                                       ("protection", self.protection_tick, 2), ("hosted", self.hosted_tick, .5)):
             thread = threading.Thread(target=self.loop, args=(name, callback, period),
                                       name="smart-money-" + name, daemon=True)
             self.threads.append(thread)
@@ -93,6 +96,42 @@ class Runtime:
             self.ai.worker.invalidate()
         for thread in self.threads:
             thread.join()
+        if self.hosted_ledger is not None:
+            self.hosted_ledger.close()
+            self.hosted_ledger = None
+            self.hosted_lane = None
+
+    def hosted_status(self):
+        with self.lock:
+            rows = []
+            if self.db.db.execute("SELECT 1 FROM sqlite_master WHERE name='hosted_stops'").fetchone():
+                for raw, in self.db.db.execute("SELECT body FROM hosted_stops ORDER BY rowid DESC LIMIT 50"):
+                    order = json.loads(raw)
+                    rows.append({k: order.get(k) for k in ("symbol", "stage", "quantity", "remaining_quantity",
+                        "last_check", "next_check", "maintenance_error", "children_reconciled")})
+            return dict(mode="demo_recovery_only", automatic_creation=False, real_funds_verified=False,
+                        running=any(t.name == "smart-money-hosted" and t.is_alive() for t in self.threads),
+                        error=self.hosted_error, orders=rows, blocks_orders=live.hosted_pending(self.db))
+
+    def hosted_tick(self):
+        if self.exit.is_set() or not self.order_mutex.acquire(blocking=False):
+            return
+        try:
+            with self.lock:
+                if not live.hosted_pending(self.db):
+                    return
+                if self.hosted_ledger is None:
+                    from execution.hosted import HostedStops
+                    from execution.stop_maintenance import StopMaintenance
+                    from execution.stop_recovery import RuntimeStops
+                    self.hosted_ledger = HostedStops(self.root / "terminal.db")
+                    self.hosted_lane = StopMaintenance(RuntimeStops(self, self.hosted_ledger))
+            self.hosted_lane.once()
+            self.hosted_error = None
+        except Exception:
+            self.hosted_error = "托管保护恢复未完成，请检查连接、原账户和数据库"
+        finally:
+            self.order_mutex.release()
 
     def account_key(self, c):
         return c["exchange"] + "/" + c["execution"]
@@ -134,6 +173,8 @@ class Runtime:
         return self.clients[key]
 
     def new(self, body):
+        if live.hosted_pending(self.db):
+            raise ValueError("先核对原会话托管保护单及剩余持仓，再切换账户或创建会话")
         c = body.settings()
         if live.unresolved(self.db):
             raise ValueError("先核对原会话未完订单，再创建新会话或切换平台")
@@ -320,6 +361,8 @@ class Runtime:
     def order_tick(self):
         with self.lock:
             for cid, order in live.unresolved(self.db):
+                if order.get("source") == "hosted_stop":
+                    continue
                 if time.time() >= order.get("retry", 0):
                     state = self.db.load(cid)
                     break
@@ -497,6 +540,8 @@ class Runtime:
                 if not current or current["client_id"] != order["client_id"]:
                     return
                 state, order = self.db.load(state["id"]), current
+                if order.get("source") == "hosted_stop":
+                    return
             try:
                 if order.get("account_ref"):
                     self.check_binding(state)
@@ -517,6 +562,8 @@ class Runtime:
             self.order_mutex.release()
 
     def valid_intent(self, state, o):
+        if live.hosted_pending(self.db):
+            raise ValueError("托管保护单待核对，禁止普通委托与保护单冲突")
         self.check_binding(state)
         if o.get("revision") != state.get("revision", 0):
             raise ValueError("订单所属会话版本已变更")

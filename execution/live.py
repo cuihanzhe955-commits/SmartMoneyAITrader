@@ -10,6 +10,12 @@ FINAL = ("FILLED", "PARTIAL_CANCELLED", "CANCELLED", "REJECTED")
 OPEN = "stage NOT IN ('FILLED','PARTIAL_CANCELLED','CANCELLED','REJECTED')"
 
 
+def hosted_pending(db):
+    if not db.db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='hosted_stops'").fetchone():
+        return False
+    return bool(db.db.execute("SELECT 1 FROM hosted_stops WHERE stage NOT IN ('CANCELED','FAILED') LIMIT 1").fetchone())
+
+
 def setup(db):
     db.db.execute("CREATE TABLE IF NOT EXISTS venue_orders(client_id TEXT PRIMARY KEY,challenge_id INTEGER,stage TEXT,body TEXT)")
     db.db.execute("CREATE INDEX IF NOT EXISTS venue_pending ON venue_orders(challenge_id,stage)")
@@ -45,6 +51,9 @@ def unresolved(db):
 
 
 def enqueue(db, s, k, side, m, amount, why):
+    if hosted_pending(db):
+        db.record("system_events", s, "REJECT", "托管保护单待核对，禁止普通委托与保护单冲突", k)
+        return
     tag = decision_tag(s, k, side, m)
     client = "sm" + tag["signal_id"][:28]
     if db.db.execute("SELECT 1 FROM venue_orders WHERE client_id=?", (client,)).fetchone():

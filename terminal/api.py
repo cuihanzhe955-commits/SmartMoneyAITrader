@@ -113,6 +113,10 @@ def create_app(path=None):
             "database": rt().db.db.execute("SELECT 1").fetchone()[0] == 1,
         }
 
+    @app.get("/api/protection-status")
+    def protection_status():
+        return rt().hosted_status()
+
     @app.post("/api/shutdown")
     def shutdown(body: dict):
         if not hasattr(app.state, "request_shutdown"):
