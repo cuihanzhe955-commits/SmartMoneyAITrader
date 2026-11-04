@@ -187,6 +187,24 @@ class HostedStops:
         # Triggered is NOT filled. Child fills/fees must still reach the ledger.
         return self.get(client_id)["stage"] not in TERMINAL
 
+    def due(self, now, limit=4):
+        """Bounded recovery queue. Never auto-send a planned intent."""
+        with self.lock:
+            rows = self.db.execute("""SELECT body FROM hosted_stops
+                WHERE stage NOT IN ('PLANNED','CANCELED','FAILED')
+                AND COALESCE(json_extract(body,'$.next_check'),0)<=?
+                ORDER BY COALESCE(json_extract(body,'$.next_check'),0),rowid LIMIT ?""", (now, limit)).fetchall()
+        return [json.loads(row[0]) for row in rows]
+
+    def maintenance_result(self, client_id, now, failed):
+        with self.transaction():
+            order = self.get(client_id)
+            count = min(order.get("check_failures", 0) + 1, 5) if failed else 0
+            order.update(check_failures=count, last_check=now,
+                         next_check=now + (min(60, 2 ** count) if failed else 5),
+                         maintenance_error="保护维护未完成，请检查连接与账户，原单保持待核对" if failed else None)
+            self._save(order, order["stage"])
+
     def settle_children(self, client_id, receipts):
         """Atomically apply confirmed child receipts to the EXISTING session book.
 
