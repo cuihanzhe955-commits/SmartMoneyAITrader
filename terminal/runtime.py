@@ -104,14 +104,26 @@ class Runtime:
     def hosted_status(self):
         with self.lock:
             rows = []
+            current = self.db.load()
+            handover = []
+            if current and current.get("hosted_review_required"):
+                handover = [dict(symbol=k, quantity=p["qty"], session_id=current["id"])
+                            for k, p in current["positions"].items()]
             if self.db.db.execute("SELECT 1 FROM sqlite_master WHERE name='hosted_stops'").fetchone():
                 for raw, in self.db.db.execute("SELECT body FROM hosted_stops ORDER BY rowid DESC LIMIT 50"):
                     order = json.loads(raw)
                     row = {k: order.get(k) for k in ("client_id", "symbol", "stage", "quantity", "remaining_quantity",
-                        "last_check", "next_check", "maintenance_error", "children_reconciled", "released")}
+                        "last_check", "last_query_at", "next_check", "maintenance_error", "children_reconciled", "released",
+                        "cancel_attempts", "cancel_retry_after")}
+                    last_query = order.get("last_query_at") or 0
+                    row["stale"] = order["stage"] in ("LIVE", "CANCEL_PENDING") and not 0 <= time.time() - last_query <= 15
+                    row["needs_attention"] = not order.get("released") and (row["stale"] or bool(order.get("maintenance_error"))
+                        or order["stage"] in ("UNKNOWN", "CANCEL_PENDING", "FAILED", "TRIGGERED"))
                     row["session_id"] = order["scope"][0]
                     rows.append(row)
-            return dict(mode="demo_recovery_only", automatic_creation=False, real_funds_verified=False,
+            return dict(mode="demo_protection", automatic_creation=False, manual_creation=True,
+                        live_creation=False, real_funds_verified=False,
+                        handover=handover, review_required=bool(current and current.get("hosted_review_required")),
                         running=any(t.name == "smart-money-hosted" and t.is_alive() for t in self.threads),
                         error=self.hosted_error, orders=rows, blocks_orders=live.hosted_pending(self.db))
 
@@ -200,21 +212,28 @@ class Runtime:
             self.db.record("system_events", s, "AI_SKIP", reason)
 
     def venue(self, c):
+        environment = c["execution"] if c["execution"] != "paper" else "public"
+        keys = self.vault.values.get(self.account_key(c)) if environment != "public" else None
+        if environment != "public" and not keys:
+            raise ValueError("请先保存对应环境的交易所凭据")
         key = (
-            threading.current_thread().name,
+            threading.get_ident(),
             c["exchange"],
             c["product"],
-            c["execution"] if c["execution"] != "paper" else "public",
+            environment,
+            digest(keys),
         )
         if key not in self.clients:
-            keys = (
-                self.vault.values.get(self.account_key(c))
-                if key[3] != "public"
-                else None
-            )
-            if key[3] != "public" and not keys:
-                raise ValueError("请先保存对应环境的交易所凭据")
-            self.clients[key] = Venue(*key[1:], keys)
+            client = Venue(*key[1:4], keys)
+            # Key/secret edits take effect without reusing this lane's old client.
+            for old in list(self.clients):
+                if old[:4] == key[:4] and old != key:
+                    retired = self.clients.pop(old)
+                    try:
+                        retired.client.session.close()
+                    except Exception:
+                        pass
+            self.clients[key] = client
         return self.clients[key]
 
     def new(self, body):

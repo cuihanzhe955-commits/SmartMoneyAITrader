@@ -175,7 +175,8 @@ class HostedStops:
                 raise ValueError("保护单终态回退或触发结果冲突")
             if not set(order["children"]).issubset(children):
                 raise ValueError("触发子订单清单回退")
-            order.update(exchange_id=row["algoId"], children=children, exchange_time=stamp, last_observation=observation)
+            order.update(exchange_id=row["algoId"], children=children, exchange_time=stamp,
+                         last_observation=observation, last_query_at=time.time())
             if stage == "LIVE" and order["cancel_requested"]:
                 stage = "CANCEL_PENDING"
             self._save(order, stage)
@@ -186,10 +187,19 @@ class HostedStops:
             order = self.get(client_id)
             if order["stage"] == "PLANNED":
                 self._save(order, "CANCELED")
-            elif order["stage"] != "LIVE":
+            elif order["stage"] not in ("LIVE", "CANCEL_PENDING"):
                 raise ValueError("仅已核对的待触发保护单可请求撤销；未知状态先查单")
             else:
+                if ((order.get("last_observation") or {}).get("state") != "LIVE"
+                        or not 0 <= time.time() - order.get("last_query_at", 0) <= 10):
+                    raise ValueError("撤销前必须重新查询并确认原保护单仍待触发")
+                if order.get("cancel_attempts", 0) >= 3:
+                    raise ValueError("撤销请求已达三次上限，请继续查原单并在平台人工核对")
+                if time.time() < order.get("cancel_retry_after", 0):
+                    raise ValueError("撤销结果待核对，尚未到重试时间；请先查原单")
                 order["cancel_requested"] = True
+                order["cancel_attempts"] = order.get("cancel_attempts", 0) + 1
+                order["cancel_retry_after"] = time.time() + 30 * 2 ** (order["cancel_attempts"] - 1)
                 self._save(order, "CANCEL_PENDING")
         return order
 

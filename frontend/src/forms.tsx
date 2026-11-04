@@ -411,11 +411,13 @@ function LiveChecks() {
           </div>}
           {protection.data?.error && <p>{protection.data.error}</p>}
           {protection.data?.blocks_orders && <p>保护单待核对，普通委托和账户切换已阻断</p>}
+          {protection.data?.review_required && <p>保护交接后普通交易保持暂停，恢复前必须重新验收。</p>}
+          {protection.data?.handover?.map((p: any) => <p key={p.symbol}>待接管持仓：{p.symbol} · 剩余数量 {p.quantity}。可为实际剩余持仓创建下一代模拟保护。</p>)}
           {!protection.data?.orders?.length ? <p>暂无托管保护记录；当前不代表已获得交易所保护</p> :
-            <table><thead><tr><th>币种</th><th>实际记录状态</th><th>数量</th><th>核对结果</th><th>模拟操作</th></tr></thead><tbody>
-              {protection.data.orders.map((o: any, i: number) => <tr key={i}><td>{o.symbol}</td><td>{o.released ? "核对完成 · 已释放" : ({PLANNED:"待发送",SENDING:"提交待确认",UNKNOWN:"状态未知",ACCEPTED:"请求已受理",LIVE:"待触发记录",CANCEL_PENDING:"撤销待确认",TRIGGERED:"已触发 · 待验收",CANCELED:"已取消",FAILED:"触发失败"} as Record<string,string>)[o.stage] || o.stage}</td><td>{o.quantity}</td><td>{o.maintenance_error || (o.released ? "账户已核对，恢复交易前重新验收" : o.children_reconciled ? "子订单已核对，账户仍需验收" : "等待核对")}</td><td>{!o.released && <>
-                <button disabled={protectionBusy || o.stage === "PLANNED"} onClick={() => protect("query", o.client_id, o.session_id)}>查询原单</button>
-                {["PLANNED", "LIVE"].includes(o.stage) && <button disabled={protectionBusy} onClick={() => protect("cancel", o.client_id, o.session_id)}>撤销模拟保护</button>}
+            <table><thead><tr><th>币种</th><th>实际记录状态</th><th>原保护数量</th><th>核对结果与剩余持仓</th><th>模拟操作</th></tr></thead><tbody>
+              {protection.data.orders.map((o: any, i: number) => <tr key={i}><td>{o.symbol}</td><td>{o.released ? "核对完成 · 已释放" : ({PLANNED:"待发送",SENDING:"提交待确认",UNKNOWN:"状态未知",ACCEPTED:"请求已受理",LIVE:"待触发记录",CANCEL_PENDING:"撤销待确认",TRIGGERED:"已触发 · 待验收",CANCELED:"已取消",FAILED:"触发失败"} as Record<string,string>)[o.stage] || o.stage}</td><td>{o.quantity}</td><td>{o.remaining_quantity != null && <div>成交核对后剩余 {o.remaining_quantity}</div>}{o.needs_attention && <strong>需要处理 · </strong>}{o.maintenance_error || (o.stale ? "记录已过期，请重新查原单" : o.released ? "账户已核对，恢复交易前重新验收" : o.children_reconciled ? "子订单已核对，账户仍需验收" : "等待核对")}</td><td>{!o.released && <>
+                {(o.cancel_attempts || 0) > 0 && <small>撤销提交 {o.cancel_attempts}/3 次 · 重试前查询原单</small>}<button disabled={protectionBusy || o.stage === "PLANNED"} onClick={() => protect("query", o.client_id, o.session_id)}>查询原单</button>
+                {["PLANNED", "LIVE", "CANCEL_PENDING"].includes(o.stage) && <button disabled={protectionBusy || (o.cancel_attempts || 0) >= 3 || (o.cancel_retry_after || 0) > Date.now()/1000} onClick={() => protect("cancel", o.client_id, o.session_id)}>{o.stage === "CANCEL_PENDING" ? "查单后重试撤销" : "撤销模拟保护"}</button>}
                 {(["CANCELED", "FAILED"].includes(o.stage) || o.children_reconciled) && <button disabled={protectionBusy} onClick={() => protect("finalize", o.client_id, o.session_id)}>核对账户并释放</button>}
               </>}</td></tr>)}
             </tbody></table>}
