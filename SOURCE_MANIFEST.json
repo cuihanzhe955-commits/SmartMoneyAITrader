@@ -1,9 +1,9 @@
 {
-  "version": "1.0-E1-worker-foundation",
+  "version": "1.0-E1-public-paper-async",
   "stable": false,
   "real_funds_verified": false,
   "components_reviewed": true,
-  "built_at": "2026-11-05T15:13:17.524021+00:00",
+  "built_at": "2026-11-05T15:41:27.067610+00:00",
   "files": {
     ".env.example": "05f3f27b70523c728102179c2596c6b51db43262776f408494de1e042e470002",
     ".gitignore": "42ffa014e11eedc02abec4419ae90dbae6acb7c5ce726db9b06c3fe575631047",
@@ -100,7 +100,7 @@
     "execution/stop_maintenance.py": "cb2292bdba9a950103b8dde12b67518564995854c77922cb7be31b7dc61dbdb0",
     "execution/stop_recovery.py": "192721647574e7ade223672ef1169f9b9d9fb2ac5d24bc02024a107524b8a404",
     "execution/stop_transport.py": "19cbf5bcc6a3607f8fd7760bdd9665f1b984b1f8e0c0b28e7422b71577ef5894",
-    "execution/venue.py": "cbd03b389c3acec1077251ec6bafc76528a1d181f88c3616accac7ad2ff20ac5",
+    "execution/venue.py": "20b5db0e3604a5d6481740f334ce4659729c9e7f9dc8c7dfe19a5d135c2390ea",
     "frontend/index.html": "0cd89608281fa56ec40f984f25a0a6d44ba9cdf9faed5cadd3b87186fd4af4f9",
     "frontend/package-lock.json": "16dcf329a1664e86ef074572e9b9dc135993fa8034ad3d15e1fdac8463bec349",
     "frontend/package.json": "a607527a57bdb2d3c5df0a52a56bc7079c4bcdbf45ac02a85ba8886990f9a9a6",
@@ -139,7 +139,7 @@
     "terminal/api.py": "2dfea48f566baa3f00174082783eb63dd7a6bdaa4ed2d2d004808d8b9a79e01d",
     "terminal/config.py": "7a4e13588af5ceb3fa1741ac6181955169b7e5d04501969c8117736afcaaf605",
     "terminal/replay.py": "45df5fa7da5915e9a73b457121cd79be2823f2702219fdde9843845843bd3b3d",
-    "terminal/runtime.py": "f846e6b419e6bc58a4e6c9f9eb6478d70f0d87281a34987c8ca2ceee99666df9",
+    "terminal/runtime.py": "360de23d9b3d160802691d2facfe6c0547ca9f422287565a636159409fa8bf90",
     "terminal/settings.py": "e780d1614bf89c7c04963a67f23799d9b6fcbb3aefddf6c00e03689e29f05e35",
     "tests/acceptance_browser.py": "951cf65adf119b5b9d05c8d565d7923c5e22a806ecda2456d58a13301dad50a1",
     "tests/browser.py": "56d9aa010d9a501aafc61c419b619b70c890ec5e8f69fbd3bca570a9b1f70fea",
@@ -192,15 +192,18 @@
     "web/app.js": "ab78e15449c894787e76428bdb56af4dffa5360b10bac4a19272622f4fa65a6f",
     "web/index.html": "eed90aae7452da475d8bcb401c26ab9e8eb7b0418c640806e5d06350ac84ed81",
     "web/style.css": "2f33179dd143f53c45bf51c803ff43a9ce9e84b4716456e0bdb5b8587035e62f",
-    "market/worker.py": "e46299a0667eed8d399c640f4540e66daf159f69abc4bd4cb2f8078d2a9d6adf",
-    "tests/test_market_worker.py": "04bbb0f725a59339fdc8342a8664b590d8a07349684e02636bb463a6ca31f649"
+    "market/worker.py": "f2c49c8aa4715185fa2d5edc07a586a305fb434a7f2da7d5552b17a07266d241",
+    "tests/test_market_worker.py": "04bbb0f725a59339fdc8342a8664b590d8a07349684e02636bb463a6ca31f649",
+    "tests/test_async_market_runtime.py": "b9f13a0765a4d48b133bf2dc0f59935db8bc3077eff601b7c0ecdf15a986c53a"
   },
   "sensitive_scan": {
     "matches": 0,
     "method": "allowlist + known token/private key/chat ID/profile path patterns; not a proof of absence"
   },
   "development_step": {
-    "name": "market single-flight worker foundation",
-    "runtime_integrated": false
+    "name": "background public-paper market I/O integration",
+    "runtime_integrated": true,
+    "live_path_changed": false,
+    "dynamic_entries_enabled": false
   }
 }

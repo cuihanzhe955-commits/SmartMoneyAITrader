@@ -73,11 +73,14 @@ class Venue:
             raise ValueError("标的不在可交易范围")
         return m
 
-    def bars(self, symbols=None, required=()):
+    def bars(self, symbols=None, required=(), *, cancel=None, deadline=None):
         from market.pool import plan
         selection = plan(SYMBOLS if symbols is None else symbols, required)
         result = MarketBatch()
         for k in selection["monitor"]:
+            if ((cancel is not None and cancel.is_set()) or
+                    (deadline is not None and time.monotonic() >= deadline)):
+                raise ValueError("行情任务已取消或超时")
             pair = self.pair(k)
             if pair not in self.client.markets:
                 if k in selection["required"]:

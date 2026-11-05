@@ -1,4 +1,4 @@
-"""Bounded single-flight market I/O primitive; not yet wired into Runtime.
+"""Bounded market I/O used by background public-paper fetches.
 
 Cancellation is cooperative: an outstanding network call retains the only slot
 until it actually returns. No executor, account, or database is passed here.
@@ -18,6 +18,7 @@ class Request:
     done: Event=field(default_factory=Event)
     value: object=None
     failed: bool=False
+    error_code: str="ERROR"
     reported: bool=False
 
 
@@ -42,8 +43,10 @@ class MarketWorker:
                 try:
                     if not task.cancel.is_set():
                         task.value=deepcopy(fetch(task.cancel,task.deadline))
-                except Exception:
+                except Exception as err:
                     task.failed=True  # Never retain/log raw URLs, headers or keys.
+                    if "451" in str(err) or "restricted location" in str(err).lower():
+                        task.error_code="RESTRICTED"
                 finally:task.done.set()
             try:
                 Thread(target=run,name="smart-money-market-fetch",daemon=True).start()
@@ -72,6 +75,7 @@ class MarketWorker:
             if status!="READY":task.cancel.set()
             value=task.value if status=="READY" else None
             result=dict(status=status,scope=task.scope,value=value)
+            if status=="ERROR":result["error_code"]=task.error_code
             self._reap()
             return result
 

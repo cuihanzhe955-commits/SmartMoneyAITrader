@@ -12,6 +12,7 @@ from ai.coordinator import Coordinator, expired
 from execution.identity import digest, scope, position_version
 from market.feeds import historical, START, SYMBOLS
 from market.pool import plan as monitor_plan
+from market.worker import MarketWorker
 from market.imports import parse_csv, window
 from ai.provider import Provider
 from terminal.settings import Vault, AIConfig
@@ -50,6 +51,7 @@ class Runtime:
         self.vault = Vault(self.root / "credentials.dpapi")
         self.clients = {}
         self.ai = Coordinator()
+        self.market_worker = MarketWorker()
         self.order_mutex = threading.Lock()
         self.health_mutex = threading.Lock()
         self.background = False
@@ -93,6 +95,7 @@ class Runtime:
 
     def shutdown(self):
         self.exit.set()
+        self.market_worker.close()
         with self.lock:
             self.ai.worker.invalidate()
         for thread in self.threads:
@@ -375,6 +378,7 @@ class Runtime:
                 s["anchor"] = time.time() - (s["t"] - s["start"]) / c["speed"]
             action(self.db, s, cmd)
         if cmd in ("pause", "end", "stop", "start", "resume"):
+            self.market_worker.invalidate()
             self.invalidate_ai(s, "会话状态已变更")
         if cmd in ("start", "resume") and c["execution"] != "paper":
             self.check_binding(s)
@@ -396,6 +400,25 @@ class Runtime:
         if pool:
             return self.venue(c).bars(pool["monitor"], required=pool["required"])
         return self.venue(c).bars()
+
+    def paper_market(self, state, pool):
+        """Nonblocking public-only fetch; worker owns its client, never the ledger."""
+        c = state["config"]
+        expected = (state["id"], state.get("revision", 0), position_version(state),
+                    c["exchange"], c["product"], c["execution"])
+        result = self.market_worker.poll(expected)
+        if result and result["status"] != "STALE":
+            return result
+        exchange, product = c["exchange"], c["product"]
+        symbols, required = tuple(pool["monitor"]), tuple(pool["required"])
+        def fetch(cancel, deadline):
+            venue = Venue(exchange, product, "public")
+            try:
+                return venue.bars(symbols, required=required, cancel=cancel, deadline=deadline)
+            finally:
+                venue.client.session.close()
+        self.market_worker.submit(expected, fetch, 30)
+        return {"status": "WAITING", "value": None}
 
     def loop(self, lane, step, period):
         while not self.exit.wait(period):
@@ -565,7 +588,27 @@ class Runtime:
             if remote and (s.get("needs_check") or not s.get("admitted")):
                 if has_pending or not self.admit(s) or paused:
                     return
-            bars = self.feed({**c, "_monitor_pool": pool} if pool else c, t)
+            if self.background and pool and not remote:
+                fetched = self.paper_market(s, pool)
+                with self.lock, self.db.db:
+                    current = self.db.load()
+                    if (self.exit.is_set() or identity != (current["id"], current.get("revision", 0), position_version(current))):
+                        return
+                    if fetched["status"] == "WAITING":
+                        status = {"status": "WAITING", "checked_at": int(time.time())}
+                        if current.get("market_fetch") != status:
+                            current["market_fetch"] = status
+                            current["heartbeat"] = status["checked_at"]
+                            current["current_activity"] = "WAITING_MARKET"
+                            self.db.save(current)
+                        return
+                if fetched["status"] != "READY":
+                    if fetched.get("error_code") == "RESTRICTED":
+                        raise ValueError("HTTP 451 · 公开行情访问受限，已停止自动扫描")
+                    raise ValueError("异步行情请求超时或失败，未接受迟到数据")
+                bars = fetched["value"]
+            else:
+                bars = self.feed({**c, "_monitor_pool": pool} if pool else c, t)
             account = None
             if remote and not has_pending:
                 self.check_binding(s)
@@ -581,6 +624,8 @@ class Runtime:
             if c["source"] == "public":
                 t = market_time(cur)
             if pool:
+                if self.background and not remote:
+                    cur["market_fetch"] = {"status": "READY" if not reason else "ERROR", "checked_at": t}
                 cur["scan_pool"] = {**pool, "source": "fixed", "requested_candidates": c["candidates"],
                                     "fetched_count": len(bars), "errors": getattr(bars, "errors", {}),
                                     "checked_at": t, "discovery_execution_enabled": False}
