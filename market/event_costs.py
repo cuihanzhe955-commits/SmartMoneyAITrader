@@ -104,6 +104,10 @@ def estimate_cost(query, market, info, raw_book, now):
     if total > budget:
         raise ValueError("成本计算超出研究预算，拒绝结果")
     return dict(provider="polymarket",product="event",market_id=market["market_id"],condition_id=market["condition_id"],
+        title=market["title"],slug=market["slug"],market_ends_at=market.get("ends_at"),resolution_description=market.get("resolution_source"),
+        replay_input=dict(schema_version=1,market=market,
+            info={k:info[k] for k in ("t","fd","mos","mts")},
+            book={k:raw_book[k] for k in ("market","asset_id","timestamp","hash","bids","asks","min_order_size","tick_size")}),
         token_id=outcome["token_id"],outcome=outcome["name"],source_timestamp=snapshot["source_timestamp"],book_hash=snapshot["book_hash"],received_at=now,
         protocol_version="v1",curve_source=CLOB_INFO+market["condition_id"],book_source=snapshot["source"],
         model="documented_taker_exponent_1",fee_formula="shares * rate * price * (1-price), summed per depth level",

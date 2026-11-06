@@ -36,7 +36,8 @@ export function EventResearchPanel(){
           <span style={{display:"block",maxWidth:320,whiteSpace:"normal",overflowWrap:"anywhere"}}>{row.title}<br/><small>市场 #{row.market_id}</small></span>,row.outcomes.map((v:Row)=>v.name).join(" / "),stamp(row.source_updated_at)+" / "+stamp(row.ends_at),
           String(row.minimum_size??"未知")+" / "+String(row.price_tick??"未知"),
           <div className="buttons"><button onClick={()=>useUI.getState().show({title:"事件市场标识 · "+row.market_id,summary:"市场、事件、条件及结果 Token 保持独立；元数据不是交易或结算授权。",data:row})}>查看市场标识</button>
-          <button onClick={()=>setSelected(row)}>查询公开详情</button></div>
+          <button onClick={()=>setSelected(row)}>查询公开详情</button>
+          <button onClick={()=>{useUI.getState().chooseResearchMarket(row);document.querySelector('[data-event-lab]')?.scrollIntoView({behavior:'smooth'});}}>用于预测研究</button></div>
         ])}/>
         {selected&&<EventMarketDetails key={selected.market_id} market={selected} onSaved={()=>setJournalVersion(v=>v+1)}/> }
         {Object.keys(data.rejections).length>0&&<p>未展示原因：{Object.entries(data.rejections).map(([reason,count])=>reason+" "+count).join("；")}</p>}

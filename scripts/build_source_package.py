@@ -20,7 +20,8 @@ DOCS.update({"DEPENDENCY_AUDIT.json", "COMPONENT_DECISIONS.md", "PHASE_D_RESULTS
 DOCS.update({"PHASE_E_RESULTS.md", "E_TEST_RESULTS.json"})
 DOCS.update({"PHASE_F_READONLY_RESULTS.md", "POLYMARKET_RESEARCH.md", "F_TEST_RESULTS.json"})
 DOCS.update({"PHASE_F4_COST_RESEARCH.md", "PHASE_F5_OBSERVATIONS.md"})
-VERSION = "1.0-F5-research-journal"
+DOCS.update({"PHASE_F_RESULTS.md", "BRAIN_MEMORY_DESIGN.md", "POLYMARKET_API_RESEARCH.md", "TEST_REPORT.md", "RELEASE_READINESS.md"})
+VERSION = "1.0-F-research-rc"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
     "provider_token": re.compile(r"(?:sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{20,}"),

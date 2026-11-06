@@ -7,6 +7,8 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT))
 
 def serve():
     import uvicorn
+    import json
+    from datetime import datetime,timezone,timedelta
     from unittest.mock import patch
     from test_event_research import market
     from test_event_details import book,resolved
@@ -14,6 +16,11 @@ def serve():
     from test_event_costs import info
     from market.event_costs import CLOB_INFO
     from terminal.api import create_app
+    class ModelMock:
+        def __init__(self,c,key):self.c=c
+        def chat(self,prompt,data):
+            if "observation" in prompt:return json.dumps(dict(observation="合成验收结果",hypothesis="仅供测试，不能证明策略有效",invalidation="样本外不成立"))
+            return json.dumps(dict(action="BUY",probability=.9,reason="合成验收假设",counter_evidence="未校准"))
     def guard(event,args):
         if event in ("socket.connect","socket.connect_ex","socket.sendto"):
             address=args[-1]
@@ -28,15 +35,16 @@ def serve():
         return [data]
     def details(url,params):
         if url==ENDPOINT+"/1":
-            data=market();data.update(version="v1",feesEnabled=True);return data
+            data=market();data.update(version="v1",feesEnabled=True,endDate=(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat());return data
         if url==CLOB_INFO+book()["market"]:return info()
         if url==BOOK:
             data=book();data.update(timestamp=str(int(time.time()*1000)),asset_id=params["token_id"])
             return data
         if url==FEE:return dict(base_fee=30)
-        if url==RESOLUTION:return resolved()
+        if url==RESOLUTION:
+            data=resolved();data['data'][0].update(resolved_at=str(time.time()-.1),last_update_timestamp=str(time.time()-.1));return data
         raise AssertionError("Unexpected endpoint")
-    with patch("market.predictions.public_page",side_effect=fetch),patch("market.event_details.public_get",side_effect=details):
+    with patch("market.predictions.public_page",side_effect=fetch),patch("market.event_details.public_get",side_effect=details),patch("terminal.api.Provider",ModelMock):
         uvicorn.run(create_app(),host="127.0.0.1",port=int(sys.argv[2]),log_level="error")
 
 

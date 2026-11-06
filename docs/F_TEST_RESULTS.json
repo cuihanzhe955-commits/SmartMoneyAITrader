@@ -1,6 +1,6 @@
 {
   "date": "2026-11-06",
-  "scope": "F1-F5.1 public event research and persistent observations",
+  "scope": "F public research, reference-paper accounting and Brain non-funds engineering",
   "stable": false,
   "real_funds_verified": false,
   "historical_tests": [
@@ -15,6 +15,11 @@
       "passed": 692,
       "failed": 0,
       "seconds": 40.78
+    },
+    {
+      "commit": "b487a87",
+      "passed": 765,
+      "failed": 0
     }
   ],
   "offline_runner": "python -X utf8 -B tests/run_offline.py",
@@ -30,7 +35,10 @@
     "themes": [
       "dark",
       "light"
-    ]
+    ],
+    "f_model_mock_paper_flow": true,
+    "memory_correction_export_restore": true,
+    "quote_source_replay": true
   },
   "public_observations": {
     "historical": true,
@@ -56,24 +64,29 @@
     "official resolution state and micro-USDC payout vector validation",
     "v1 exponent-1 taker curve and bounded depth cost research",
     "Gamma/CLOB/book rule cross-check and source-scoped unit/precision evidence",
-    "append-only research snapshots, idempotent capture and restart recovery with UI"
+    "append-only research snapshots, idempotent capture and restart recovery with UI",
+    "versioned BUY/SKIP forecasts with source cutoff and independent risk",
+    "isolated reference cash/positions and idempotent official settlement/recovery",
+    "paper spot and event observations plus asynchronous AI hypotheses",
+    "scoped memory search/correction/export/restore and forward paired evaluation",
+    "complete depth replay evidence and optional-service failure isolation"
   ],
   "not_completed": [
-    "all-protocol fee and actual rounding/collateral acceptance",
-    "event simulation ledger",
-    "idempotent simulation settlement",
-    "AI prediction and reflection",
-    "Brain memory/retrieval/evaluation",
-    "100 round challenge"
+    "platform-native minimum/collateral/actual-fee acceptance",
+    "v2 and other fee curves",
+    "real AI Provider integration in this stage",
+    "onchain redemption or real event orders",
+    "G 100-round challenge and notifications",
+    "H/I remaining deliverables and real-fund acceptance"
   ],
   "dependencies_changed": false,
   "database_schema_changed": true,
   "user_runtime_changed": false,
-  "current_increment": "F5.1 persistent event research observations",
+  "current_increment": "F research RC",
   "latest_regression": {
-    "passed": 765,
+    "passed": 814,
     "failed": 0,
-    "seconds": 34.13,
+    "seconds": 50.22,
     "isolated_offline": true
   },
   "f4_cost_tests_passed": 33,
@@ -101,7 +114,50 @@
   "f4_code_baseline": "fc1eea2",
   "f4_1_tests_passed": 18,
   "f4_1_baseline": "85a9ee5",
-  "schema_migration": "Lazy additive event_research_observations table on first successful save; existing trade tables preserved",
+  "schema_migration": "Additive brain_* and event_lab_* tables; existing trade tables untouched",
   "f5_1_tests_passed": 22,
-  "f5_1_baseline": "3493218"
+  "f5_1_baseline": "3493218",
+  "nonfunds_engineering_verified": true,
+  "platform_faithful_execution_verified": false,
+  "real_ai_provider_verified_this_stage": false,
+  "f_closing_baseline": "b487a87",
+  "f_public_closed_loop": {
+    "synthetic_data": false,
+    "provider": "polymarket",
+    "market_id": "6708728",
+    "source_timestamp": 1793960071.816,
+    "decision_at": 1793960076.4235048,
+    "event_end": 1793960400,
+    "official_resolved_at": 1793960481,
+    "accepted_at": 1793960531.4359157,
+    "status": "SETTLED",
+    "action": "SKIP",
+    "predicted": 1,
+    "participated": 0,
+    "settled": 1,
+    "raw_payouts_micro_usdc": [
+      1000000,
+      0
+    ],
+    "reference_cash": 100,
+    "reference_realized": 0,
+    "verification": "official_api_only",
+    "onchain_verified": false,
+    "account_access": false,
+    "real_order_writes": false
+  },
+  "f_closing_new_tests": 49,
+  "f_targeted_tests_passed": 148,
+  "windows_smoke": {
+    "dependency_verification": true,
+    "pip_check": true,
+    "server_started": true,
+    "graceful_shutdown": true,
+    "isolated_database": true,
+    "historical_replay_candles": 240,
+    "account_access": false,
+    "orders_submitted": false,
+    "reused_clean_dependency_environment": true,
+    "new_windows_machine": false
+  }
 }

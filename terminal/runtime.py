@@ -9,6 +9,7 @@ from events.store import Store, encode
 from execution import live
 from execution.venue import Venue
 from ai.coordinator import Coordinator, expired
+from ai.brain import Brain
 from execution.identity import digest, scope, position_version
 from market.feeds import historical, START, SYMBOLS
 from market.pool import plan as monitor_plan
@@ -82,6 +83,10 @@ class Runtime:
             self.db.db.execute(
                 "CREATE TABLE IF NOT EXISTS preferences(id TEXT PRIMARY KEY,body TEXT)"
             )
+        self.brain=Brain(self.root / "terminal.db")
+        try:self.brain.setup()
+        except ValueError:self.brain.error="模拟学习初始化暂不可用；核心交易状态保留"
+        self.ai.brain=self.brain
 
     def start_worker(self):
         with self.lock, self.db.db:
@@ -97,6 +102,8 @@ class Runtime:
                              recovery_required=True, latest="重启后先查原单、核对账户。核验后可手动恢复")
                 self.db.save(state)
         self.background = True
+        try:self.brain.recover()
+        except ValueError:self.brain.error="模拟学习恢复暂不可用；交易保护不受影响"
         for name, callback, period in (("market", self.tick, .04), ("orders", self.order_tick, .25),
                                        ("protection", self.protection_tick, 2), ("hosted", self.hosted_tick, .5)):
             thread = threading.Thread(target=self.loop, args=(name, callback, period),
@@ -104,6 +111,11 @@ class Runtime:
             self.threads.append(thread)
             thread.start()
         self.thread = self.threads[0]
+        def reflection_provider():
+            cfg=self.vault.values.get("ai_config");key=self.vault.values.get("ai_key","")
+            if not cfg or not key:raise ValueError("未配置AI复盘模型")
+            return Provider(dict(cfg),key)
+        self.threads.append(self.brain.start(self.exit,reflection_provider))
 
     def shutdown(self):
         self.exit.set()

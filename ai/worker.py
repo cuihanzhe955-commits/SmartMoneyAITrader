@@ -30,6 +30,7 @@ class Inference:
         def run():
             try:
                 flight.result = provider.propose(metrics, holdings)
+                flight.stamp["memory_refs"] = getattr(provider,"memory_refs",[])
             except Exception as err:
                 # Provider supplies a sanitized error. Never log HTTP headers/body.
                 flight.error = str(err) if type(err) is ValueError else "模型请求失败"

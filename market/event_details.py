@@ -127,6 +127,8 @@ def resolution_evidence(raw, market, now):
         raise ValueError("官方兑付数值单位或总额无效，应为每份额 micro-USDC 整数")
     payouts = [Decimal(v) / 1_000_000 for v in values]
     resolved = result["resolved_at"]
+    if result["source_updated_at"] is not None and result["source_updated_at"]>now:
+        raise ValueError("官方结算更新时间在未来，请检查时间后重新核验")
     if resolved is None or resolved > now:
         return dict(result, reason="官方结算完成时间缺失或在未来，暂不采纳兑付比例")
     result.update(settlement_verified=True, verification="official_api_only",

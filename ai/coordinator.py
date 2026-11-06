@@ -28,6 +28,7 @@ def expired(stamp, s, market_time, *, same_snapshot):
 class Coordinator:
     def __init__(self):
         self.worker = Inference()
+        self.brain = None
 
     def decide(self, db, s, bars, t, vault):
         cfg = AIConfig(**vault.values.get("ai_config", {}))
@@ -82,6 +83,9 @@ class Coordinator:
                                  market_deadline=min(t + cfg.ttl, bar + 120))
                     try:
                         provider = Provider(cfg.model_dump(), key)
+                        if self.brain is not None and s["config"].get("execution","paper")=="paper":
+                            memory_scope=f"spot:{s['config'].get('exchange','okx')}:{s['id']}"
+                            provider.memory_context=lambda: self.brain.retrieve(memory_scope,received,bar)
                     except ValueError as err:
                         self.failure(db, s, cfg, str(err), stamp, "AI_ERROR")
                     else:

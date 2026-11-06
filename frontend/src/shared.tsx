@@ -30,6 +30,8 @@ export const useUI = create<{
   msg: string;
   tell: (x: string) => void;
   id: number | null;
+  researchMarket: Row | null;
+  chooseResearchMarket: (market: Row) => void;
   open: (x: number | null) => void;
 }>((set) => ({
   page: "总览",
@@ -39,6 +41,8 @@ export const useUI = create<{
   msg: "",
   tell: (msg) => set({ msg }),
   id: null,
+  researchMarket: null,
+  chooseResearchMarket: (researchMarket) => set({researchMarket}),
   open: (id) => set({ id }),
 }));
 export const f = (x: unknown, n = 2) =>

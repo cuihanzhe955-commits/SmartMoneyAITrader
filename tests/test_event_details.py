@@ -12,6 +12,11 @@ from test_event_research import market,NOW
 def metadata():return normalize(market(),NOW)
 
 
+def test_future_resolution_update_is_rejected():
+    raw=resolved();raw['data'][0]['last_update_timestamp']=str(NOW+10)
+    with pytest.raises(ValueError,match='未来'):resolution_evidence(raw,metadata(),NOW)
+
+
 def book():
     return dict(market=metadata()["condition_id"],asset_id="2",timestamp=str(NOW*1000),hash="a"*40,
         bids=[dict(price=".40",size="100"),dict(price=".45",size="20")],

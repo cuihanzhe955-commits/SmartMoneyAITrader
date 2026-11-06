@@ -27,6 +27,9 @@ from market.predictions import EventResearch, EventQuery
 from market.event_details import EventDetails, MarketSelector, QuoteQuery
 from market.event_costs import CostQuery
 from events.observations import CaptureQuery, ObservationJournal
+from events.lab import EventLab, LabConfig, RoundRequest
+from events.adapters import GateEventAdapter, PolymarketResearchAdapter
+from ai.brain import BrainSettings, Correction
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -76,6 +79,23 @@ def create_app(path=None):
         app.state.event_research = EventResearch()
         app.state.event_details = EventDetails()
         app.state.event_observations = ObservationJournal(rt.root / "terminal.db", app.state.event_details)
+        def research_provider():
+            cfg=rt.vault.values.get("ai_config")
+            key=rt.vault.values.get("ai_key","")
+            if not cfg or not key: raise ValueError("请先在AI设置中配置模型；也可选择规则研究")
+            return Provider(dict(cfg),key)
+        def make_lab():
+            lab_details=PolymarketResearchAdapter(app.state.event_research,EventDetails())
+            try:
+                if not rt.brain.ready:rt.brain.setup()
+                return EventLab(rt.brain,lab_details,research_provider)
+            except Exception:
+                lab_details.close();raise
+        app.state.make_lab=make_lab
+        app.state.lab_init_lock=threading.Lock()
+        try:app.state.event_lab=make_lab()
+        except ValueError:
+            app.state.event_lab=None
         # Enforce one scheduler per ledger even when the app starts on a second port.
         import msvcrt
 
@@ -83,9 +103,13 @@ def create_app(path=None):
         owner.seek(0)
         msvcrt.locking(owner.fileno(), msvcrt.LK_NBLCK, 1)
         rt.start_worker()
+        if app.state.event_lab:app.state.event_lab.start()
         try:
             yield
         finally:
+            if app.state.event_lab:
+                app.state.event_lab.close()
+                app.state.event_lab.details.close()
             app.state.event_details.close()
             app.state.event_research.close()
             rt.shutdown()
@@ -99,6 +123,10 @@ def create_app(path=None):
 
     def rt():
         return app.state.rt
+
+    def lab():
+        if app.state.event_lab is None:raise ValueError("事件研究初始化暂不可用，请点击重新连接研究服务；现有交易与保护继续运行")
+        return app.state.event_lab
 
     @app.middleware("http")
     async def local(request, call_next):
@@ -214,6 +242,84 @@ def create_app(path=None):
     @app.get("/api/research/events/observations")
     def event_observations(limit: int = Query(20, ge=1, le=50)):
         return app.state.event_observations.list(limit)
+
+    @app.get("/api/research/lab")
+    def event_lab_view(session_id: str | None = None):
+        return dict(lab().view(session_id),gate=GateEventAdapter().capabilities())
+
+    @app.post("/api/research/lab/sessions")
+    def event_lab_create(config: LabConfig):
+        return lab().create(config)
+
+    @app.post("/api/research/lab/retry")
+    def event_lab_retry():
+        with app.state.lab_init_lock:
+            if app.state.event_lab is None:
+                app.state.event_lab=app.state.make_lab()
+                app.state.event_lab.start()
+        return {"ok":True}
+
+    @app.post("/api/research/lab/rounds")
+    def event_lab_round(query: RoundRequest):
+        return lab().enqueue(query)
+
+    @app.get("/api/research/lab/evaluation")
+    def event_lab_evaluation(session_id: str):
+        from events.evaluation import evaluate
+        return evaluate(lab(),session_id)
+
+    @app.get("/api/research/lab/evidence")
+    def event_lab_evidence(round_id: str):
+        return lab().evidence(round_id)
+
+    class LabCommand(BaseModel):
+        model_config={"extra":"forbid"}
+        session_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+        action: Literal["pause","resume","end"]
+
+    @app.post("/api/research/lab/command")
+    def event_lab_command(query: LabCommand):
+        return lab().command(query.session_id,query.action)
+
+    class ReflectionRequest(BaseModel):
+        model_config={"extra":"forbid"}
+        round_id: str = Field(pattern=r"^[a-f0-9]{32}$")
+
+    @app.post("/api/research/lab/reflection")
+    def retry_reflection(query: ReflectionRequest):
+        return lab().retry_reflection(query.round_id)
+
+    @app.get("/api/brain")
+    def brain(scope: str = "", search: str = ""):
+        return rt().brain.search(scope,search)
+
+    @app.post("/api/brain/settings")
+    def brain_settings(config: BrainSettings):
+        return rt().brain.settings(config)
+
+    @app.post("/api/brain/correct")
+    def brain_correct(query: Correction):
+        return rt().brain.correct(query)
+
+    @app.post("/api/brain/retry")
+    def brain_retry(query: dict):
+        mid=query.get("memory_id")
+        if not isinstance(mid,str) or len(mid)!=64:raise ValueError("复盘任务标识无效")
+        return rt().brain.retry(mid)
+
+    @app.get("/api/brain/export")
+    def brain_export():
+        return rt().brain.export()
+
+    @app.post("/api/brain/restore")
+    async def brain_restore(request: Request):
+        body=bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body)>8_000_000:raise ValueError("记忆备份不能超过8MB")
+        try:payload=json.loads(body)
+        except ValueError:raise ValueError("记忆备份不是有效JSON") from None
+        return rt().brain.restore(payload)
 
     @app.get("/api/replay")
     def replay_view(session_id: int, symbol: str, as_of: int):

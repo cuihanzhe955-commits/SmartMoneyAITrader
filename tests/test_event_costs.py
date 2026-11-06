@@ -172,3 +172,14 @@ def test_cost_lane_rejects_stale_cached_data_instead_of_retimestamping():
     r=d.cost(CostQuery(market_id="1"));assert r["source_timestamp"]==NOW
     now[0]+=30;mono[0]=1
     with pytest.raises(ValueError,match="过期"):d.cost(CostQuery(market_id="1"))
+
+
+def test_complete_replay_input_reproduces_more_than_twenty_modeled_levels():
+    raw=depth();raw['asks']=[dict(price=str(Decimal('.50')+Decimal('.01')*i),size='10') for i in range(25)]
+    q=CostQuery(market_id='1',shares=300,budget=1000,max_slippage_pct=100)
+    first=estimate_cost(q,metadata(),info(),raw,NOW)
+    assert first['depth_rows_truncated']
+    source=first['replay_input']
+    replay=estimate_cost(q,source['market'],source['info'],source['book'],first['received_at'])
+    assert replay['modeled_total']==first['modeled_total'] and replay['modeled_shares']==first['modeled_shares']
+    assert len(source['book']['asks'])==25

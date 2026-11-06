@@ -55,3 +55,8 @@ cd SmartMoneyAITrader
 ## 6. 当前交付边界
 
 这是**源码版智能启动器（第一级）**，不是免 Python 的便携 EXE 或正式安装程序。启动流程自动化不代表真实交易功能已通过验证。当前事件研究操作见[Polymarket研究说明](POLYMARKET_RESEARCH.md)，最新检查点见[F1–F3记录](PHASE_F_READONLY_RESULTS.md)，资金边界见[实盘状态](LIVE_TRADING_VERIFICATION.md)。
+
+
+## F研究候选版升级
+
+首次启动会增量建立Brain与事件参考模拟表，原会话、现货订单和持仓保留。升级前保留runtime的私有备份；回退源码时保留当前数据库与新增表，不覆盖交易历史。操作入口：策略实验室 → 事件预测与参考模拟 / AI Brain。研究服务暂不可用时可点击「重新连接研究服务」，不会启动真实账户交易。
