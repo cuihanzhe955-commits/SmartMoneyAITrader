@@ -22,6 +22,7 @@ MAX_BODY = 4 * 1024 * 1024
 class EventQuery(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
     provider: Literal["polymarket", "gate"] = "polymarket"
+    lifecycle: Literal["open", "closed"] = "open"
     limit: int = Field(20, ge=1, le=50, strict=True)
     pages: int = Field(1, ge=1, le=3, strict=True)
     search: str = Field("", max_length=100)
@@ -93,7 +94,7 @@ def normalize(raw, received):
     return dict(provider="polymarket", product="event", market_id=market_id,
         condition_id=condition.lower(), event_ids=event_ids, title=title, slug=slug,
         outcomes=[dict(name=name, token_id=token) for name, token in zip(outcomes, tokens)],
-        metadata_active=active, restricted=raw.get("restricted") if type(raw.get("restricted")) is bool else None,
+        metadata_active=active, closed=raw.get("closed") if type(raw.get("closed")) is bool else None, restricted=raw.get("restricted") if type(raw.get("restricted")) is bool else None,
         listed_at=source_time(raw.get("startDate")), ends_at=source_time(raw.get("endDate")),
         source_updated_at=source_time(raw.get("updatedAt")), received_at=received,
         minimum_size=positive(raw.get("orderMinSize")), price_tick=positive(raw.get("orderPriceMinTickSize")),
@@ -103,16 +104,26 @@ def normalize(raw, received):
 
 
 def public_page(params):
-    # Fixed official HTTPS origin, GET only, no environment proxy or redirects.
+    return public_get(ENDPOINT, params)
+
+
+def public_get(url, params):
+    allowed = {ENDPOINT, "https://clob.polymarket.com/book", "https://clob.polymarket.com/fee-rate",
+               "https://data-api.polymarket.com/v2/resolutions"}
+    if url not in allowed and not re.fullmatch(r"https://gamma-api\.polymarket\.com/markets/[1-9][0-9]{0,29}", url):
+        raise ValueError("未批准的公开研究接口")
+    # Fixed official HTTPS origins, GET only, no environment proxy or redirects.
     try:
         with requests.Session() as client:
             client.trust_env = False
-            with client.get(ENDPOINT, params=params, timeout=(3, 7), stream=True,
+            with client.get(url, params=params, timeout=(3, 7), stream=True,
                             allow_redirects=False, headers={"Accept": "application/json"}) as response:
                 if response.status_code in (403, 451):
                     raise ValueError("Polymarket 公开接口拒绝访问；未重试或绕过限制")
                 if response.status_code == 429:
                     raise ValueError("Polymarket 公开接口限频；未自动重试")
+                if response.status_code == 404:
+                    raise ValueError("Polymarket 公开资源不存在或尚不可用")
                 if response.status_code != 200:
                     raise ValueError("Polymarket 公开接口未返回可用市场数据")
                 if "application/json" not in response.headers.get("Content-Type", "").lower():
@@ -146,7 +157,7 @@ class EventResearch:
         try:
             if self.closed.is_set():
                 raise ValueError("事件研究服务已关闭")
-            key = (query.limit, query.pages, query.search, query.slug)
+            key = (query.lifecycle, query.limit, query.pages, query.search, query.slug)
             cached = self.cache.get(key)
             age = self.monotonic() - cached[0] if cached else 30
             if cached and 0 <= age < 30:
@@ -158,6 +169,9 @@ class EventResearch:
                     raise ValueError("事件研究查询已取消")
                 params = dict(active="true", closed="false", limit=query.limit,
                               offset=page*query.limit, order="id", ascending="false")
+                if query.lifecycle == "closed":
+                    params.pop("active")
+                    params["closed"] = "true"
                 if query.slug:
                     params["slug"] = query.slug
                 raw = self.fetch(params)
@@ -177,8 +191,9 @@ class EventResearch:
                     seen.add(market["market_id"]); conditions.add(market["condition_id"])
                     if query.slug and market["slug"] != query.slug:
                         raise ValueError("事件市场返回的 slug 与请求不符")
-                    if not market["metadata_active"]:
-                        rejections["未确认市场处于开放元数据状态"] += 1
+                    if ((query.lifecycle == "open" and not market["metadata_active"])
+                            or (query.lifecycle == "closed" and market["closed"] is not True)):
+                        rejections["市场元数据状态与筛选不符"] += 1
                         continue
                     if query.search.casefold() in (market["title"]+" "+market["slug"]).casefold():
                         rows.append(market)
@@ -190,7 +205,7 @@ class EventResearch:
                 changes_sessions=False, execution_enabled=False, cached=False, cache_age_sec=0,
                 received_at=self.clock(), scanned=scanned, shown=len(rows), duplicates=duplicates,
                 pages_requested=requested, sample_only=True, rejections=dict(rejections), rows=rows,
-                capabilities=dict(discovery="implemented", quotes="unverified", settlement="unverified",
+                capabilities=dict(discovery="implemented", quotes="on_demand_read_only", settlement="on_demand_read_only",
                                   simulation="unverified", submit_order="disabled", gate_events="unverified"))
             self.cache[key] = (self.monotonic(), deepcopy(result))
             self.cache.move_to_end(key)

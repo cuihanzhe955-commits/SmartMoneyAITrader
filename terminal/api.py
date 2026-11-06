@@ -24,6 +24,7 @@ from ai.provider import Provider
 from risk.parameters import RECOMMENDED
 from market.discovery import Discovery, DiscoveryQuery
 from market.predictions import EventResearch, EventQuery
+from market.event_details import EventDetails, MarketSelector, QuoteQuery
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -71,6 +72,7 @@ def create_app(path=None):
         app.state.rt = rt
         app.state.discovery = Discovery()
         app.state.event_research = EventResearch()
+        app.state.event_details = EventDetails()
         # Enforce one scheduler per ledger even when the app starts on a second port.
         import msvcrt
 
@@ -81,6 +83,7 @@ def create_app(path=None):
         try:
             yield
         finally:
+            app.state.event_details.close()
             app.state.event_research.close()
             rt.shutdown()
             rt.db.db.close()
@@ -188,6 +191,14 @@ def create_app(path=None):
     @app.post("/api/research/events")
     def research_events(query: EventQuery):
         return app.state.event_research.run(query)
+
+    @app.post("/api/research/events/quote")
+    def event_quote(query: QuoteQuery):
+        return app.state.event_details.quote(query)
+
+    @app.post("/api/research/events/resolution")
+    def event_resolution(query: MarketSelector):
+        return app.state.event_details.resolution(query)
 
     @app.get("/api/replay")
     def replay_view(session_id: int, symbol: str, as_of: int):

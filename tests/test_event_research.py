@@ -166,3 +166,20 @@ def test_api_uses_only_research_service_and_leaves_account_and_sessions_unchange
         assert client.get("/api/state").json()==before
         assert not list(tmp_path.glob("*.dpapi"))
         assert client.post("/api/research/events",json=dict(execution="live")).status_code==422
+
+
+def test_closed_market_discovery_does_not_reuse_open_cache_or_infer_resolution():
+    raw=market();closed=market("2");closed.update(closed=True,acceptingOrders=False)
+    fetch=Mock(side_effect=[[raw],[closed]])
+    d=EventResearch(fetch)
+    assert d.run(EventQuery())["rows"][0]["market_id"]=="1"
+    r=d.run(EventQuery(lifecycle="closed"));assert r["rows"][0]["market_id"]=="2"
+    params=fetch.call_args.args[0]
+    assert params["closed"]=="true" and "active" not in params
+    assert not r["rows"][0]["settlement_verified"] and r["rows"][0]["closed"]
+
+
+def test_closed_discovery_rejects_wrong_lifecycle_from_server():
+    d=EventResearch(Mock(return_value=[market()]))
+    r=d.run(EventQuery(lifecycle="closed"))
+    assert r["shown"]==0 and r["rejections"]

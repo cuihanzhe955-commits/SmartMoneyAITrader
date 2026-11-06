@@ -9,6 +9,8 @@ def serve():
     import uvicorn
     from unittest.mock import patch
     from test_event_research import market
+    from test_event_details import book,resolved
+    from market.event_details import ENDPOINT,BOOK,FEE,RESOLUTION
     from terminal.api import create_app
     def guard(event,args):
         if event in ("socket.connect","socket.connect_ex","socket.sendto"):
@@ -18,11 +20,19 @@ def serve():
     sys.addaudithook(guard)
     def fetch(params):
         if params.get("slug")=="error":raise ValueError("测试替身：公开接口限频")
-        data=market();data["question"]="合成验收市场 · <script>window.fixtureInjected=true</script>"
+        data=market();data["closed"]=params.get("closed")=="true";data["question"]="合成验收市场 · <script>window.fixtureInjected=true</script>"
         if params.get("slug"):data["slug"]=params["slug"]
         if params.get("slug")=="slow":time.sleep(.6)
         return [data]
-    with patch("market.predictions.public_page",side_effect=fetch):
+    def details(url,params):
+        if url==ENDPOINT+"/1":return market()
+        if url==BOOK:
+            data=book();data.update(timestamp=str(int(time.time()*1000)),asset_id=params["token_id"])
+            return data
+        if url==FEE:return dict(base_fee=30)
+        if url==RESOLUTION:return resolved()
+        raise AssertionError("Unexpected endpoint")
+    with patch("market.predictions.public_page",side_effect=fetch),patch("market.event_details.public_get",side_effect=details):
         uvicorn.run(create_app(),host="127.0.0.1",port=int(sys.argv[2]),log_level="error")
 
 
@@ -49,13 +59,30 @@ def run():
                 panel.get_by_role("button",name="查看市场标识",exact=True).click()
                 dialog=page.get_by_role("dialog");dialog.get_by_text("condition_id",exact=False).wait_for()
                 page.screenshot(path=str(out/"event-identities.png"),full_page=True);page.keyboard.press("Escape")
+                panel.get_by_role("button",name="查询公开详情",exact=True).click()
+                details_panel=page.locator("[data-event-details='1']")
+                details_panel.get_by_role("button",name="读取盘口与基准费率",exact=True).click()
+                details_panel.locator("[data-event-quote]").get_by_text("已核验双边盘口快照",exact=False).wait_for()
+                details_panel.get_by_label("盘口结果选择",exact=True).select_option("1")
+                assert details_panel.locator("[data-event-quote]").count()==0
+                details_panel.get_by_role("button",name="读取盘口与基准费率",exact=True).click()
+                details_panel.locator("[data-event-quote]").get_by_text("结果 Down",exact=False).wait_for()
+                details_panel.get_by_role("button",name="查询官方结算",exact=True).click()
+                details_panel.locator("[data-event-resolution]").get_by_text("官方接口结算证据已核验",exact=False).wait_for()
                 for w,h in ((1366,768),(1920,1080)):
                     page.set_viewport_size({"width":w,"height":h})
                     for theme in ("dark","light"):
                         if page.evaluate("document.body.classList.contains('light')")!=(theme=="light"):page.get_by_label("切换主题").click()
-                        panel.scroll_into_view_if_needed()
+                        details_panel.scroll_into_view_if_needed()
                         assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
                         page.screenshot(path=str(out/f"events-{w}-{theme}.png"))
+                page.screenshot(path=str(out/"event-book-resolution.png"),full_page=True)
+                page.get_by_label("事件市场状态",exact=True).select_option("closed")
+                button.click();panel.get_by_text("显示 1 个二元市场",exact=False).wait_for()
+                panel.get_by_role("button",name="查询公开详情",exact=True).click()
+                details_panel=page.locator("[data-event-details='1']")
+                details_panel.get_by_role("button",name="查询官方结算",exact=True).click()
+                details_panel.locator("[data-event-resolution]").get_by_text("官方接口结算证据已核验",exact=False).wait_for()
                 page.get_by_label("事件标题关键词",exact=True).fill("no-match");button.click()
                 panel.get_by_text("显示 0 个二元市场",exact=False).wait_for()
                 page.get_by_label("事件标题关键词",exact=True).fill("")
@@ -69,7 +96,7 @@ def run():
                 assert page.request.get(url+"/api/state").json()["state"] is None
                 assert not errors,errors
                 page.goto("about:blank");browser.close()
-            print("PASS event UI: inert text, full identities, 2 viewports x 2 themes, empty/loading/error, no session mutation")
+            print("PASS event UI: inert text, full identities, bound quote/fee/resolution, outcome switching, 2 viewports x 2 themes, empty/loading/error, no session mutation")
         finally:proc.terminate();proc.wait(15)
 
 
