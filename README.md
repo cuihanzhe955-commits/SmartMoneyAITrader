@@ -6,7 +6,7 @@
 
 ![Development](https://img.shields.io/badge/Status-F4%20Cost%20Research-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前开发检查点：v1.0-F4-cost-research（2026-11-06）。** F1–F3已接入Polymarket公开发现、盘口/基准费率和官方结算证据；F4新增受限v1费用曲线及逐档成本研究。最新离线回归**725通过、0失败**，前端构建和浏览器检查通过。完整费用/资产执行验收、模拟账本、AI复盘与Brain仍未完成，当前不是Stable。见[F4记录](docs/PHASE_F4_COST_RESEARCH.md)、[F1–F3记录](docs/PHASE_F_READONLY_RESULTS.md)、[操作说明](docs/POLYMARKET_RESEARCH.md)。完整E与C资金门槛仍开放，需求以[主计划](docs/SmartMoney_Stable_Plan.md)为准。
+> **当前开发检查点：v1.0-F4-cost-research（2026-11-06）。** F1–F3已接入Polymarket公开发现、盘口/基准费率和官方结算证据；F4新增受限v1费用曲线及逐档成本研究；F4.1补齐单位交叉核对与费用精度情景。最新离线回归**743通过、0失败**，前端构建和浏览器检查通过。完整费用/资产执行验收、模拟账本、AI复盘与Brain仍未完成，当前不是Stable。见[F4记录](docs/PHASE_F4_COST_RESEARCH.md)、[F1–F3记录](docs/PHASE_F_READONLY_RESULTS.md)、[操作说明](docs/POLYMARKET_RESEARCH.md)。完整E与C资金门槛仍开放，需求以[主计划](docs/SmartMoney_Stable_Plan.md)为准。
 
 ## 项目概览
 
@@ -140,7 +140,7 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ~~~
 
-当前725项回归在Windows本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；当前结果见[F测试摘要](docs/F_TEST_RESULTS.json)；E历史结果仍见[E测试摘要](docs/E_TEST_RESULTS.json)。事件浏览器复验见`tests/event_research_browser.py`。
+当前743项回归在Windows本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；当前结果见[F测试摘要](docs/F_TEST_RESULTS.json)；E历史结果仍见[E测试摘要](docs/E_TEST_RESULTS.json)。事件浏览器复验见`tests/event_research_browser.py`。
 
 ## 项目文档
 

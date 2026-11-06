@@ -6,6 +6,7 @@ No orders, fills, account balances, simulation ledger or actual-fee claims.
 from decimal import Decimal, ROUND_DOWN
 from pydantic import Field
 from market.event_details import QuoteQuery, decimal, book_snapshot
+from market.event_units import unit_evidence, precision_envelope
 
 CLOB_INFO = "https://clob.polymarket.com/clob-markets/"
 SHARE_STEP = Decimal("0.000001")
@@ -48,6 +49,7 @@ def curve_parameters(info, market):
 
 def estimate_cost(query, market, info, raw_book, now):
     params = curve_parameters(info, market)
+    units = unit_evidence(market, params)
     outcome = market["outcomes"][query.outcome_index]
     snapshot = book_snapshot(raw_book, market, outcome["token_id"], now)
     if not snapshot["quote_available"]:
@@ -63,6 +65,7 @@ def estimate_cost(query, market, info, raw_book, now):
     best = asks[0][0]
     cap = min(Decimal(1), best*(1+decimal(query.max_slippage_pct,"滑点预算")/100))
     quantity = gross = fee = reserve = Decimal(0)
+    precision_low = precision_high = Decimal(0)
     fills = []; limits = ["目标份额按研究步长向下取整"] if desired != requested else []
     for price, depth in asks:
         if quantity >= desired:break
@@ -82,8 +85,12 @@ def estimate_cost(query, market, info, raw_book, now):
         if take <= 0:
             limits.append("预算或盘口数量低于计算步长")
             break
-        quantity += take;gross += take*price;fee += take*per_fee;reserve += padding
-        fills.append(dict(price=float(price),shares=float(take),gross=float(take*price),model_fee=float(take*per_fee),rounding_reserve=float(padding)))
+        level_fee = take*per_fee
+        low, high = precision_envelope(level_fee)
+        precision_low += low; precision_high += high
+        quantity += take;gross += take*price;fee += level_fee;reserve += padding
+        fills.append(dict(price=float(price),shares=float(take),gross=float(take*price),model_fee=float(level_fee),rounding_reserve=float(padding),
+            precision_scenario_low=float(low),precision_scenario_high=float(high)))
         if affordable < wanted:
             limits.append("研究预算限制")
             break
@@ -101,6 +108,8 @@ def estimate_cost(query, market, info, raw_book, now):
         protocol_version="v1",curve_source=CLOB_INFO+market["condition_id"],book_source=snapshot["source"],
         model="documented_taker_exponent_1",fee_formula="shares * rate * price * (1-price), summed per depth level",
         fee_rate=float(params["rate"]),fee_exponent=1,fee_curve_verified=True,transaction_fee_verified=False,
+        unit_evidence=units, precision_scenario_low=float(precision_low),precision_scenario_high=float(precision_high),
+        precision_scenario="Assumes one modeled depth level is one match; not a bound on actual aggregated transaction fees",
         cost_unit="USDC reference units from official fee model",collateral_asset_verified=False,
         requested_shares=query.shares,rounded_requested_shares=float(desired),modeled_shares=float(quantity),unfilled_shares=float(desired-quantity),
         requested_budget=query.budget,modeled_gross=float(gross),modeled_fee=float(fee),rounding_reserve=float(reserve),

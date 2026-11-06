@@ -31,7 +31,7 @@ export function EventResearchPanel(){
         <p>来源：{data.source} · 接收于 {stamp(data.received_at)} · {data.cached?"30秒内元数据缓存":"本次公开查询"}</p>
         <p>读取 {data.pages_requested} 页 / 检查 {data.scanned} 条 / 显示 {data.shown} 个二元市场 / 重复 {data.duplicates} 条。</p>
         <p>发现列表仅有元数据。可在详情中读取公开盘口、基准费率和官方结算状态；完整费用模型、结算资产与模拟闭环仍待验证。市场开放标志不代表账户资格或交易授权。</p>
-        <Table heads={["市场 / 标识","两个结果","源更新时间 / 到期时间","最小份额 / 价格档位","详情"]} rows={data.rows.map((row:Row)=>[
+        <Table heads={["市场 / 标识","两个结果","源更新时间 / 到期时间","Gamma最小金额（USDC）/ 价格档位","详情"]} rows={data.rows.map((row:Row)=>[
           <span style={{display:"block",maxWidth:320,whiteSpace:"normal",overflowWrap:"anywhere"}}>{row.title}<br/><small>市场 #{row.market_id}</small></span>,row.outcomes.map((v:Row)=>v.name).join(" / "),stamp(row.source_updated_at)+" / "+stamp(row.ends_at),
           String(row.minimum_size??"未知")+" / "+String(row.price_tick??"未知"),
           <div className="buttons"><button onClick={()=>useUI.getState().show({title:"事件市场标识 · "+row.market_id,summary:"市场、事件、条件及结果 Token 保持独立；元数据不是交易或结算授权。",data:row})}>查看市场标识</button>
@@ -89,13 +89,21 @@ function EventMarketDetails({market}:{market:Row}){
       <p>均价 {n(cost.average_price)} · 滑点上限价 {n(cost.price_cap)} · 模型滑点 {n(cost.modeled_slippage_pct)}%。{cost.research_feasible?"保守研究门槛通过":"保守研究门槛未通过"}，不授予模拟或实际执行权限。</p>
       <p>限制原因：{cost.limits.join("；")||"输入的取整目标在本快照内得到模型覆盖"}。规则最小值 {n(cost.minimum_rule_value)} 同时作份额及名义金额的保守检查；原生最小值单位未用于执行授权。</p>
       <p>计算步长 {cost.quantity_step} 份；每个费用非零的深度档额外预留0.0001参考USDC，不声称这是实际平台取整方式。{cost.notice}</p>
+      <div data-event-unit-evidence>
+        <h4>单位与费用精度依据</h4>
+        <p>Gamma最小名义金额 {n(cost.unit_evidence.gamma_minimum_notional)} USDC；已与CLOB最小值和价格档位交叉核对数值，CLOB原生最小值的单位仍未确认，继续保留双重保守检查。</p>
+        <p>官方说明费用保留 {cost.unit_evidence.fee_precision_decimals} 位小数，低于 {cost.unit_evidence.fee_precision_quantum} USDC 归零；具体取整方向和实际撮合拆分尚未核验。</p>
+        <p>若每个研究深度档恰为一笔撮合，取整情景费用为 {n(cost.precision_scenario_low)}–{n(cost.precision_scenario_high)} 参考USDC。该区间不代表真实交易总费用上下界，也不替代预算中的曲线费用与保守预留。</p>
+        <p>待验证：{cost.unit_evidence.blockers.join("；")}。</p>
+        <p>依据复核日 {cost.unit_evidence.reviewed_on} · <a href={cost.unit_evidence.gamma_minimum_source} target="_blank" rel="noreferrer">官方市场单位说明</a> · <a href={cost.unit_evidence.fee_precision_source} target="_blank" rel="noreferrer">官方费用精度说明</a>。文档单位不等于该市场抵押资产已验证。</p>
+      </div>
       <Table heads={["卖盘价格","研究份额","名义金额","曲线费用估计","取整预留"]} rows={cost.depth_fills.map((r:Row)=>[n(r.price),n(r.shares),n(r.gross),n(r.model_fee),n(r.rounding_reserve)])}/>
       {cost.depth_rows_truncated&&<p>模型使用全部有效档位，此处只显示前20档明细。</p>}
     </div>}
     {quote&&<div data-event-quote>
       <p>结果 {quote.outcome} · 源时间 {time(quote.source_timestamp)} · 接收时间 {time(quote.received_at)} · {quote.cached?"3秒内缓存（未重置源时间）":"本次公开快照"}</p>
       <p>买一 {n(quote.best_bid)} / 卖一 {n(quote.best_ask)} / 价差 {n(quote.spread)} · {quote.quote_available?"已核验双边盘口快照":"单边或空盘口，不可作为双边报价"}</p>
-      <p>最小份额 {n(quote.minimum_size)} · 价格档位 {n(quote.price_tick)} · 官方基准费率 {n(quote.base_fee_bps)} bps。{quote.fee_note}</p>
+      <p>CLOB原生最小值 {n(quote.minimum_size)}（单位待核验） · 价格档位 {n(quote.price_tick)} · 官方基准费率 {n(quote.base_fee_bps)} bps。{quote.fee_note}</p>
       <p>{quote.note} 结算资产尚未核验，不将报价标为 USDT；模拟与真实订单均未启用。</p>
       <Table heads={["买盘价格","买盘份额","卖盘价格","卖盘份额"]} rows={Array.from({length:Math.max(quote.bids.length,quote.asks.length)},(_,i)=>[
         n(quote.bids[i]?.price),n(quote.bids[i]?.size),n(quote.asks[i]?.price),n(quote.asks[i]?.size)

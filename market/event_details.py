@@ -64,7 +64,7 @@ def book_snapshot(raw, market, token, now):
     if not isinstance(book_hash, str) or not re.fullmatch(r"[0-9a-fA-F]{32,128}", book_hash):
         raise ValueError("盘口快照哈希缺失或无效")
     tick = decimal(raw.get("tick_size"), "价格档位")
-    minimum = decimal(raw.get("min_order_size"), "最小份额")
+    minimum = decimal(raw.get("min_order_size"), "CLOB原生最小值")
     if not 0 < tick <= 1 or minimum <= 0:
         raise ValueError("盘口交易规则无效")
     sides = {}
@@ -94,7 +94,7 @@ def book_snapshot(raw, market, token, now):
         bids=[dict(price=float(p), size=float(n)) for p, n in sides["bids"][:20]],
         asks=[dict(price=float(p), size=float(n)) for p, n in sides["asks"][:20]],
         bid_levels=len(sides["bids"]), ask_levels=len(sides["asks"]),
-        minimum_size=float(minimum), price_tick=float(tick), simulation_ready=False,
+        minimum_size=float(minimum), minimum_size_unit=None, price_tick=float(tick), simulation_ready=False,
         note="盘口来自公开快照，非保证成交；仅展示前20档。" if bid is not None and ask is not None else "单边或空盘口，不能视为双边可用报价")
 
 
@@ -210,6 +210,7 @@ class EventDetails:
 
     def cost(self, query):
         from market.event_costs import CLOB_INFO, estimate_cost, curve_parameters
+        from market.event_units import unit_evidence
         def fetch():
             market = self._market(query.market_id)
             if not market["metadata_active"]:
@@ -217,7 +218,7 @@ class EventDetails:
             if market.get("protocol_version") != "v1":
                 raise ValueError("成本研究仅支持明确标记v1的市场；未使用其他版本的Token")
             info = self._read(CLOB_INFO + market["condition_id"], {})
-            curve_parameters(info, market)
+            unit_evidence(market, curve_parameters(info, market))
             raw = self._read(BOOK, dict(token_id=market["outcomes"][query.outcome_index]["token_id"]))
             return estimate_cost(query, market, info, raw, self.clock())
         return self._run("cost", (query.market_id, query.outcome_index, query.shares, query.budget, query.max_slippage_pct), 3, fetch)

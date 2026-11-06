@@ -77,6 +77,10 @@ def run():
                 details_panel.get_by_role("button",name="计算公开盘口成本",exact=True).click()
                 details_panel.locator("[data-event-cost]").get_by_text("模型合计",exact=False).wait_for()
                 assert "0.07" in details_panel.locator("[data-event-cost]").inner_text()
+                evidence=details_panel.locator("[data-event-unit-evidence]")
+                evidence.get_by_text("CLOB原生最小值的单位仍未确认",exact=False).wait_for()
+                evidence.get_by_text("取整情景费用",exact=False).wait_for()
+                assert evidence.get_by_role("link",name="官方费用精度说明").get_attribute("href")=="https://docs.polymarket.com/trading/fees"
                 details_panel.get_by_role("button",name="查询官方结算",exact=True).click()
                 details_panel.locator("[data-event-resolution]").get_by_text("官方接口结算证据已核验",exact=False).wait_for()
                 for w,h in ((1366,768),(1920,1080)):
