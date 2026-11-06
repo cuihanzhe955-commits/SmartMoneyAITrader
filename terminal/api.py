@@ -23,6 +23,7 @@ from events.store import encode
 from ai.provider import Provider
 from risk.parameters import RECOMMENDED
 from market.discovery import Discovery, DiscoveryQuery
+from market.predictions import EventResearch, EventQuery
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -69,6 +70,7 @@ def create_app(path=None):
         rt = Runtime(path or os.environ.get("SMART_MONEY_RUNTIME", ROOT / "runtime"))
         app.state.rt = rt
         app.state.discovery = Discovery()
+        app.state.event_research = EventResearch()
         # Enforce one scheduler per ledger even when the app starts on a second port.
         import msvcrt
 
@@ -79,6 +81,7 @@ def create_app(path=None):
         try:
             yield
         finally:
+            app.state.event_research.close()
             rt.shutdown()
             rt.db.db.close()
             owner.close()
@@ -181,6 +184,10 @@ def create_app(path=None):
     @app.post("/api/research/markets")
     def research_markets(query: DiscoveryQuery):
         return app.state.discovery.run(query)
+
+    @app.post("/api/research/events")
+    def research_events(query: EventQuery):
+        return app.state.event_research.run(query)
 
     @app.get("/api/replay")
     def replay_view(session_id: int, symbol: str, as_of: int):
