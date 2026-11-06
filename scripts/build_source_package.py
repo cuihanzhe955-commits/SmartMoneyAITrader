@@ -18,7 +18,8 @@ DOCS.update({"OPEN_SOURCE_AUDIT.md", "PHASE_D_COMPONENTS.md", "PHASE_D2_CCXT.md"
              "PHASE_C2_MAINTENANCE.md", "PHASE_C2_RUNTIME.md", "PHASE_C2_LIFECYCLE.md", "PHASE_C2_RECOVERY.md", "PHASE_C2_DIAGNOSTICS.md", "PHASE_C3_READINESS.md"})
 DOCS.update({"DEPENDENCY_AUDIT.json", "COMPONENT_DECISIONS.md", "PHASE_D_RESULTS.md", "COMPONENT_TEST_RESULTS.json"})
 DOCS.update({"PHASE_E_RESULTS.md", "E_TEST_RESULTS.json"})
-VERSION = "1.0-E-nonfunds-accepted"
+DOCS.update({"PHASE_F_READONLY_RESULTS.md", "POLYMARKET_RESEARCH.md", "F_TEST_RESULTS.json"})
+VERSION = "1.0-F3-readonly-research"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
     "provider_token": re.compile(r"(?:sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{20,}"),

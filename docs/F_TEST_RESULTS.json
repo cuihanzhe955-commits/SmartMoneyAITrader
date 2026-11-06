@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-06",
+  "scope": "F1-F3 public read-only research",
+  "code_commit": "0491e4c08a0f0ba83771a64f89abd4347c66c9b7",
+  "stable": false,
+  "real_funds_verified": false,
+  "historical_tests": [
+    {
+      "commit": "370b6b2",
+      "passed": 624,
+      "failed": 0,
+      "seconds": 31.49
+    },
+    {
+      "commit": "0491e4c",
+      "passed": 692,
+      "failed": 0,
+      "seconds": 40.78
+    }
+  ],
+  "offline_runner": "python -X utf8 -B tests/run_offline.py",
+  "external_network_in_tests": false,
+  "frontend_build": true,
+  "browser": {
+    "passed": true,
+    "fixtures": true,
+    "viewports": [
+      "1366x768",
+      "1920x1080"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ]
+  },
+  "public_observations": {
+    "historical": true,
+    "raw_snapshots_committed": false,
+    "metadata_markets_checked": 5,
+    "fresh_book_markets_checked": 2,
+    "base_fee_bps_observed": 1000,
+    "resolution_market_ids": [
+      "6742367",
+      "6742336"
+    ],
+    "resolution_evidence": "official_api_only",
+    "onchain_verified": false,
+    "account_access": false,
+    "order_writes": false
+  },
+  "implemented": [
+    "bounded market discovery",
+    "exact market/token mapping",
+    "fresh book and rule checks",
+    "base fee parameter query",
+    "closed market discovery",
+    "official resolution state and micro-USDC payout vector validation"
+  ],
+  "not_completed": [
+    "complete fee model",
+    "event simulation ledger",
+    "idempotent simulation settlement",
+    "AI prediction and reflection",
+    "Brain memory/retrieval/evaluation",
+    "100 round challenge"
+  ],
+  "dependencies_changed": false,
+  "database_schema_changed": false,
+  "user_runtime_changed": false
+}

@@ -1,6 +1,6 @@
 # Windows 快速启动与常见问题
 
-> 适用于 **Smart Money AI Trader 源码体验版（v1.0 C1 开发检查点）**。本版本主要面向 Windows 11，本地历史模拟可以不配置交易 API。**尚未完成真实资金交易的完整验收，不建议使用真实资金体验。**
+> 适用于 **Smart Money AI Trader 源码体验版（v1.0 F3只读研究检查点）**。本版本主要面向 Windows 11，本地历史模拟可以不配置交易 API。**尚未完成真实资金交易的完整验收，不建议使用真实资金体验。**
 
 ## 1. 下载项目
 
@@ -17,7 +17,7 @@ cd SmartMoneyAITrader
 
 ## 2. 运行前准备
 
-- **系统**：Windows 11；推荐 Python **3.11（64 位）**，其他 3.11 以上版本需满足项目锁定依赖的兼容性。
+- **系统**：Windows 11；本轮已验证Python **3.12（64位）**，其他 3.11 以上版本需满足项目锁定依赖的兼容性。
 - **Python**：从 [python.org 官方下载页](https://www.python.org/downloads/windows/) 安装。安装时启用 **Add python.exe to PATH**，或使用 Windows Python Launcher（py）。安装完重新打开命令行。
 - **Node.js**：普通运行不需要；只有重新开发/构建 React 前端时才需要。
 - **依赖**：不用逐个安装 FastAPI、CCXT 等；启动器自动检查 requirements.txt 并在项目的 .venv 内安装缺失的依赖。首次安装需要网络。
@@ -54,4 +54,4 @@ cd SmartMoneyAITrader
 
 ## 6. 当前交付边界
 
-这是**源码版智能启动器（第一级）**，不是免 Python 的便携 EXE 或正式安装程序。启动流程自动化不代表真实交易功能已通过验证。实际测试结论和未完成项参见 [C1 验收记录](PHASE_C1_RESULTS.md) 与 [实盘验证状态](LIVE_TRADING_VERIFICATION.md)。
+这是**源码版智能启动器（第一级）**，不是免 Python 的便携 EXE 或正式安装程序。启动流程自动化不代表真实交易功能已通过验证。当前事件研究操作见[Polymarket研究说明](POLYMARKET_RESEARCH.md)，最新检查点见[F1–F3记录](PHASE_F_READONLY_RESULTS.md)，资金边界见[实盘状态](LIVE_TRADING_VERIFICATION.md)。
