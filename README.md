@@ -145,6 +145,7 @@ npm --prefix frontend run build
 ## 项目文档
 
 - [项目进度与验收口径](docs/PROGRESS_STATUS.md)：A–I 阶段状态、测试证据、未完成门槛和真实资金验证顺序
+- [Codex + GitHub Copilot 双 AI 协作规范](docs/AI_DEVELOPMENT_COLLABORATION.md)：额度切换、分支隔离、任务交接、测试和安全边界
 - [主实施计划书](docs/SmartMoney_Stable_Plan.md)：v1.0 冻结范围、平台优先级和后续执行依据
 - [文档导航与仓库结构](docs/README.md)：按计划、使用、验收和未来候选分类查看项目资料
 - [v1.0 公开开发路线图](docs/V1_ROADMAP.md)：A–I 阶段目标及验收边界

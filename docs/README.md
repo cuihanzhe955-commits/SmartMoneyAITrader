@@ -20,6 +20,7 @@
 | 验收证据 | [PHASE_C1_RESULTS.md](PHASE_C1_RESULTS.md)、[LIVE_TRADING_VERIFICATION.md](LIVE_TRADING_VERIFICATION.md) | 历史阶段测试结果与实盘未通过项 |
 | 已发生的功能变更 | [CHALLENGE_TEMPLATE_UPDATE.md](CHALLENGE_TEMPLATE_UPDATE.md) | 挑战模板 UI 调整的历史记录 |
 | 仓库维护 | [GITHUB_UPLOAD.md](GITHUB_UPLOAD.md) | 公开仓库状态及上传说明的历史兼容信息 |
+| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | Codex 与 Copilot 的职责、分支、交接、测试和安全规范 |
 | 未来候选 | [PRODUCT_DECISION_POOL.md](PRODUCT_DECISION_POOL.md) | 新模块、研究方向及延后理由，**不构成当前开发指令** |
 
 ## 状态与优先级
