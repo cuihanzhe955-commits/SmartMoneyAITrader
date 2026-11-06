@@ -3,7 +3,7 @@
   "stable": false,
   "real_funds_verified": false,
   "components_reviewed": true,
-  "built_at": "2026-11-06T15:27:23.797462+00:00",
+  "built_at": "2026-11-06T15:33:20.084456+00:00",
   "files": {
     ".env.example": "05f3f27b70523c728102179c2596c6b51db43262776f408494de1e042e470002",
     ".gitignore": "42ffa014e11eedc02abec4419ae90dbae6acb7c5ce726db9b06c3fe575631047",
@@ -247,9 +247,11 @@
     "使用说明.md": "bd244d18ddccb23baf411465697b4e4451e52ff3e69c75a791c5bdcc8b5a5e3c",
     "events/notification_outbox.py": "6d2860a657c544a69f6a892a10133328e440de7fbda61af4e3cafd8347818ad7",
     "tests/test_notification_outbox.py": "0ceae3b5d1c9fa072c1d7021756397553e97b6146047cde31ff2605d7cce4a63",
-    "docs/G2_OUTBOX_CHECKPOINT.md": "63c2ae5b9900e0aaa8eb3d565ec07d4f35a6382fa5dcd070be44a16413e7a22b",
+    "docs/G2_OUTBOX_CHECKPOINT.md": "3c53f57c3b06e024a9ef248f7ca09e98dc23c2a4ca24a8efc13a6c49d4e51397",
     "events/notification_worker.py": "7c61a4fea135ac8271d1f83d9263807e80a9726a6a9b24981091f329d86706cd",
-    "tests/test_notification_worker.py": "19b3ffa2346262bd75a187e4ee81200194a0f0e8fbefc09d3221496609869624"
+    "tests/test_notification_worker.py": "19b3ffa2346262bd75a187e4ee81200194a0f0e8fbefc09d3221496609869624",
+    "events/notification_gateway.py": "5441cb86a0299ca309eb573e71f76b6644aea69dde81a8e2291d277df50ad473",
+    "tests/test_notification_gateway.py": "6ecaadb8029f79f6e2e6a4af339253d4c85435b55273165b9432c455b0701d68"
   },
   "sensitive_scan": {
     "matches": 0,
