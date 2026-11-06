@@ -21,7 +21,7 @@ export function EventLabPanel(){
   const load=async()=>{const result=await api("research/lab");setData(result);};
   useEffect(()=>{let alive=true;const read=()=>api("research/lab").then(r=>{if(alive)setData(r);}).catch(e=>{if(alive)setError(e.message);});read();const timer=setInterval(read,3000);return()=>{alive=false;clearInterval(timer);};},[]);
   const act=async(fn:()=>Promise<unknown>)=>{setBusy(true);setError("");try{await fn();await load();}catch(e){setError(e instanceof Error?e.message:"研究操作失败");}finally{setBusy(false);}};
-  const current=data?.sessions.find((s:Row)=>s.id===sid);
+  const current=data?.sessions.find((s:Row)=>s.id===sid&&!s.challenge_owner);
   const rounds=data?.rounds.filter((r:Row)=>r.session_id===sid)||[];
   return <><Panel title="事件预测与参考模拟" cap="EVENT PAPER LAB · NO REAL FUNDS">
     <div className="pad" data-event-lab>
@@ -38,7 +38,7 @@ export function EventLabPanel(){
         </fieldset>
         <button disabled={busy} onClick={()=>act(async()=>{const r=await api("research/lab/sessions",{...config,request_id:createKey});setSid(r.id);setCreateKey(crypto.randomUUID());})}>创建参考模拟会话</button>
       </details>
-      <Field label="当前研究会话"><select aria-label="当前研究会话" value={sid} onChange={e=>{setSid(e.target.value);setReport(null);setRequestKey(crypto.randomUUID());}}><option value="">请选择研究会话</option>{data?.sessions.map((s:Row)=><option key={s.id} value={s.id}>{s.config.name} · {label[s.status]} · {s.id.slice(0,8)}</option>)}</select></Field>
+      <Field label="当前研究会话"><select aria-label="当前研究会话" value={sid} onChange={e=>{setSid(e.target.value);setReport(null);setRequestKey(crypto.randomUUID());}}><option value="">请选择研究会话</option>{data?.sessions.filter((s:Row)=>!s.challenge_owner).map((s:Row)=><option key={s.id} value={s.id}>{s.config.name} · {label[s.status]} · {s.id.slice(0,8)}</option>)}</select></Field>
       {current&&<>
         <p>环境：参考模拟 · {label[current.status]} · 可用参考现金 {show(Number(current.cash))} · 已结算参考盈亏 {show(Number(current.realized))} · 已预留AI调用 {current.calls} 次。</p>
         <div className="buttons">{["pause","resume","end"].map((action,i)=><button key={action} disabled={busy||current.status==="CLOSED"} onClick={()=>act(()=>api("research/lab/command",{session_id:sid,action}))}>{["暂停新预测","恢复研究","结束会话"][i]}</button>)}

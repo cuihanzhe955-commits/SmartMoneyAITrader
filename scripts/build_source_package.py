@@ -21,7 +21,8 @@ DOCS.update({"PHASE_E_RESULTS.md", "E_TEST_RESULTS.json"})
 DOCS.update({"PHASE_F_READONLY_RESULTS.md", "POLYMARKET_RESEARCH.md", "F_TEST_RESULTS.json"})
 DOCS.update({"PHASE_F4_COST_RESEARCH.md", "PHASE_F5_OBSERVATIONS.md"})
 DOCS.update({"PHASE_F_RESULTS.md", "BRAIN_MEMORY_DESIGN.md", "POLYMARKET_API_RESEARCH.md", "TEST_REPORT.md", "RELEASE_READINESS.md"})
-VERSION = "1.0-F-research-rc"
+DOCS.update({"PHASE_G1_CHALLENGE.md", "G_TEST_RESULTS.json", "G1_TASK_HANDOFF.md", "AI_DEVELOPMENT_COLLABORATION.md"})
+VERSION = "1.0-G1-challenge-checkpoint"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
     "provider_token": re.compile(r"(?:sk-|gh[pousr]_|github_pat_)[A-Za-z0-9_-]{20,}"),

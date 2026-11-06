@@ -29,7 +29,7 @@ def serve():
     sys.addaudithook(guard)
     def fetch(params):
         if params.get("slug")=="error":raise ValueError("测试替身：公开接口限频")
-        data=market();data.update(version="v1",feesEnabled=True);data["closed"]=params.get("closed")=="true";data["question"]="合成验收市场 · <script>window.fixtureInjected=true</script>"
+        data=market();data.update(version="v1",feesEnabled=True,endDate=(datetime.now(timezone.utc)+timedelta(hours=1)).isoformat());data["closed"]=params.get("closed")=="true";data["question"]="合成验收市场 · <script>window.fixtureInjected=true</script>"
         if params.get("slug"):data["slug"]=params["slug"]
         if params.get("slug")=="slow":time.sleep(.6)
         return [data]
@@ -42,7 +42,8 @@ def serve():
             return data
         if url==FEE:return dict(base_fee=30)
         if url==RESOLUTION:
-            data=resolved();data['data'][0].update(resolved_at=str(time.time()-.1),last_update_timestamp=str(time.time()-.1));return data
+            time.sleep(.03)  # Synthetic result must follow the committed prediction, even with fast workers.
+            data=resolved();data['data'][0].update(resolved_at=str(time.time()-.001),last_update_timestamp=str(time.time()-.001));return data
         raise AssertionError("Unexpected endpoint")
     with patch("market.predictions.public_page",side_effect=fetch),patch("market.event_details.public_get",side_effect=details),patch("terminal.api.Provider",ModelMock):
         uvicorn.run(create_app(),host="127.0.0.1",port=int(sys.argv[2]),log_level="error")

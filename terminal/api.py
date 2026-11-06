@@ -29,6 +29,7 @@ from market.event_costs import CostQuery
 from events.observations import CaptureQuery, ObservationJournal
 from events.lab import EventLab, LabConfig, RoundRequest
 from events.adapters import GateEventAdapter, PolymarketResearchAdapter
+from challenge.prediction import PredictionChallenges,PredictionConfig
 from ai.brain import BrainSettings, Correction
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -88,7 +89,11 @@ def create_app(path=None):
             lab_details=PolymarketResearchAdapter(app.state.event_research,EventDetails())
             try:
                 if not rt.brain.ready:rt.brain.setup()
-                return EventLab(rt.brain,lab_details,research_provider)
+                instance=EventLab(rt.brain,lab_details,research_provider)
+                discovery=EventResearch()
+                try:instance.challenges=PredictionChallenges(instance,discovery)
+                except ValueError:discovery.close()
+                return instance
             except Exception:
                 lab_details.close();raise
         app.state.make_lab=make_lab
@@ -127,6 +132,11 @@ def create_app(path=None):
     def lab():
         if app.state.event_lab is None:raise ValueError("事件研究初始化暂不可用，请点击重新连接研究服务；现有交易与保护继续运行")
         return app.state.event_lab
+
+    def prediction_challenges():
+        manager=lab().challenges
+        if manager is None:raise ValueError('自动预测挑战暂不可用，可点击重新连接挑战服务；现有保护继续运行')
+        return manager
 
     @app.middleware("http")
     async def local(request, call_next):
@@ -271,6 +281,43 @@ def create_app(path=None):
     @app.get("/api/research/lab/evidence")
     def event_lab_evidence(round_id: str):
         return lab().evidence(round_id)
+
+    @app.get('/api/research/challenges')
+    def prediction_challenge_view(id: str | None = None):
+        cfg=rt().vault.values.get('ai_config',{})
+        return dict(prediction_challenges().view(id),ai=dict(ready=bool(rt().vault.values.get('ai_key')),
+            model=cfg.get('model',''),calls=cfg.get('calls',40),interval=cfg.get('interval',120)))
+
+    @app.post('/api/research/challenges')
+    def prediction_challenge_create(config: PredictionConfig):
+        return prediction_challenges().create(config)
+
+    class PredictionCommand(BaseModel):
+        model_config={'extra':'forbid'}
+        id: str = Field(pattern=r'^[a-f0-9]{32}$')
+        action: Literal['pause','resume','stop']
+
+    @app.post('/api/research/challenges/command')
+    def prediction_challenge_command(query: PredictionCommand):
+        return prediction_challenges().command(query.id,query.action)
+
+    @app.get('/api/research/challenges/report')
+    def prediction_challenge_report(id: str):
+        manager=prediction_challenges();report=manager.view(id)
+        sid=report['challenges'][0]['session_id']
+        report['reconciliation']=lab().reconcile(sid) if sid else None
+        return report
+
+    @app.post('/api/research/challenges/retry')
+    def prediction_challenge_retry():
+        with app.state.lab_init_lock:
+            instance=lab()
+            if instance.challenges is None:
+                discovery=EventResearch()
+                try:instance.challenges=PredictionChallenges(instance,discovery)
+                except Exception:discovery.close();raise
+                instance.challenges.start()
+        return {'ok':True}
 
     class LabCommand(BaseModel):
         model_config={"extra":"forbid"}

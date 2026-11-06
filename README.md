@@ -4,9 +4,9 @@
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-F%20Research%20RC-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-G1%20Checkpoint-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前开发检查点：v1.0-F-research-rc（2026-11-06）。** 已实现F阶段研究与参考模拟/Brain非资金工程：可追溯预测/SKIP、独立参考资金账本、官方幂等结算、恢复、长期记忆与配对评估。最新隔离离线回归**814通过、0失败**，见[F测试摘要](docs/F_TEST_RESULTS.json)，前端与浏览器验收通过；真实公开ETH市场6708728完成了预测后的SKIP结果核验。完整平台费用/资产与真实AI、资金执行验收仍开放，当前不是Stable。见[F验收](docs/PHASE_F_RESULTS.md)、[Brain说明](docs/BRAIN_MEMORY_DESIGN.md)及[发布门槛](docs/RELEASE_READINESS.md)。
+> **当前开发检查点：v1.0-G1-challenge-checkpoint（2026-11-06）。** G1自动预测挑战已接入策略实验室，支持逐轮发现、预测、官方结算推进、恢复与报告；全量隔离回归**840通过、0失败**，前端和浏览器检查通过。100轮证据为Model Mock工程验证，G通知闭环和真实市场/模型持续运行仍待验收。见[G1记录](docs/PHASE_G1_CHALLENGE.md)、[G测试摘要](docs/G_TEST_RESULTS.json)。[F研究候选](docs/PHASE_F_RESULTS.md)保持历史证据，当前不是Stable。
 
 ## 项目概览
 
@@ -89,7 +89,7 @@ flowchart LR
 | D · 开源组件 | 组件 POC、采用评审、依赖审查和图表回放 | **已完成本阶段组件验收** |
 | E · 多交易所 | Gate / OKX / Binance 单主平台切换与隔离 | **非资金实现与本地验收通过；完整 E 的地区/数据源/私有执行与账户验收缺口仍开放** |
 | F · Brain 与事件研究 | 模拟学习记忆、Polymarket事件研究 | 研究与参考模拟/Brain非资金工程验收通过；平台忠实执行与真实AI联调继续单列；Gate事件禁用 |
-| G · 挑战与通知 | 100轮 AI 预测挑战、OpenClaw 飞书/Telegram 异步通知 | 尚未整体验收 |
+| G · 挑战与通知 | 100轮预测、原规则挑战与异步通道 | G1自动调度/恢复/统计和UI本地验收通过；G2通知与真实持续运行待验收 |
 | H · UI 与迁移 | AI Intelligence Center、模型迁移、设置与工作台闭环 | 部分设置和保护界面已有实现；完整中心与迁移未完成 |
 | I · Stable 发布 | 全量安装、迁移、平台和发布验收 | 未通过；不得标记 Stable |
 
@@ -99,7 +99,7 @@ flowchart LR
 
 ## 快速开始（本地历史模拟）
 
-**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为F研究候选检查点，**不是 Stable，完整平台与实盘验收未通过**。
+**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为G1开发检查点，**不是 Stable，完整平台与实盘验收未通过**。
 
 **无需安装 Git 也能体验**：点击本仓库的 **Code → Download ZIP**，解压后进入包含 start.bat 的项目根目录，**双击 start.bat**。喜欢命令行的开发者可以通过 Git 克隆：
 

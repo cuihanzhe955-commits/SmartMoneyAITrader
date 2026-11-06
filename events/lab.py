@@ -34,6 +34,7 @@ class LabConfig(BaseModel):
 class RoundRequest(CostQuery):
     session_id: str = Field(pattern=r"^[a-f0-9]{32}$")
     request_id: str = Field(pattern=r"^[a-f0-9-]{36}$")
+    expected_condition_id: str | None = Field(default=None,pattern=r"^0x[0-9a-f]{64}$")
 
 
 class Forecast(BaseModel):
@@ -52,6 +53,7 @@ class EventLab:
         self.brain,self.details,self.provider_factory,self.clock=brain,details,provider_factory,clock
         self.stop=threading.Event();self.error="";self.active_provider=None
         self.work_mutex=threading.Lock();self.settle_mutex=threading.Lock()
+        self.challenges=None
         with brain.db(True) as db:
             db.execute("CREATE TABLE IF NOT EXISTS event_lab_sessions(id TEXT PRIMARY KEY,request_id TEXT UNIQUE,config TEXT,state TEXT)")
             db.execute("""CREATE TABLE IF NOT EXISTS event_lab_rounds(
@@ -63,17 +65,19 @@ class EventLab:
             # re-executes a fill; durable round state and atomic cash rows rule.
             db.execute("UPDATE event_lab_rounds SET status='QUEUED' WHERE status='FETCHING'")
 
-    def create(self, config):
+    def create(self, config, *, owner=None):
         if config.per_trade>config.capital: raise ValueError("单次研究预算不能超过会话资金")
         encoded=canonical(config.model_dump())
         with self.brain.db(True) as db:
             old=db.execute("SELECT * FROM event_lab_sessions WHERE request_id=?",(config.request_id,)).fetchone()
             if old:
                 if old["config"]!=encoded: raise ValueError("同一创建请求不能改变配置")
+                if json.loads(old['state']).get('challenge_owner')!=owner:raise ValueError("研究会话归属不符")
                 return {"id":old["id"],"duplicate":True}
             sid=uuid4().hex
             state=dict(status="ACTIVE",cash=str(D(config.capital)),initial=str(D(config.capital)),realized="0",calls=0,
                 created_at=self.clock(),environment="reference_paper",asset="reference_USDC",execution_enabled=False)
+            if owner:state['challenge_owner']=owner
             db.execute("INSERT INTO event_lab_sessions VALUES(?,?,?,?)",(sid,config.request_id,encoded,canonical(state)))
         return {"id":sid,"duplicate":False}
 
@@ -83,6 +87,7 @@ class EventLab:
             row=db.execute("SELECT * FROM event_lab_sessions WHERE id=?",(sid,)).fetchone()
             if not row: raise ValueError("研究会话不存在")
             s=json.loads(row["state"])
+            if s.get('challenge_owner'):raise ValueError("请在预测挑战面板控制此专属会话")
             if s["status"]=="CLOSED": raise ValueError("研究会话已结束")
             if action=="end":
                 if db.execute("SELECT 1 FROM event_lab_rounds WHERE session_id=? AND status='WAITING'",(sid,)).fetchone():
@@ -93,15 +98,18 @@ class EventLab:
             db.execute("UPDATE event_lab_sessions SET state=? WHERE id=?",(canonical(s),sid))
         return {"ok":True}
 
-    def enqueue(self, request):
+    def enqueue(self, request, *, owner=None):
+        request=RoundRequest.model_validate(request.model_dump())
         inputs=canonical(request.model_dump())
         with self.brain.db(True) as db:
             old=db.execute("SELECT id,inputs FROM event_lab_rounds WHERE request_id=?",(request.request_id,)).fetchone()
             if old:
-                if old["inputs"]!=inputs: raise ValueError("同一轮次请求不能改变参数")
+                previous=canonical(RoundRequest.model_validate_json(old['inputs']).model_dump())
+                if previous!=inputs: raise ValueError("同一轮次请求不能改变参数")
                 return {"id":old["id"],"duplicate":True}
             session=db.execute("SELECT * FROM event_lab_sessions WHERE id=?",(request.session_id,)).fetchone()
             if not session or json.loads(session["state"])["status"]!="ACTIVE": raise ValueError("请先选择运行中的研究会话")
+            if json.loads(session['state']).get('challenge_owner')!=owner:raise ValueError("挑战会话禁止手动插入轮次")
             count=db.execute("SELECT COUNT(*) FROM event_lab_rounds WHERE session_id=? AND status IN ('QUEUED','FETCHING','PREDICTING')",(request.session_id,)).fetchone()[0]
             if count>=10: raise ValueError("研究队列已满，请等待当前轮次完成")
             if db.execute("SELECT COUNT(*) FROM event_lab_rounds WHERE session_id=?",(request.session_id,)).fetchone()[0]>=1000:raise ValueError("当前研究会话已达1000轮，请另建会话")
@@ -180,7 +188,7 @@ class EventLab:
         if s["status"]!="ACTIVE": return
         data=json.loads(row["data"])
         if not data:
-            query=CostQuery(**request.model_dump(exclude={"session_id","request_id"}))
+            query=CostQuery(**{key:getattr(request,key) for key in CostQuery.model_fields})
             query=query.model_copy(update={"budget":float(min(D(query.budget),D(config.per_trade),D(s["cash"])))})
             if query.budget<=0: raise ValueError("研究会话没有可用参考现金")
             snap=self.details.cost(query)
@@ -188,6 +196,7 @@ class EventLab:
             if (snap.get("provider")!="polymarket" or snap.get("product")!="event" or snap.get("market_id")!=request.market_id
                     or snap.get("protocol_version")!="v1" or snap.get("execution_enabled") is not False
                     or snap.get("simulation_ready") is not False):raise ValueError("成本快照作用域或权限不符")
+            if request.expected_condition_id and snap['condition_id']!=request.expected_condition_id:raise ValueError("候选市场条件已变化，拒绝旧发现结果")
             if not 0<=cutoff-snap["source_timestamp"]<30: raise ValueError("研究盘口已过期")
             end=snap.get("market_ends_at")
             if end is None or end<=cutoff:raise ValueError("事件结束时间缺失或已到期，不建立新预测")
@@ -195,7 +204,11 @@ class EventLab:
             data=dict(snapshot=snap,snapshot_sha256=digest(canonical(snap)),decision_started_at=cutoff,
                 expires_at=min(cutoff+30,snap["source_timestamp"]+30,end),memory_refs=[dict(id=m["id"],revision=m["revision"]) for m in memories],
                 memory_context=memories,model="quote-baseline/1",forecasts={},reflection_status="pending")
-            with self.brain.db(True) as db:self._save_round(db,row,data,"PREDICTING")
+            with self.brain.db(True) as db:
+                current=db.execute('SELECT status FROM event_lab_rounds WHERE id=?',(row['id'],)).fetchone()
+                active=json.loads(db.execute('SELECT state FROM event_lab_sessions WHERE id=?',(sid,)).fetchone()[0])
+                if not current or current[0]!='QUEUED' or active['status']!='ACTIVE':return
+                self._save_round(db,row,data,"PREDICTING")
         if self.clock()>=data["expires_at"]:
             forecasts={"selected":dict(action="SKIP",probability=None,reason="提案或盘口已过期",counter_evidence="不执行迟到结果")}
         else:
@@ -251,6 +264,7 @@ class EventLab:
                 data["order"]=dict(id="REFERENCE_PAPER_"+row["id"],shares=str(qty),cost=str(cost),asset="reference_USDC",actual_order=False)
                 db.execute("INSERT INTO event_lab_cash VALUES(?,'DEBIT',?)",(row["id"],str(-cost)))
                 s["cash"]=str(D(s["cash"])-cost)
+            data['reference_cash_after_entry']=s['cash']
             db.execute("UPDATE event_lab_sessions SET state=? WHERE id=?",(canonical(s),row["session_id"]))
             self._save_round(db,row,data,"WAITING",now)
         try:self._learn(row,data,False)
@@ -263,14 +277,16 @@ class EventLab:
         if self.stop.is_set():return
         if not evidence["settlement_verified"]:
             with self.brain.db(True) as db:
+                data.pop('error',None)
                 data["last_resolution"]=evidence;self._save_round(db,row,data,"WAITING",self.clock()+60)
             return
         payouts=evidence.get("payouts") or []
         chosen=[p for p in payouts if p["token_id"]==snap["token_id"]]
         if evidence["condition_id"]!=snap["condition_id"] or len(chosen)!=1: raise ValueError("结算条件或结果Token不匹配")
-        if evidence["resolved_at"]<=data["decision_started_at"]: raise ValueError("该结果早于预测，拒绝未来信息泄漏/事后预测计分")
+        if evidence["resolved_at"]<=data["decision_at"]: raise ValueError("该结果早于预测完成，拒绝未来信息泄漏/事后预测计分")
         payout=D(chosen[0]["payout"])
         if not payout.is_finite() or not 0<=payout<=1:raise ValueError("官方兑付比例无效")
+        data.pop('error',None)
         with self.brain.db(True) as db:
             self.reconcile(row["session_id"],db)
             live=db.execute("SELECT status FROM event_lab_rounds WHERE id=?",(row["id"],)).fetchone()
@@ -281,7 +297,7 @@ class EventLab:
             if data["order"]:
                 db.execute("INSERT INTO event_lab_cash VALUES(?,'PAYOUT',?)",(row["id"],str(proceeds)))
                 s["cash"]=str(D(s["cash"])+proceeds);s["realized"]=str(D(s["realized"])+proceeds-cost)
-            data.update(settlement=evidence,payout=float(payout),proceeds=str(proceeds),realized=str(proceeds-cost),settled_at=self.clock())
+            data.update(settlement=evidence,payout=float(payout),proceeds=str(proceeds),realized=str(proceeds-cost),settled_at=self.clock(),reference_cash_after_settlement=s['cash'])
             self._save_round(db,row,data,"SETTLED")
             db.execute("UPDATE event_lab_sessions SET state=? WHERE id=?",(canonical(s),row["session_id"]))
 
@@ -348,12 +364,14 @@ class EventLab:
                     with self.brain.db(True) as db:
                         fresh=db.execute("SELECT * FROM event_lab_rounds WHERE id=?",(row["id"],)).fetchone();data=json.loads(fresh["data"])
                         data["error"]=self.error
-                        if fresh["status"] in ("QUEUED","PREDICTING"):
-                            data.update(action="SKIP",order=None,reflection_status="not_applicable")
-                            self._save_round(db,row,data,"FAILED")
+                        if lane=='predict':
+                            if fresh["status"] in ("QUEUED","PREDICTING"):
+                                data.update(action="SKIP",order=None,reflection_status="not_applicable")
+                                self._save_round(db,row,data,"FAILED")
                         elif lane=="reflect":
-                            data["reflection_status"]="failed";self._save_round(db,row,data,"SETTLED")
-                        else:self._save_round(db,row,data,"WAITING",self.clock()+60)
+                            if fresh['status']=='SETTLED':
+                                data["reflection_status"]="failed";self._save_round(db,row,data,"SETTLED")
+                        elif fresh['status']=='WAITING':self._save_round(db,row,data,"WAITING",self.clock()+60)
                 except Exception:pass
         finally:mutex.release()
 
@@ -363,7 +381,9 @@ class EventLab:
         self.threads=[]
         for kind in ("work","settle"):
             thread=threading.Thread(target=loop,args=(kind,),name="smart-money-event-"+kind,daemon=True);thread.start();self.threads.append(thread)
+        if self.challenges:self.challenges.start()
 
     def close(self):
+        if self.challenges:self.challenges.close()
         self.stop.set()
         for thread in getattr(self,"threads",[]):thread.join(timeout=.2)
