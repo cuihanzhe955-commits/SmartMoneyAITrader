@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {MarketResearch} from "./market-research";
+import {PlatformStatus} from "./platform-status";
 import { useQuery } from "@tanstack/react-query";
 import { Field, Panel, api, run, useUI, txt, Row } from "./shared";
 const strategies = [
@@ -9,9 +10,9 @@ const strategies = [
   "成交量异常",
   "波动率策略",
 ];
-function select(v: string, set: (x: string) => void, items: string[]) {
+function select(v: string, set: (x: string) => void, items: string[], label?: string) {
   return (
-    <select value={v} onChange={(e) => set(e.target.value)}>
+    <select aria-label={label} value={v} onChange={(e) => set(e.target.value)}>
       {items.map((x) => (
         <option key={x} value={x}>
           {txt(x)}
@@ -29,6 +30,7 @@ export function Builder({
 }) {
   const [template, setTemplate] = useState(challenge ? "challenge" : "normal");
   return <>
+    <PlatformStatus />
     <Panel title="创建会话 · 选择策略模板" cap="STRATEGY TEMPLATE">
       <div className="pad">
         <Field label="策略模板">
@@ -86,7 +88,10 @@ function SessionBuilder({
     consent: false,
     confirmation: "",
     dataset: "",
+    market_mode: "fixed",
+    scanner: {limit:25,min_volume:1000000,max_spread_pct:.3,max_change_pct:50,max_slippage_pct:.5,search:"",whitelist:[],blacklist:[]},
   });
+  const [scannerLists, setScannerLists] = useState<Record<string,string>>({whitelist:"",blacklist:""});
   const upd = (k: string, v: unknown) => set((p) => ({ ...p, [k]: v }));
   const ds = useQuery({
     queryKey: ["datasets"],
@@ -132,6 +137,8 @@ function SessionBuilder({
               set((p) => ({
                 ...p,
                 execution: v,
+                market_mode: "fixed",
+                exchange: v !== "paper" && p.exchange === "gate" ? "okx" : p.exchange,
                 product: v === "live" ? "spot" : p.product,
                 source: v === "paper" ? p.source : "public",
                 settlement: "mark",
@@ -146,6 +153,7 @@ function SessionBuilder({
               set((p) => ({
                 ...p,
                 source: v,
+                market_mode: "fixed",
                 product: v === "public" ? p.product : "spot",
               })),
             s.execution === "paper" ? ["history", "csv", "public"] : ["public"],
@@ -170,16 +178,29 @@ function SessionBuilder({
         {s.source === "public" && (
           <>
             <Field label="交易所">
-              {select(s.exchange, (v) => upd("exchange", v), [
-                "okx",
-                "binance",
-              ])}
+              {select(s.exchange, (v) => set(p=>({...p,exchange:v,product:v==="gate"?"spot":p.product})), s.execution==="paper" ? ["okx","binance","gate"] : ["okx","binance"], "主交易所")}
             </Field>
             <Field label="账户产品">
-              {select(s.product, (v) => upd("product", v), s.execution === "live" ? ["spot"] : ["spot", "swap"])}
+              {select(s.product, (v) => set(p=>({...p,product:v,market_mode:"fixed"})), s.execution === "live" || s.exchange === "gate" ? ["spot"] : ["spot", "swap"])}
             </Field>
           </>
         )}
+        {s.execution === "paper" && s.source === "public" && s.product === "spot" && <>
+          <Field label="入场候选来源">
+            <select aria-label="入场候选来源" value={s.market_mode} onChange={e=>set(p=>({...p,market_mode:e.target.value,paper_rules:"micro"}))}>
+              <option value="fixed">固定交易对池</option><option value="dynamic">动态发现 · 公开规则复核模拟</option>
+            </select>
+          </Field>
+          {s.market_mode === "dynamic" && <div className="pad" data-dynamic-settings style={{gridColumn:"1 / -1"}}>
+            <p>动态候选只参与模拟交易。批量行情每 60 秒刷新，逐笔按真实风控预算、源时间、价差、最小金额与数量精度再次检查；至少等待下一根有效分钟线才模拟成交。成交额仅为流动性代理，未验证盘口深度。</p>
+            <div className="formgrid">
+              {[["动态扫描上限（1–200）","limit"],["最低24小时成交额 USDT","min_volume"],["动态最大价差 %","max_spread_pct"],["异常涨跌幅阈值 %","max_change_pct"],["模拟滑点预算 %","max_slippage_pct"]].map(([label,key])=><Field key={key} label={label}><input aria-label={label} type="number" step="any" value={s.scanner[key]} onChange={e=>upd("scanner",{...s.scanner,[key]:Number(e.target.value)})}/></Field>)}
+              <Field label="动态搜索币种"><input aria-label="动态搜索币种" value={s.scanner.search} onChange={e=>upd("scanner",{...s.scanner,search:e.target.value})}/></Field>
+              {[["动态白名单","whitelist"],["动态黑名单","blacklist"]].map(([label,key])=><Field key={key} label={label}><input aria-label={label} value={scannerLists[key]} placeholder="BTC,ETH" onChange={e=>{const value=e.target.value;setScannerLists(p=>({...p,[key]:value}));upd("scanner",{...s.scanner,[key]:value.split(/[,，\s]+/).filter(Boolean)});}}/></Field>)}
+            </div>
+            <small>入场候选落选不会移除持仓或在途委托监控。Gate 若不提供可核验源时间，将显示拒绝原因并保持不入场。</small>
+          </div>}
+        </>}
         <Field
           label={
             s.execution === "paper"
@@ -336,7 +357,7 @@ function SessionBuilder({
           />
         </Field>
       )}
-      {s.execution === "paper" && (
+      {s.execution === "paper" && s.market_mode !== "dynamic" && (
         <div className="pad">
           <Field label="模拟成交规则">
             <select
@@ -372,7 +393,7 @@ export function Settings() {
     queryKey: ["settings"],
     queryFn: () => api("settings"),
   });
-  return q.data ? <><LiveChecks /><Config data={q.data} /></> : <p>读取配置…</p>;
+  return q.data ? <><PlatformStatus /><LiveChecks /><Config data={q.data} /></> : <p>读取配置…</p>;
 }
 
 function protectionNumber(value: any) {

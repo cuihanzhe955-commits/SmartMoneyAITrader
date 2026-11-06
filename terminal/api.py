@@ -160,6 +160,10 @@ def create_app(path=None):
         app.state.request_shutdown()
         return {"ok": True}
 
+    @app.get("/api/platforms")
+    def platforms():
+        return rt().platform_status()
+
     @app.get("/api/settings")
     def settings():
         return rt().vault.public()
@@ -307,6 +311,8 @@ def create_app(path=None):
                     engine=v["config"].get("engine", "rules"),
                     source=v["config"]["source"],
                     execution=v["config"].get("execution", "paper"),
+                    exchange=v["config"].get("exchange", "okx"),
+                    product=v["config"].get("product", "spot"),
                     status=v["lifecycle_status"],
                     nav=equity(v),
                     roi=(equity(v) / v["config"]["capital"] - 1) * 100,

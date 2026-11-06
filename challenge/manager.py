@@ -133,6 +133,15 @@ def finish(db, s, stop=False):
     ):
         for k in list(s["positions"]):
             m = next(r for r in s["radar"] if r["symbol"] == k)
+            if c.get("market_mode") == "dynamic":
+                from market.admission import before_fill
+                try:
+                    checked = before_fill(s, k, m, 0, "SELL")
+                    m = dict(m, execution_price=checked["price"], execution_quantity=checked["quantity"])
+                except (ValueError, ArithmeticError) as err:
+                    s["pending"] = True
+                    db.record("system_events", s, "REJECT", "动态结算复核拒绝 · " + str(err), k)
+                    continue
             if c.get("paper_rules") == "venue":
                 from execution.paper_queue import round_step, ROUND_DOWN
 

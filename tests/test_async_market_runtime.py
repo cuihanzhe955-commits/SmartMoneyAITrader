@@ -15,7 +15,7 @@ def setup(tmp_path):
 
 
 def bars():
-    offset=int(time.time())-START
+    offset=int(time.time())-START-1
     return {k:[(r[0]+offset,*r[1:]) for r in rows] for k,rows in historical(START).items()}
 
 

@@ -23,7 +23,7 @@ class PublicClientCache:
             except Exception:
                 pass  # Cleanup must not leak URLs or mask the original failure.
 
-    def fetch(self, factory, exchange, product, symbols, required, cancel, deadline):
+    def fetch(self, factory, exchange, product, symbols, required, cancel, deadline, include_rules=False):
         key = (exchange, product)
         with self.lock:
             if self.closed or self.active:
@@ -41,6 +41,8 @@ class PublicClientCache:
                 self.key, self.created = key, self.clock()
             self.check(cancel, deadline)
             result = self.venue.bars(symbols, required=required, cancel=cancel, deadline=deadline)
+            if include_rules:
+                result.rules = self.venue.public_rules(symbols)
             self.check(cancel, deadline)
             failed = False
             return result

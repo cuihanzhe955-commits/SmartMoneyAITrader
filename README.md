@@ -4,9 +4,9 @@
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-E1%20Async%20Market%20Code-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-E%20Nonfund%20Accepted-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前 GitHub 代码检查点：v1.0-E1-public-paper-async（2026-11-05）。** 最新 main 提交为 [`bcf96a4`](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/bcf96a4282b3ff7c1ee2d2f3090fbac9d6ded343)，在 D 阶段组件验收基础上，新增有界异步行情工作器，并接入后台公开行情模拟运行时。E1 属于**代码实现检查点，尚未完成独立回归验收**，不是 Stable，也不是实盘就绪证明。D 阶段历史隔离离线回归为 **495 通过、0 失败**，该数字不包含本次 E1 新增测试。C 阶段平台 demo 联调与真实资金验收尚未通过；近期不进行真实资金测试。当前阶段状态见 [项目进度](docs/PROGRESS_STATUS.md)，D 阶段证据见 [D 阶段记录](docs/PHASE_D_RESULTS.md)。主需求与平台优先级以 [GitHub 主计划书](docs/SmartMoney_Stable_Plan.md) 为准：Polymarket 是事件研究首选，Gate 事件接口保留待验证并默认禁用。
+> **当前开发检查点：v1.0-E-nonfunds-accepted（2026-11-06）。** E1 异步行情、E2 动态模拟准入和 E3 单主平台隔离的非资金实现已通过本地验收：**587项离线测试通过、前端构建与两档尺寸/深浅主题浏览器检查通过**。完整 E 平台验收仍有缺口：Binance 当前地区访问受限，Gate 缺少批量行情源时间且私有执行仍关闭，三所账户与真实资金验收后移。当前不是 Stable。详见 [E 验收记录](docs/PHASE_E_RESULTS.md)、[项目进度](docs/PROGRESS_STATUS.md)；需求以 [主计划书](docs/SmartMoney_Stable_Plan.md) 为准。Polymarket 事件研究仍待 F 阶段实施。
 
 ## 项目概览
 
@@ -46,7 +46,7 @@ flowchart LR
 |---|---|---|
 | 前端与本地服务 | React / TypeScript 工作台、FastAPI / WebSocket 本地服务及 Windows 启动器已有代码和构建检查 | 全站最终体验、干净 Windows 安装包和发布迁移仍需 I 阶段验收 |
 | 规则与 AI 决策 | 规则扫描与 AI 提案分层；AI 推理工作线程有超时、取消、过期结果检查及规则回退相关代码和离线测试 | AI Brain 长期记忆、模拟结算后自动复盘、跨模型记忆闭环尚未整体验收 |
-| 市场研究 | CCXT 公开只读现货发现支持 OKX、Binance、Gate 的研究适配；E1 已将公开行情获取放入有界后台工作器，并接入后台 paper runtime | 动态发现结果尚未接入模拟入场准入；候选池仍未完成生产化，单主平台切换及账户/订单隔离仍待 E2/E3 |
+| 市场研究与模拟 | 三平台公开现货研究适配；异步行情、动态模拟准入、独立持仓保护通道与单主平台隔离已通过本地验收 | Binance地区访问受限；Gate源时间不足导致动态拒绝、私有执行关闭；平台账户验收仍未通过 |
 | 订单与保护 | 已有订单状态、部分成交、未知订单阻断、模拟保护生命周期、恢复和只读核对报告的实现及离线测试证据 | 相关 Mock / 模拟验证不代表平台 demo 真实回报；托管保护单的实际平台生命周期仍未通过联调 |
 | 历史实验与回放 | 有历史行情模拟、SQLite 事件账本和只读图表回放；D 验收使用24小时历史会话及272笔模拟成交验证回放 | 模拟盈亏不是实盘成绩；回放不驱动真实交易 |
 | D 组件与依赖审查 | D 阶段 POC / 条件采用评审完成；495 项隔离离线回归通过、0 失败，前端构建通过 | 这是 D 验收记录，不是495项平台或真实资金验收 |
@@ -59,19 +59,19 @@ flowchart LR
 - **浏览器：** 回放、研究、市场发现和监控池回归通过；检查 1366×768、1920×1080 两种尺寸及深浅主题。
 - **图表压力：** 100,000 个输入点；24小时回放显示 86,401 个点，首次渲染记录约 1.02–2.12 秒。
 - **依赖：** 38 个生产 Python 包、2 个研究 Python 包和185个 npm 锁定节点完成目标环境审查；当次公开公告查询结果为0。
-- **隔离边界：** 未访问用户真实账户、未读取真实密钥、未提交交易所订单。上述数字来自 D 验收报告；本次 README 更新没有重新运行测试。
+- **隔离边界：** 未访问用户真实账户、未读取真实密钥、未提交交易所订单。上述数字是 D 阶段历史证据；本轮 E 回归另行记录。
 
 详见 [D 阶段最终验收记录](docs/PHASE_D_RESULTS.md)、[组件采用决定](docs/COMPONENT_DECISIONS.md) 和 [依赖审查](docs/OPEN_SOURCE_AUDIT.md)。
 
-### E1 阶段新增代码（尚待独立验收）
+### E 阶段非资金验收
 
-- `market/worker.py`：新增单飞（single in-flight）、有界行情工作器；按会话/平台作用域隔离结果，支持截止时间、协作取消、旧结果丢弃和错误信息脱敏。
-- `terminal/runtime.py`：将公开行情获取接入后台 paper runtime；行情工作线程不持有数据库或订单执行器，运行时在接收结果前再次核对会话版本和持仓版本；暂停/停止/关闭时使请求失效。
-- `execution/venue.py`：行情批次逐标的请求前检查取消状态与截止时间。
-- 新增测试文件：[test_market_worker.py](tests/test_market_worker.py) 与 [test_async_market_runtime.py](tests/test_async_market_runtime.py)，覆盖慢请求不阻塞、队列有界、过期/旧作用域结果拒绝、暂停/关闭时丢弃结果、地区访问限制及错误脱敏等场景。
-- 对应提交：[6d4b296](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/6d4b296a8d25cca59171f099f469daca75900cb0)（工作器基础）和 [bcf96a4](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/bcf96a4282b3ff7c1ee2d2f3090fbac9d6ded343)（接入后台 paper runtime）。
+- 587项隔离离线回归通过，规则及Mock AI提案均经独立风控进入动态模拟委托/成交，覆盖原固定池之外的交易对。
+- 发现、候选扫描、持仓保护使用独立有界通道；市场数据、交易规则、预算、费用、滑点和精度不满足时拒绝模拟成交。
+- OKX / Binance / Gate模拟切换独立建立资金、订单、持仓和风控作用域；未知订单、保护单及任意远程环境待核对资产阻止切换。
+- 前端设置、主平台能力状态、动态雷达与中文拒绝原因通过1366×768 / 1920×1080、深浅主题检查。
+- 公开只读探测与模拟测试分开：OKX可读；Binance返回地区限制；Gate可读但缺少批量行情源时间。三所账户/资金验收均未完成。
 
-**验收边界：** 以上是源码与测试用例存在性核对，不代表这些新增测试已经在本次更新中执行或通过。该实现目前服务于后台公开行情模拟路径，不代表真实交易行情、动态候选自动开仓或多平台切换已经完成。
+详见 [E记录](docs/PHASE_E_RESULTS.md)、[机器可读测试摘要](docs/E_TEST_RESULTS.json)。这是非资金工程检查点，不是完整E外部平台验收或Stable。
 
 ## v1.0 阶段路线图
 
@@ -83,7 +83,7 @@ flowchart LR
 | B · 可靠性 | AI 非阻塞、决策过期、订单幂等和异常恢复 | 已有代码与离线测试证据；后续持续回归 |
 | C · 实盘核心 | 订单、资金、保护与恢复的端到端验收 | 本地实现持续推进；平台 demo 与真实资金验收未通过 |
 | D · 开源组件 | 组件 POC、采用评审、依赖审查和图表回放 | **已完成本阶段组件验收** |
-| E · 多交易所 | Gate / OKX / Binance 单主平台切换与隔离 | **E1 有界异步公开行情已提交，待独立回归验收；E2 动态模拟准入、E3 单主平台切换及账户/订单隔离未完成** |
+| E · 多交易所 | Gate / OKX / Binance 单主平台切换与隔离 | **非资金实现与本地验收通过；完整 E 的地区/数据源/私有执行与账户验收缺口仍开放** |
 | F · Brain 与事件研究 | 模拟学习记忆、Polymarket 事件市场发现/行情/模拟/结算 | 尚未整体验收；Polymarket 接入仍待验证，Gate 事件接口默认禁用 |
 | G · 挑战与通知 | 100轮 AI 预测挑战、OpenClaw 飞书/Telegram 异步通知 | 尚未整体验收 |
 | H · UI 与迁移 | AI Intelligence Center、模型迁移、设置与工作台闭环 | 部分设置和保护界面已有实现；完整中心与迁移未完成 |
@@ -95,7 +95,7 @@ flowchart LR
 
 ## 快速开始（本地历史模拟）
 
-**系统要求**：Windows 11，Python 3.11 或以上；推荐先使用 Python 3.11。前端已编译，普通使用无需 Node.js。当前为 E1 异步公开行情代码检查点，**不是 Stable，E1 尚待独立验收，实盘未完成验收**。
+**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为 E 非资金工程检查点，**不是 Stable，完整平台与实盘验收未通过**。
 
 **无需安装 Git 也能体验**：点击本仓库的 **Code → Download ZIP**，解压后进入包含 start.bat 的项目根目录，**双击 start.bat**。喜欢命令行的开发者可以通过 Git 克隆：
 
@@ -107,7 +107,7 @@ cd SmartMoneyAITrader
 
 智能启动器会检查 Python 版本、已有本机服务与端口、项目虚拟环境和 requirements.txt 的依赖；**缺少项目依赖时自动安装到 .venv**，已安装则跳过。首次安装需要网络；没有 Python 时，会提示前往官方页面安装，而不是静默修改系统环境。想只准备依赖、不启动服务，可使用 install.bat。
 
-正常启动后访问 **http://127.0.0.1:8785**；运行期间保持命令行窗口打开。进入总览，选择「配置普通交易」→ **内置历史归档 + 规则引擎 + 本地模拟**，创建会话后再点击「开始运行」。结束时使用 stop.bat 安全退出。E1 的后台异步公开行情路径属于代码实现检查点，尚待独立回归验收；普通用户体验仍建议先使用内置历史数据模拟。
+正常启动后访问 **http://127.0.0.1:8785**；运行期间保持命令行窗口打开。进入总览，选择「配置普通交易」→ **内置历史归档 + 规则引擎 + 本地模拟**，创建会话后再点击「开始运行」。结束时使用 stop.bat 安全退出。也可创建公开现货的动态模拟会话；地区或源时间不满足条件时显示拒绝原因，内置历史模拟仍可使用。
 
 **遇到 Python 未识别、pip 安装失败、端口占用或刷新后打不开？** 请查看 [Windows 快速启动与常见问题](docs/WINDOWS_QUICK_START.md)。交易所接入、CSV 格式、风控细节及运行边界请阅读 [完整使用说明](使用说明.md)。
 
@@ -136,7 +136,7 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ~~~
 
-GitHub 当前没有配置 Actions workflow，因此仓库没有对应的自动 CI 运行记录。D 阶段的 495 项测试和前端构建结果来自 [组件测试报告](docs/COMPONENT_TEST_RESULTS.json) 与 [D 验收记录](docs/PHASE_D_RESULTS.md)，**不是 E1 测试结果，也不是本次文档提交后由 GitHub Actions 重新执行的结果**。E1 新增的 [工作器测试](tests/test_market_worker.py) 和 [运行时集成测试](tests/test_async_market_runtime.py) 已提交到仓库，但尚无更新后的完整测试报告；应在 Codex 本地执行后记录真实通过/失败数量。浏览器专项脚本可参照 tests 目录及各阶段报告运行。
+本轮587项回归在 Windows 本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；E的最新结果见 [E测试摘要](docs/E_TEST_RESULTS.json)。浏览器专项脚本见 `tests/e_stage_browser.py`，公开只读探测见 `scripts/check_public_platforms.py`。
 
 ## 项目文档
 
@@ -184,4 +184,4 @@ GitHub 当前没有配置 Actions workflow，因此仓库没有对应的自动 C
 
 ---
 
-*文档更新日期：2026-11-06。当前代码基线为 main 提交 bcf96a4（E1 有界异步公开行情代码已提交，尚待独立回归验收）。本次仅整理 README 与项目进度文档，不修改业务代码或测试。后续状态以 GitHub main 的主计划、源码和对应验收记录为准。*
+*文档更新日期：2026-11-06。本轮基于 f222474 实施 E 非资金工程升级；完整 E 外部平台与真实资金门槛仍开放。后续状态以 GitHub main 的主计划、源码和对应验收记录为准。*

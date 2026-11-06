@@ -8,7 +8,7 @@ def fill(db, s, symbol, side, m, amount, reason, order_id=None, calculation=None
     buying = side == "BUY"
     ref = m["price"]
     price = m.get("execution_price", ref * (1 + m["slip"] if buying else 1 - m["slip"]))
-    qty = amount / price if buying else s["positions"][symbol]["qty"]
+    qty = m.get("execution_quantity", amount / price if buying else s["positions"][symbol]["qty"])
     nominal = qty * price
     fee = nominal * c["fee"] / 100
     slip = abs(ref - price) * qty

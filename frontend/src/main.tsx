@@ -78,14 +78,16 @@ function RadarTable({ s }: { s: Row }) {
   return (
     <Panel title="候选机会排名" cap="OPPORTUNITY SCORE">
       {s.scan_pool && <div className="pad" data-monitor-pool>
-        <p>{s.scan_pool.source === "fixed" ? "固定入场池" : s.scan_pool.source} {s.scan_pool.entry_count} 币 · 配置候选数 {s.scan_pool.requested_candidates} ·
+        <p>{s.scan_pool.source === "fixed" ? "固定入场池" : s.scan_pool.source === "dynamic" ? "动态模拟入场池" : s.scan_pool.source} {s.scan_pool.entry_count} 币 · 配置候选数 {s.scan_pool.requested_candidates} ·
           必须监控 {s.scan_pool.required_count} 币 · 计划监控 {s.scan_pool.monitor_count} 币 ·
           本轮取得行情 {s.scan_pool.fetched_count} 币 · 通过行情校验 {s.scan_pool.valid_count ?? "—"} 币</p>
         {Object.entries(s.scan_pool.retained || {}).map(([symbol, why]) =>
           <p key={symbol}>{symbol} · 因{(why as string[]).join("、")}保留监控；不在入场池时只管理原仓或原单。</p>)}
+        {Object.entries(s.scan_pool.rejections || {}).map(([symbol, reason]) => <p key={symbol}>{symbol} · 动态准入拒绝：{String(reason)}</p>)}
+        {s.scan_pool.error && <p role="alert">{s.scan_pool.error}</p>}
         {Object.entries(s.scan_pool.errors || {}).map(([symbol, error]) =>
           <p key={symbol}>{symbol} · {String(error)}</p>)}
-        <small>最近扫描尝试 {time(s.scan_pool.checked_at)} UTC。动态发现结果尚未自动用于开仓；持仓与原单不受候选落选影响。</small>
+        <small>最近扫描尝试 {time(s.scan_pool.checked_at)} UTC。{s.scan_pool.discovery_execution_enabled ? "已启用动态模拟准入；真实交易未启用动态候选。" : "固定候选池运行。"}持仓与原单不受候选落选影响。</small>
       </div>}
       <Table
         heads={["交易对", "评分", "动量", "相对量能", "RSI", "策略信号"]}
@@ -552,7 +554,7 @@ function Terminal() {
             #{String(s.id).padStart(3, "0")}　{txt(c.profile)}
           </b>
           <span>
-            {txt(s.engine_override || c.engine)} · {txt(c.execution)} · {txt(c.product)}
+            {c.exchange.toUpperCase()} · {txt(s.engine_override || c.engine)} · {txt(c.execution)} · {txt(c.product)}
           </span>
           <div className="actions">
             {live ? (
@@ -589,6 +591,10 @@ function Terminal() {
           </div>
         </div>
         {stats}
+        {s.paper_watch && <div className="status" data-paper-protection>
+          本地分钟线模拟保护 · {s.paper_watch.status} · 最近核验 {time(s.paper_watch.checked_at)} UTC
+          <p>{s.paper_watch.error || "持仓专用行情通道，不等待动态发现、候选扫描或 AI；退出仍需有效分钟线及交易规则。非交易所托管止损。"}</p>
+        </div>}
         {s.ai_status && <div className="status">AI · {s.ai_status}　
           {c.engine === "ai" && !s.engine_override && live && <button onClick={() => command("use_rules")}>手动切回规则</button>}</div>}
         {c.execution !== "paper" && <div className="status">本地策略止损 · 交易所托管保护数量 0　

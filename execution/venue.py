@@ -25,11 +25,13 @@ class Venue:
         self.swap = product == "swap"
         self.env = env
         if (
-            name not in ("okx", "binance")
+            name not in ("okx", "binance", "gate")
             or product not in ("spot", "swap")
             or env not in ("public", "demo", "live")
         ):
             raise ValueError("交易连接类型无效")
+        if name == "gate" and (product != "spot" or env != "public"):
+            raise ValueError("Gate 当前仅开放公开现货行情和模拟，账户执行尚未验收")
         cls = (
             ccxt.okx
             if name == "okx"
@@ -55,7 +57,9 @@ class Venue:
                 secret=keys["secret"],
                 password=keys.get("passphrase", ""),
             )
+        if name == "gate":cls = ccxt.gate
         self.client = cls(params)
+        if name == "gate":self.client.has["fetchCurrencies"] = False
         self.client.session.trust_env = False
         if env == "demo":
             if name == "binance":
@@ -70,6 +74,26 @@ class Venue:
             except Exception:
                 pass
             raise
+
+    def public_rules(self, symbols):
+        if self.env != "public" or self.swap:
+            raise ValueError("动态模拟规则只允许公开现货连接")
+        from execution.market_rules import spot_rules
+        result = {}
+        for k in symbols:
+            try:
+                market = self.client.markets[self.pair(k)]
+                if self.name == "gate":
+                    info = market.get("info") or {}
+                    minimum = D(info.get("min_base_amount") or 0)
+                    if info.get("trade_status") != "tradable" or not minimum.is_finite() or minimum <= 0:
+                        raise ValueError("Gate 现货状态或最小数量未确认")
+                rule = spot_rules(market, self.client.precisionMode, self.pair(k))
+                result[k] = dict(rule=dict(rule, limits=market["limits"]), checked_at=time.time(),
+                                 exchange=self.name, product="spot")
+            except (ValueError, KeyError, ArithmeticError):
+                continue  # Missing rules never grant paper execution permission.
+        return result
 
     def pair(self, s):
         return s + "/USDT" + (":USDT" if self.swap else "")

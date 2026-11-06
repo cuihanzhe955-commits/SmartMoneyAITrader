@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict, model_validator
 from challenge.config import DEFAULT
 from strategy.ensemble import NAMES
 from risk.parameters import validate_parameters, recommendations
+from market.admission import ScannerConfig
 
 
 class Session(BaseModel):
@@ -10,10 +11,12 @@ class Session(BaseModel):
     profile: Literal["normal", "challenge"] = "normal"
     engine: Literal["rules", "ai"] = "rules"
     execution: Literal["paper", "demo", "live"] = "paper"
-    exchange: Literal["okx", "binance"] = "okx"
+    exchange: Literal["okx", "binance", "gate"] = "okx"
     product: Literal["spot", "swap"] = "spot"
     source: Literal["history", "public", "csv"] = "history"
     dataset: str = ""
+    market_mode: Literal["fixed", "dynamic"] = "fixed"
+    scanner: ScannerConfig = Field(default_factory=ScannerConfig)
     consent: bool = False
     confirmation: str = ""
     capital: float = Field(1000, strict=True)
@@ -57,6 +60,12 @@ class Session(BaseModel):
             raise ValueError("需输入「启用实盘」确认真实账户")
         if self.source != "public" and self.product != "spot":
             raise ValueError("内置归档和 CSV 为现货数据")
+        if self.market_mode == "dynamic" and (self.execution != "paper" or self.source != "public" or self.product != "spot"):
+            raise ValueError("动态候选仅适用于公开现货行情的模拟会话")
+        if self.market_mode == "dynamic" and self.paper_rules != "micro":
+            raise ValueError("动态模拟使用公开规则复核，不能混用历史归档撮合规则")
+        from execution.platforms import require_session
+        require_session(self.settings())
         validate_parameters(self.settings())
         return self
 

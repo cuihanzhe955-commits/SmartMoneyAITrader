@@ -547,3 +547,11 @@ summary {
     flex-wrap: wrap;
   }
 }
+
+/* Platform capability explanations must remain readable on both desktop sizes. */
+[data-platform-status] table { table-layout: fixed; width: 100%; }
+[data-platform-status] td, [data-platform-status] th { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+[data-platform-status] th:first-child { width: 9%; }
+[data-platform-status] th:nth-child(2) { width: 23%; }
+[data-platform-status] th:nth-child(3) { width: 19%; }
+[data-platform-status] th:nth-child(4) { width: 13%; }

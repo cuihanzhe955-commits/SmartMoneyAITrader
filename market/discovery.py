@@ -71,7 +71,7 @@ def evaluate(client,markets,tickers,q,now,received_at=None):
                 if minimum is None or not Decimal(str(minimum)).is_finite() or Decimal(str(minimum))<=0:
                     raise ValueError("Gate 现货最小数量未确认")
             rules=spot_rules(m,client.precisionMode,symbol)
-            r["rules"]=rules
+            r["rules"]=dict(rules, limits=m["limits"])
             ticker=tickers.get(symbol)
             if not isinstance(ticker,dict) or ticker.get("symbol")!=symbol:raise ValueError("批量行情缺失或标的不符")
             bid,ask,last,volume,high,low=(ticker.get(k) for k in ("bid","ask","last","quoteVolume","high","low"))
@@ -128,11 +128,12 @@ def evaluate(client,markets,tickers,q,now,received_at=None):
 class Discovery:
     def __init__(self,factory=None,clock=time.time,monotonic=time.monotonic):
         self.factory,self.clock,self.monotonic=factory or public_client,clock,monotonic
-        self.cache={};self.lock=threading.Lock()
+        self.cache={};self.lock=threading.Lock();self.closing=threading.Event()
 
     def run(self,q):
         if not self.lock.acquire(blocking=False):raise ValueError("公开行情研究正在进行，请稍后重试")
         try:
+            if self.closing.is_set():raise ValueError("公开行情服务已关闭")
             now=self.monotonic();item=self.cache.get(q.exchange)
             if not item or now-item["market_at"]>=600:
                 c=self.factory(q.exchange)
@@ -154,16 +155,26 @@ class Discovery:
                 refresh_interval_sec=60,market_refresh_interval_sec=600)
         except ccxt.BaseError as e:
             if "451" in str(e) or "restricted location" in str(e).lower():
-                raise ValueError("平台限制了当前地区访问；研究已停止，不切换域名或绕过限制") from None
+                raise ValueError("HTTP 451 · 平台限制了当前地区访问；研究已停止，不切换域名或绕过限制") from None
             if isinstance(e,ccxt.RateLimitExceeded):raise ValueError("公开接口限频，未重试；请稍后重试") from None
             raise ValueError("公开行情读取失败，未使用过期缓存，请检查平台连接") from None
         except ValueError:
             raise
         except Exception:
             raise ValueError("公开市场元数据无法解析，研究已停止；未修改交易会话") from None
-        finally:self.lock.release()
+        finally:
+            if self.closing.is_set():self._dispose()
+            self.lock.release()
+            if self.closing.is_set():self.close(wait=False)
 
-    def close(self):
-        with self.lock:
-            for item in self.cache.values():item["client"].close()
-            self.cache.clear()
+    def _dispose(self):
+        for item in self.cache.values():
+            try:item["client"].close()
+            except Exception:pass
+        self.cache.clear()
+
+    def close(self, wait=True):
+        self.closing.set()
+        if self.lock.acquire(blocking=wait):
+            try:self._dispose()
+            finally:self.lock.release()

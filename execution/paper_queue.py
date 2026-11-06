@@ -51,10 +51,12 @@ def cancel(db, s, k, why, calculation=None):
               {"order_id": o["id"], "calculation": calculation})
 
 
-def drain(db, s, ranked, *, block_buys=False):
+def drain(db, s, ranked, *, block_buys=False, only_sells=False):
     markets = {m["symbol"]: m for m in ranked}
     c = s["config"]
     for k, o in list(s.get("paper_pending", {}).items()):
+        if only_sells and o["side"] != "SELL":
+            continue
         if o["side"] == "BUY" and block_buys:
             cancel(db, s, k, "暂停新仓，撤回待成交模拟买单")
             continue
@@ -90,6 +92,21 @@ def drain(db, s, ranked, *, block_buys=False):
         elif k not in s["positions"]:
             cancel(db, s, k, "持仓已变更")
             continue
+        if c.get("market_mode") == "dynamic":
+            from market.admission import before_fill
+            try:
+                result = before_fill(s, k, m, amount, o["side"])
+                m = dict(m, execution_price=result["price"], execution_quantity=result["quantity"])
+                if buy:
+                    amount = result["notional"]
+                    calculation.update(result)
+                    why = "限制原因：动态市场规则与数量取整"
+            except (ValueError, ArithmeticError) as err:
+                if buy:
+                    finalize(caps, 0, str(err))
+                    db.record("risk_checks", s, "REJECT", str(err), k, caps)
+                cancel(db, s, k, "动态执行前复核拒绝 · " + str(err), calculation)
+                continue
         rules = c.get("precision_rules", {}).get(k)
         if c.get("paper_rules") == "venue":
             if not rules:
@@ -128,7 +145,7 @@ def drain(db, s, ranked, *, block_buys=False):
                     why = "限制原因：数量步长取整"
                 amount = qty * price
         if buy:
-            if c.get("paper_rules") != "venue":
+            if c.get("paper_rules") != "venue" and c.get("market_mode") != "dynamic":
                 calculation["precision_status"] = "微资金模拟，不检查交易所数量精度"
             finalize(caps, amount, why)
             db.record("risk_checks", s, "APPROVED", why, k, caps)

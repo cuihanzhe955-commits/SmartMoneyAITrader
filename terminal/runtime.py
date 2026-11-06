@@ -14,6 +14,9 @@ from market.feeds import historical, START, SYMBOLS
 from market.pool import plan as monitor_plan
 from market.worker import MarketWorker
 from market.public_client import PublicClientCache
+from market.discovery import Discovery
+from market.admission import query_for, admit as dynamic_admit
+from execution.platforms import require_session, switch_blockers, registry
 from market.imports import parse_csv, window
 from ai.provider import Provider
 from terminal.settings import Vault, AIConfig
@@ -54,6 +57,13 @@ class Runtime:
         self.ai = Coordinator()
         self.market_worker = MarketWorker()
         self.public_market_client = PublicClientCache()
+        self.paper_protection_worker = MarketWorker()
+        self.paper_protection_client = PublicClientCache()
+        self.paper_protection_next = 0
+        self.discovery_worker = MarketWorker()
+        self.discovery_service = Discovery()
+        self.discovery_next = 0
+        self.discovery_scope = None
         self.order_mutex = threading.Lock()
         self.health_mutex = threading.Lock()
         self.background = False
@@ -99,6 +109,10 @@ class Runtime:
         self.exit.set()
         self.market_worker.close()
         self.public_market_client.close()
+        self.paper_protection_worker.close()
+        self.paper_protection_client.close()
+        self.discovery_worker.close()
+        self.discovery_service.close(wait=False)
         with self.lock:
             self.ai.worker.invalidate()
         for thread in self.threads:
@@ -211,7 +225,7 @@ class Runtime:
 
     def account_ref(self, c):
         if c["execution"] == "paper":
-            return "paper"
+            return digest(["paper", c["exchange"], c["product"]])
         keys = self.vault.values.get(self.account_key(c)) or {}
         if not keys.get("key"):
             raise ValueError("原授权账户的密钥不可用")
@@ -256,6 +270,10 @@ class Runtime:
         if live.hosted_pending(self.db):
             raise ValueError("先核对原会话托管保护单及剩余持仓，再切换账户或创建会话")
         c = body.settings()
+        require_session(c)
+        blockers = switch_blockers(self.db)
+        if blockers:
+            raise ValueError("；".join(blockers))
         if live.unresolved(self.db):
             raise ValueError("先核对原会话未完订单，再创建新会话或切换平台")
         if c["execution"] == "live" and c["product"] != "spot":
@@ -278,6 +296,13 @@ class Runtime:
             raise ValueError("请在设置中配置所选交易所及环境")
         if c["engine"] == "ai" and not self.vault.values.get("ai_key"):
             raise ValueError("请先配置 AI 服务")
+        self.market_worker.invalidate()
+        self.discovery_worker.invalidate()
+        self.paper_protection_worker.invalidate()
+        self.paper_protection_next = 0
+        self.discovery_next = 0
+        self.discovery_scope = None
+        self.ai.worker.invalidate()
         s = create(self.db, {}, validated=c)
         s["revision"] = 0
         s["account_ref"] = self.account_ref(c)
@@ -382,6 +407,10 @@ class Runtime:
             action(self.db, s, cmd)
         if cmd in ("pause", "end", "stop", "start", "resume"):
             self.market_worker.invalidate()
+            self.discovery_worker.invalidate()
+            self.paper_protection_worker.invalidate()
+            self.paper_protection_next = 0
+            self.discovery_next = 0
             self.invalidate_ai(s, "会话状态已变更")
         if cmd in ("start", "resume") and c["execution"] != "paper":
             self.check_binding(s)
@@ -401,7 +430,11 @@ class Runtime:
             return historical(t)
         pool = c.get("_monitor_pool")
         if pool:
-            return self.venue(c).bars(pool["monitor"], required=pool["required"])
+            venue = self.venue(c)
+            bars = venue.bars(pool["monitor"], required=pool["required"])
+            if c.get("market_mode") == "dynamic":
+                bars.rules = venue.public_rules(pool["monitor"])
+            return bars
         return self.venue(c).bars()
 
     def paper_market(self, state, pool):
@@ -415,10 +448,61 @@ class Runtime:
         exchange, product = c["exchange"], c["product"]
         symbols, required = tuple(pool["monitor"]), tuple(pool["required"])
         client = self.public_market_client
+        dynamic = c.get("market_mode") == "dynamic"
         def fetch(cancel, deadline):
-            return client.fetch(Venue, exchange, product, symbols, required, cancel, deadline)
+            return client.fetch(Venue, exchange, product, symbols, required, cancel, deadline, include_rules=dynamic)
         self.market_worker.submit(expected, fetch, 30)
         return {"status": "WAITING", "value": None}
+
+    def platform_status(self):
+        with self.lock:
+            s = self.db.load()
+            active = None if not s else dict(session_id=s["id"], exchange=s["config"]["exchange"],
+                execution=s["config"].get("execution", "paper"), product=s["config"].get("product", "spot"),
+                status=s["lifecycle_status"], account_scope=s.get("account_ref"),
+                pending_paper=len(s.get("paper_pending", {})), positions=len(s["positions"]))
+            return dict(platforms=registry(), active=active, switch_blockers=switch_blockers(self.db),
+                        single_active_platform=True, real_funds_verified=False)
+
+    def dynamic_pool(self, s, pending, now):
+        """Independent bounded discovery lane; holdings keep their market lane."""
+        expected = (s["id"], s.get("revision", 0), s["config"]["exchange"],
+                    digest(s["config"].get("scanner", {})), position_version(s))
+        if self.discovery_scope != expected:
+            self.discovery_scope = expected
+            self.discovery_next = 0
+        report = s.get("discovery_report")
+        if not report or report.get("runtime_scope") != digest(expected):
+            report = None
+        result = self.discovery_worker.poll(expected)
+        if result and result["status"] == "READY":
+            report = dict(result["value"], runtime_scope=digest(expected))
+            self.discovery_next = time.time() + 60
+        elif result:
+            report = None
+            self.discovery_next = 0 if result["status"] == "STALE" else time.time() + 60
+            s["discovery_error"] = ("公开发现请求超时或失败，已阻止新候选入场" if result.get("error_code") != "RESTRICTED"
+                                    else "HTTP 451 · 公开发现访问受限，已暂停自动扫描")
+        if report:
+            s["discovery_report"] = report
+            s.pop("discovery_error", None)
+        else:
+            s.pop("discovery_report", None)
+        query = query_for(s)
+        if query is not None and time.time() >= self.discovery_next:
+            service = self.discovery_service
+            def fetch(cancel, deadline):
+                if cancel.is_set() or time.monotonic() >= deadline:
+                    raise ValueError("公开发现已取消或超时")
+                value = service.run(query)
+                if cancel.is_set() or time.monotonic() >= deadline:
+                    raise ValueError("公开发现已取消或超时")
+                return value
+            self.discovery_worker.submit(expected, fetch, 25)
+        pool = dynamic_admit(report, s, now, pending)
+        pool["fetch_status"] = "WAITING" if self.discovery_worker.flight else "IDLE"
+        pool["error"] = s.get("discovery_error", "")
+        return pool
 
     def loop(self, lane, step, period):
         while not self.exit.wait(period):
@@ -484,7 +568,74 @@ class Runtime:
                     cur.update(latest=msg, audit_retry=time.time() + 30)
                     self.db.save(cur)
 
+    def paper_protection_tick(self):
+        """Held-only public-paper candle lane, independent of optional scanning."""
+        from strategy.rules import analyze
+        from execution.paper_queue import drain, queue, cancel
+        with self.lock:
+            s = self.db.load()
+            if (self.exit.is_set() or not self.background or not s or not s["positions"]
+                    or s["config"].get("execution", "paper") != "paper"
+                    or s["config"].get("source") != "public"
+                    or s["lifecycle_status"] in DONE | {"CREATED", "ERROR"}
+                    or (s["lifecycle_status"] == "PAUSED" and not s["breaker"])
+                    or time.time() >= s["deadline"]):
+                return
+            c = s["config"]
+            expected = (s["id"], s.get("revision", 0), position_version(s), c["exchange"], c["product"])
+            result = self.paper_protection_worker.poll(expected)
+            if result and result["status"] == "READY":
+                try:
+                    bars = result["value"]
+                    s["t"] = int(time.time())
+                    metrics = {k: analyze(bars[k], s["t"], c) for k in s["positions"]}
+                    if c.get("market_mode") == "dynamic":
+                        s.setdefault("dynamic_rules", {}).update(getattr(bars, "rules", {}))
+                    with self.db.db:
+                        for k, m in metrics.items():
+                            position = s["positions"][k]
+                            position["price"] = m["price"]
+                            position["high"] = max(position["high"], m["price"])
+                        drain(self.db, s, [dict(symbol=k, **m) for k, m in metrics.items()], only_sells=True)
+                        for k, m in metrics.items():
+                            position = s["positions"].get(k)
+                            reason = protective_exit(position, m["price"], c) if position else ""
+                            if reason:
+                                existing = s.get("paper_pending", {}).get(k)
+                                if existing and existing["side"] == "BUY":
+                                    cancel(self.db, s, k, "独立模拟保护退出优先")
+                                if k not in s.get("paper_pending", {}):
+                                    m = dict(m, protective=True)
+                                    decision(self.db, s, k, m, "SELL", reason)
+                                    queue(self.db, s, k, "SELL", m, 0, reason)
+                        s["paper_watch"] = dict(status="READY", checked_at=int(time.time()), symbols=list(metrics),
+                            kind="本地分钟线模拟保护；非交易所托管止损")
+                        snapshot(self.db, s)
+                        self.db.save(s)
+                except (ValueError, KeyError, ArithmeticError):
+                    with self.db.db:
+                        s["paper_watch"] = dict(status="ERROR", checked_at=int(time.time()),
+                            error="持仓行情或公开规则无法核验，未使用旧价格模拟退出")
+                        self.db.save(s)
+                self.paper_protection_next = time.time() + 15
+            elif result and result["status"] != "STALE":
+                with self.db.db:
+                    s["paper_watch"] = dict(status=result["status"], checked_at=int(time.time()),
+                        error="独立模拟持仓行情请求未完成；未使用旧价格")
+                    self.db.save(s)
+                self.paper_protection_next = time.time() + 15
+            if time.time() < self.paper_protection_next:
+                return
+            client = self.paper_protection_client
+            exchange, product, symbols = c["exchange"], c["product"], tuple(s["positions"])
+            if not symbols:return
+            dynamic = c.get("market_mode") == "dynamic"
+            def fetch(cancel, deadline):
+                return client.fetch(Venue, exchange, product, symbols, symbols, cancel, deadline, include_rules=dynamic)
+            self.paper_protection_worker.submit(expected, fetch, 20)
+
     def protection_tick(self):
+        self.paper_protection_tick()
         # A dedicated book/position lane. No AI, archive scans, or pending order
         # lookups are awaited here. Only a verified held quantity can be sold.
         with self.lock:
@@ -583,7 +734,20 @@ class Runtime:
                 pending_symbols = list(s.get("paper_pending", {}))
                 if order:
                     pending_symbols.append(order["symbol"])
-                pool = monitor_plan(SYMBOLS, s["positions"], pending_symbols)
+                if c.get("market_mode") == "dynamic":
+                    pool = self.dynamic_pool(s, pending_symbols, now)
+                    with self.db.db:
+                        s["scan_pool"] = {"fetched_count": 0, "valid_count": 0, "checked_at": now,
+                            **s.get("scan_pool", {}),
+                            **{k: v for k, v in pool.items() if k != "admitted_rows"},
+                            "requested_candidates": c["candidates"], "discovery_execution_enabled": True}
+                        if "HTTP 451" in pool.get("error", ""):
+                            s.update(lifecycle_status="PAUSED", latest=pool["error"])
+                        self.db.save(s)
+                    if s["lifecycle_status"] == "PAUSED" or not pool["monitor"]:
+                        return
+                else:
+                    pool = monitor_plan(SYMBOLS, s["positions"], pending_symbols)
         try:
             if remote and (s.get("needs_check") or not s.get("admitted")):
                 if has_pending or not self.admit(s) or paused:
@@ -626,9 +790,14 @@ class Runtime:
             if pool:
                 if self.background and not remote:
                     cur["market_fetch"] = {"status": "READY" if not reason else "ERROR", "checked_at": t}
-                cur["scan_pool"] = {**pool, "source": "fixed", "requested_candidates": c["candidates"],
+                if c.get("market_mode") == "dynamic":
+                    cur["dynamic_rules"] = getattr(bars, "rules", {})
+                    # Revalidate source timestamps and actual budget after candle I/O.
+                    pool = dict(dynamic_admit(cur.get("discovery_report"), cur, t, pool["required"]),
+                                **{k: pool[k] for k in ("fetch_status", "error") if k in pool})
+                cur["scan_pool"] = {**{k: v for k, v in pool.items() if k != "admitted_rows"}, "source": pool.get("source", "fixed"), "requested_candidates": c["candidates"],
                                     "fetched_count": len(bars), "errors": getattr(bars, "errors", {}),
-                                    "checked_at": t, "discovery_execution_enabled": False}
+                                    "checked_at": t, "discovery_execution_enabled": c.get("market_mode") == "dynamic"}
             if reason and remote:
                 if cur.get("latest") != reason:
                     self.db.record("system_events", cur, "RECONCILE", reason)

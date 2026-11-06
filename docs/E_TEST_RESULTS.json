@@ -1,0 +1,114 @@
+{
+  "version": "1.0-E-nonfunds-accepted",
+  "date": "2026-11-06",
+  "baseline": "f222474e92868cdcc75912661571f4bef0725c8b",
+  "status": "nonfund_engineering_accepted",
+  "stable": false,
+  "real_funds_verified": false,
+  "account_integration_verified": false,
+  "tests": {
+    "passed": 587,
+    "failed": 0,
+    "runner": "python -X utf8 -B tests/run_offline.py",
+    "external_network": false
+  },
+  "frontend_build": true,
+  "ui": {
+    "passed": true,
+    "fixtures": true,
+    "viewports": [
+      "1366x768",
+      "1920x1080"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "screenshots": 7
+  },
+  "public_probe": {
+    "public_only": true,
+    "platform_account_integration": false,
+    "results": [
+      {
+        "exchange": "okx",
+        "checked_at": 1793942339,
+        "account_access": false,
+        "order_writes": false,
+        "real_funds_verified": false,
+        "status": "public_read_completed",
+        "spot_scope": 466,
+        "eligible": 104,
+        "rejection_counts": {
+          "成交额不足": 359,
+          "价差超限": 124,
+          "买卖盘口无效": 1
+        },
+        "closed_btc_candles": 245,
+        "candle_errors": {},
+        "quote_source_time_verified": true
+      },
+      {
+        "exchange": "binance",
+        "checked_at": 1793942339,
+        "account_access": false,
+        "order_writes": false,
+        "real_funds_verified": false,
+        "status": "blocked",
+        "reason": "地区访问限制，未绕过"
+      },
+      {
+        "exchange": "gate",
+        "checked_at": 1793942339,
+        "account_access": false,
+        "order_writes": false,
+        "real_funds_verified": false,
+        "status": "public_read_completed",
+        "spot_scope": 2032,
+        "eligible": 0,
+        "rejection_counts": {
+          "行情时间缺失、过期或时钟偏差": 2031,
+          "Gate 现货交易状态未确认": 1
+        },
+        "closed_btc_candles": 244,
+        "candle_errors": {},
+        "quote_source_time_verified": false
+      }
+    ]
+  },
+  "dependencies_changed": false,
+  "database_migration": false,
+  "remaining_gates": [
+    "Binance public REST rejected current region; no bypass",
+    "Gate batch ticker lacks verifiable source timestamp; dynamic entries rejected",
+    "Gate private execution remains disabled, no validated runtime adapter/hosted protection",
+    "All platform demo/account/live acceptance remains unverified and deferred",
+    "Local paper protection requires valid closed minute candles and rules; no hosted protection claim"
+  ],
+  "runtime_files_unchanged": true,
+  "targeted_tests": {
+    "passed": 92,
+    "failed": 0
+  },
+  "sensitive_pattern_matches": 0,
+  "package_smoke": {
+    "dependency_verification": true,
+    "pip_check": true,
+    "server_started": true,
+    "graceful_shutdown": true,
+    "isolated_database": true,
+    "historical_replay_candles": 240,
+    "account_access": false,
+    "orders_submitted": false,
+    "fresh_isolated_environment": true,
+    "locked_offline_hash_install": true,
+    "clean_windows_machine": false
+  },
+  "full_E_platform_gate_closed": false,
+  "known_warnings": [
+    "Starlette/httpx deprecation",
+    "Vite bundle size and dependency module-level directive warnings",
+    "Windows Proactor/h11 connection-close warning during smoke; smoke assertions and graceful exit passed",
+    "Existing project venv differs from lock; existing global Python has an unrelated Django/tzdata dependency issue; neither was modified"
+  ]
+}
