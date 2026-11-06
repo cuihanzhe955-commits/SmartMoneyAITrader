@@ -1,10 +1,11 @@
-import React,{useState} from "react";
+import React,{useEffect,useState} from "react";
 import {Panel,Field,Table,api,useUI,type Row} from "./shared";
 
 export function EventResearchPanel(){
   const [values,setValues]=useState({lifecycle:"open",search:"",slug:"",limit:20,pages:1});
   const [data,setData]=useState<Row|null>(null);
   const [selected,setSelected]=useState<Row|null>(null);
+  const [journalVersion,setJournalVersion]=useState(0);
   const [error,setError]=useState("");const [busy,setBusy]=useState(false);
   const change=(key:string,value:string|number)=>{setValues(p=>({...p,[key]:value}));setData(null);setSelected(null);setError("");};
   const load=async()=>{
@@ -37,19 +38,21 @@ export function EventResearchPanel(){
           <div className="buttons"><button onClick={()=>useUI.getState().show({title:"事件市场标识 · "+row.market_id,summary:"市场、事件、条件及结果 Token 保持独立；元数据不是交易或结算授权。",data:row})}>查看市场标识</button>
           <button onClick={()=>setSelected(row)}>查询公开详情</button></div>
         ])}/>
-        {selected&&<EventMarketDetails key={selected.market_id} market={selected}/> }
+        {selected&&<EventMarketDetails key={selected.market_id} market={selected} onSaved={()=>setJournalVersion(v=>v+1)}/> }
         {Object.keys(data.rejections).length>0&&<p>未展示原因：{Object.entries(data.rejections).map(([reason,count])=>reason+" "+count).join("；")}</p>}
       </div>}
+      <EventObservationHistory version={journalVersion}/>
     </div>
   </Panel>;
 }
 
 
-function EventMarketDetails({market}:{market:Row}){
+function EventMarketDetails({market,onSaved}:{market:Row,onSaved:()=>void}){
   const [index,setIndex]=useState(0);
   const [busy,setBusy]=useState("");const [error,setError]=useState("");
   const [quote,setQuote]=useState<Row|null>(null);const [resolution,setResolution]=useState<Row|null>(null);
   const [cost,setCost]=useState<Row|null>(null);
+  const [saveKey,setSaveKey]=useState("");const [saved,setSaved]=useState<Row|null>(null);
   const [costValues,setCostValues]=useState({shares:10,budget:10,max_slippage_pct:1});
   const time=(value:unknown)=>typeof value==="number"?new Date(value*1000).toLocaleString("zh-CN"):"未知";
   const n=(value:unknown)=>typeof value==="number"&&Number.isFinite(value)?String(value):"未知";
@@ -57,8 +60,16 @@ function EventMarketDetails({market}:{market:Row}){
     setBusy(kind);setError("");if(kind==="quote")setQuote(null);else if(kind==="cost")setCost(null);else setResolution(null);
     try{
       const result=await api("research/events/"+kind,{market_id:market.market_id,...(kind==="quote"?{outcome_index:index}:kind==="cost"?{outcome_index:index,...costValues}:{})});
-      if(kind==="quote")setQuote(result);else if(kind==="cost")setCost(result);else setResolution(result);
+      if(kind==="quote")setQuote(result);else if(kind==="cost"){setCost(result);setSaveKey(crypto.randomUUID());setSaved(null);}else setResolution(result);
     }catch(e){setError(e instanceof Error?e.message:"公开详情读取失败");}
+    finally{setBusy("");}
+  };
+  const save=async()=>{
+    setBusy("save");setError("");
+    try{
+      const result=await api("research/events/observations",{market_id:market.market_id,outcome_index:index,...costValues,request_id:saveKey});
+      setCost(result.snapshot);setSaved(result);onSaved();
+    }catch(e){setError(e instanceof Error?e.message:"研究记录保存失败");}
     finally{setBusy("");}
   };
   return <section className="panel pad" data-event-details={market.market_id}>
@@ -99,6 +110,9 @@ function EventMarketDetails({market}:{market:Row}){
       </div>
       <Table heads={["卖盘价格","研究份额","名义金额","曲线费用估计","取整预留"]} rows={cost.depth_fills.map((r:Row)=>[n(r.price),n(r.shares),n(r.gross),n(r.model_fee),n(r.rounding_reserve)])}/>
       {cost.depth_rows_truncated&&<p>模型使用全部有效档位，此处只显示前20档明细。</p>}
+      <p>保存时由后端重新核验快照，价格可能变化；成功后展示实际保存的结果。仅记录研究证据，不占用资金、不生成成交。</p>
+      <button disabled={!!busy||!!saved||!saveKey} onClick={save}>{busy==="save"?"正在保存研究记录…":saved?"研究记录已保存":"保存研究记录"}</button>
+      {saved&&<p role="status">{saved.duplicate?"已找回相同请求的原记录":"研究记录已持久保存"} · {saved.observation_id}</p>}
     </div>}
     {quote&&<div data-event-quote>
       <p>结果 {quote.outcome} · 源时间 {time(quote.source_timestamp)} · 接收时间 {time(quote.received_at)} · {quote.cached?"3秒内缓存（未重置源时间）":"本次公开快照"}</p>
@@ -115,5 +129,30 @@ function EventMarketDetails({market}:{market:Row}){
       <p>源更新时间 {time(resolution.source_updated_at)} · 完成时间 {time(resolution.resolved_at)} · 尚未进行链上复核或实际兑付。</p>
       {resolution.payouts&&<Table heads={["结果","官方每份额兑付（USDC，按接口单位换算）"]} rows={resolution.payouts.map((p:Row)=>[p.outcome,n(p.payout)])}/>}
     </div>}
+  </section>;
+}
+
+function EventObservationHistory({version}:{version:number}){
+  const [data,setData]=useState<Row|null>(null);const [error,setError]=useState("");const [busy,setBusy]=useState(false);
+  const [refresh,setRefresh]=useState(0);
+  useEffect(()=>{
+    let active=true;setBusy(true);setError("");
+    api("research/events/observations").then(result=>{if(active)setData(result);})
+      .catch(e=>{if(active)setError(e instanceof Error?e.message:"研究记录读取失败");})
+      .finally(()=>{if(active)setBusy(false);});
+    return()=>{active=false;};
+  },[version,refresh]);
+  return <section className="panel pad" data-event-observations>
+    <h3>已保存的事件研究记录</h3>
+    <p>独立研究记录，重启后保留。历史源时间不会刷新；这些记录尚不是模拟成交、已结算收益或验证后记忆。</p>
+    <button disabled={busy} onClick={()=>setRefresh(v=>v+1)}>{busy?"正在读取研究记录…":"刷新研究记录"}</button>
+    {error&&<p role="alert">{error}</p>}
+    {data&&!error&&<><p>共 {data.total} 条，显示最近 {data.rows.length} 条。</p>
+      <Table heads={["市场 / 结果","行情源时间","保存时间","研究份额 / 模型成本","记录"]} rows={data.rows.map((r:Row)=>[
+        "#"+r.snapshot.market_id+" / "+r.snapshot.outcome,
+        new Date(r.snapshot.source_timestamp*1000).toLocaleString("zh-CN"),new Date(r.captured_at*1000).toLocaleString("zh-CN"),
+        String(r.snapshot.modeled_shares)+" / "+String(r.snapshot.modeled_total)+" 参考USDC",
+        <button onClick={()=>useUI.getState().show({title:"事件研究证据 · "+r.observation_id,summary:"历史快照与输入参数，含内容校验值；不代表订单、实际成交或已验证经验。",data:r})}>查看研究证据</button>
+      ])}/></>}
   </section>;
 }

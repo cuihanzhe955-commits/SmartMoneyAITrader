@@ -1,6 +1,6 @@
 {
   "date": "2026-11-06",
-  "scope": "F1-F4 public read-only research and cost estimation",
+  "scope": "F1-F5.1 public event research and persistent observations",
   "stable": false,
   "real_funds_verified": false,
   "historical_tests": [
@@ -55,7 +55,8 @@
     "closed market discovery",
     "official resolution state and micro-USDC payout vector validation",
     "v1 exponent-1 taker curve and bounded depth cost research",
-    "Gamma/CLOB/book rule cross-check and source-scoped unit/precision evidence"
+    "Gamma/CLOB/book rule cross-check and source-scoped unit/precision evidence",
+    "append-only research snapshots, idempotent capture and restart recovery with UI"
   ],
   "not_completed": [
     "all-protocol fee and actual rounding/collateral acceptance",
@@ -66,13 +67,13 @@
     "100 round challenge"
   ],
   "dependencies_changed": false,
-  "database_schema_changed": false,
+  "database_schema_changed": true,
   "user_runtime_changed": false,
-  "current_increment": "F4.1 unit evidence and precision research",
+  "current_increment": "F5.1 persistent event research observations",
   "latest_regression": {
-    "passed": 743,
+    "passed": 765,
     "failed": 0,
-    "seconds": 39.68,
+    "seconds": 34.13,
     "isolated_offline": true
   },
   "f4_cost_tests_passed": 33,
@@ -99,5 +100,8 @@
   "f1_f3_code_commit": "0491e4c08a0f0ba83771a64f89abd4347c66c9b7",
   "f4_code_baseline": "fc1eea2",
   "f4_1_tests_passed": 18,
-  "f4_1_baseline": "85a9ee5"
+  "f4_1_baseline": "85a9ee5",
+  "schema_migration": "Lazy additive event_research_observations table on first successful save; existing trade tables preserved",
+  "f5_1_tests_passed": 22,
+  "f5_1_baseline": "3493218"
 }

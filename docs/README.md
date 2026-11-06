@@ -7,7 +7,7 @@
 
 1. **首次了解项目**：[仓库首页](../README.md) → [v1.0 公开路线图](V1_ROADMAP.md)。
 2. **希望运行软件**：[完整使用说明](../使用说明.md) → [Windows 快速启动](WINDOWS_QUICK_START.md)。
-3. **需要判断当前真实完成度**：[阶段与验收口径](PROGRESS_STATUS.md) → [C2 工程验收记录](PHASE_C2_DIAGNOSTICS.md) → [C3 联调准备](PHASE_C3_READINESS.md) → [D1 组件记录](PHASE_D_COMPONENTS.md) → [D2 协议对照](PHASE_D2_CCXT.md) → [D3 市场发现](PHASE_D3_DISCOVERY.md) → [D4 监控池](PHASE_D4_MONITOR_POOL.md) → [D最终验收](PHASE_D_RESULTS.md) → [E非资金验收](PHASE_E_RESULTS.md) → [F1–F3只读记录](PHASE_F_READONLY_RESULTS.md) → [F4成本研究](PHASE_F4_COST_RESEARCH.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)；[C1 记录](PHASE_C1_RESULTS.md)保留为历史证据。
+3. **需要判断当前真实完成度**：[阶段与验收口径](PROGRESS_STATUS.md) → [C2 工程验收记录](PHASE_C2_DIAGNOSTICS.md) → [C3 联调准备](PHASE_C3_READINESS.md) → [D1 组件记录](PHASE_D_COMPONENTS.md) → [D2 协议对照](PHASE_D2_CCXT.md) → [D3 市场发现](PHASE_D3_DISCOVERY.md) → [D4 监控池](PHASE_D4_MONITOR_POOL.md) → [D最终验收](PHASE_D_RESULTS.md) → [E非资金验收](PHASE_E_RESULTS.md) → [F1–F3只读记录](PHASE_F_READONLY_RESULTS.md) → [F4成本研究](PHASE_F4_COST_RESEARCH.md) → [F5.1研究记录](PHASE_F5_OBSERVATIONS.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)；[C1 记录](PHASE_C1_RESULTS.md)保留为历史证据。
 4. **查看尚未采用的新想法**：[产品决策池](PRODUCT_DECISION_POOL.md)。
 
 ## 文档按职责划分

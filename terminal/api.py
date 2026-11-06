@@ -8,7 +8,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, SecretStr
@@ -26,6 +26,7 @@ from market.discovery import Discovery, DiscoveryQuery
 from market.predictions import EventResearch, EventQuery
 from market.event_details import EventDetails, MarketSelector, QuoteQuery
 from market.event_costs import CostQuery
+from events.observations import CaptureQuery, ObservationJournal
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -74,6 +75,7 @@ def create_app(path=None):
         app.state.discovery = Discovery()
         app.state.event_research = EventResearch()
         app.state.event_details = EventDetails()
+        app.state.event_observations = ObservationJournal(rt.root / "terminal.db", app.state.event_details)
         # Enforce one scheduler per ledger even when the app starts on a second port.
         import msvcrt
 
@@ -204,6 +206,14 @@ def create_app(path=None):
     @app.post("/api/research/events/cost")
     def event_cost(query: CostQuery):
         return app.state.event_details.cost(query)
+
+    @app.post("/api/research/events/observations")
+    def capture_event_observation(query: CaptureQuery):
+        return app.state.event_observations.capture(query)
+
+    @app.get("/api/research/events/observations")
+    def event_observations(limit: int = Query(20, ge=1, le=50)):
+        return app.state.event_observations.list(limit)
 
     @app.get("/api/replay")
     def replay_view(session_id: int, symbol: str, as_of: int):
