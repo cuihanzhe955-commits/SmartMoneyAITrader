@@ -141,8 +141,8 @@ class EventDetails:
     def __init__(self, fetch=None, clock=time.time, monotonic=time.monotonic):
         self.fetch, self.clock, self.monotonic = fetch or public_get, clock, monotonic
         self.closed = Event()
-        self.locks = {"quote": Lock(), "resolution": Lock()}
-        self.cache = {"quote": OrderedDict(), "resolution": OrderedDict()}
+        self.locks = {"quote": Lock(), "resolution": Lock(), "cost": Lock()}
+        self.cache = {"quote": OrderedDict(), "resolution": OrderedDict(), "cost": OrderedDict()}
 
     def _read(self, url, params):
         if self.closed.is_set():
@@ -172,7 +172,7 @@ class EventDetails:
             if cached and 0 <= self.monotonic()-cached[0] < ttl:
                 value = deepcopy(cached[1])
                 stamp = value.get("source_timestamp")
-                if lane != "quote" or (stamp is not None and 0 <= self.clock()-stamp < 30):
+                if lane not in ("quote", "cost") or (stamp is not None and 0 <= self.clock()-stamp < 30):
                     return dict(value, cached=True)
             value = callback()
             if self.closed.is_set():
@@ -207,6 +207,20 @@ class EventDetails:
                 fee_received_at=self.clock(), base_fee_verified=True, fee_model_verified=False,
                 fee_note="基准费率不是完整成交费用；尚未核验费用曲线、资产和实际扣费规则")
         return self._run("quote", (query.market_id, query.outcome_index), 3, fetch)
+
+    def cost(self, query):
+        from market.event_costs import CLOB_INFO, estimate_cost, curve_parameters
+        def fetch():
+            market = self._market(query.market_id)
+            if not market["metadata_active"]:
+                raise ValueError("市场未确认开放，暂不估算成本")
+            if market.get("protocol_version") != "v1":
+                raise ValueError("成本研究仅支持明确标记v1的市场；未使用其他版本的Token")
+            info = self._read(CLOB_INFO + market["condition_id"], {})
+            curve_parameters(info, market)
+            raw = self._read(BOOK, dict(token_id=market["outcomes"][query.outcome_index]["token_id"]))
+            return estimate_cost(query, market, info, raw, self.clock())
+        return self._run("cost", (query.market_id, query.outcome_index, query.shares, query.budget, query.max_slippage_pct), 3, fetch)
 
     def resolution(self, query):
         def fetch():

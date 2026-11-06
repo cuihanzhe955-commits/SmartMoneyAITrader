@@ -25,6 +25,7 @@ from risk.parameters import RECOMMENDED
 from market.discovery import Discovery, DiscoveryQuery
 from market.predictions import EventResearch, EventQuery
 from market.event_details import EventDetails, MarketSelector, QuoteQuery
+from market.event_costs import CostQuery
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -199,6 +200,10 @@ def create_app(path=None):
     @app.post("/api/research/events/resolution")
     def event_resolution(query: MarketSelector):
         return app.state.event_details.resolution(query)
+
+    @app.post("/api/research/events/cost")
+    def event_cost(query: CostQuery):
+        return app.state.event_details.cost(query)
 
     @app.get("/api/replay")
     def replay_view(session_id: int, symbol: str, as_of: int):

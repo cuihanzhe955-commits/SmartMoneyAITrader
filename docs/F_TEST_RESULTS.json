@@ -1,7 +1,6 @@
 {
   "date": "2026-11-06",
-  "scope": "F1-F3 public read-only research",
-  "code_commit": "0491e4c08a0f0ba83771a64f89abd4347c66c9b7",
+  "scope": "F1-F4 public read-only research and cost estimation",
   "stable": false,
   "real_funds_verified": false,
   "historical_tests": [
@@ -54,10 +53,11 @@
     "fresh book and rule checks",
     "base fee parameter query",
     "closed market discovery",
-    "official resolution state and micro-USDC payout vector validation"
+    "official resolution state and micro-USDC payout vector validation",
+    "v1 exponent-1 taker curve and bounded depth cost research"
   ],
   "not_completed": [
-    "complete fee model",
+    "all-protocol fee and actual rounding/collateral acceptance",
     "event simulation ledger",
     "idempotent simulation settlement",
     "AI prediction and reflection",
@@ -66,5 +66,35 @@
   ],
   "dependencies_changed": false,
   "database_schema_changed": false,
-  "user_runtime_changed": false
+  "user_runtime_changed": false,
+  "current_increment": "F4 cost research",
+  "latest_regression": {
+    "passed": 725,
+    "failed": 0,
+    "seconds": 32.34,
+    "isolated_offline": true
+  },
+  "f4_cost_tests_passed": 33,
+  "f4_public_observation": {
+    "historical": true,
+    "market_id": "6675981",
+    "protocol": "v1",
+    "shares": 20,
+    "curve_rate": 0.05,
+    "exponent": 1,
+    "gross": 7.4,
+    "curve_fee_estimate": 0.2331,
+    "extra_rounding_reserve": 0.0001,
+    "total_reference_units": 7.6332,
+    "actual_trade": false
+  },
+  "f4_boundaries": [
+    "v1 only",
+    "taker-only exponent-1 curve only",
+    "conservative minimum and rounding policy",
+    "collateral and actual fee unverified",
+    "no simulation ledger or order execution"
+  ],
+  "f1_f3_code_commit": "0491e4c08a0f0ba83771a64f89abd4347c66c9b7",
+  "f4_code_baseline": "fc1eea2"
 }

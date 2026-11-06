@@ -94,6 +94,8 @@ def normalize(raw, received):
     return dict(provider="polymarket", product="event", market_id=market_id,
         condition_id=condition.lower(), event_ids=event_ids, title=title, slug=slug,
         outcomes=[dict(name=name, token_id=token) for name, token in zip(outcomes, tokens)],
+        protocol_version=raw.get("version") if isinstance(raw.get("version"), str) else None,
+        fees_enabled=raw.get("feesEnabled") if type(raw.get("feesEnabled")) is bool else None,
         metadata_active=active, closed=raw.get("closed") if type(raw.get("closed")) is bool else None, restricted=raw.get("restricted") if type(raw.get("restricted")) is bool else None,
         listed_at=source_time(raw.get("startDate")), ends_at=source_time(raw.get("endDate")),
         source_updated_at=source_time(raw.get("updatedAt")), received_at=received,
@@ -110,7 +112,8 @@ def public_page(params):
 def public_get(url, params):
     allowed = {ENDPOINT, "https://clob.polymarket.com/book", "https://clob.polymarket.com/fee-rate",
                "https://data-api.polymarket.com/v2/resolutions"}
-    if url not in allowed and not re.fullmatch(r"https://gamma-api\.polymarket\.com/markets/[1-9][0-9]{0,29}", url):
+    if (url not in allowed and not re.fullmatch(r"https://gamma-api\.polymarket\.com/markets/[1-9][0-9]{0,29}", url)
+            and not re.fullmatch(r"https://clob\.polymarket\.com/clob-markets/0x[0-9a-fA-F]{64}", url)):
         raise ValueError("未批准的公开研究接口")
     # Fixed official HTTPS origins, GET only, no environment proxy or redirects.
     try:

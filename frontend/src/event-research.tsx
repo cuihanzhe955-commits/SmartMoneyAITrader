@@ -49,13 +49,15 @@ function EventMarketDetails({market}:{market:Row}){
   const [index,setIndex]=useState(0);
   const [busy,setBusy]=useState("");const [error,setError]=useState("");
   const [quote,setQuote]=useState<Row|null>(null);const [resolution,setResolution]=useState<Row|null>(null);
+  const [cost,setCost]=useState<Row|null>(null);
+  const [costValues,setCostValues]=useState({shares:10,budget:10,max_slippage_pct:1});
   const time=(value:unknown)=>typeof value==="number"?new Date(value*1000).toLocaleString("zh-CN"):"未知";
   const n=(value:unknown)=>typeof value==="number"&&Number.isFinite(value)?String(value):"未知";
-  const read=async(kind:"quote"|"resolution")=>{
-    setBusy(kind);setError("");if(kind==="quote")setQuote(null);else setResolution(null);
+  const read=async(kind:"quote"|"resolution"|"cost")=>{
+    setBusy(kind);setError("");if(kind==="quote")setQuote(null);else if(kind==="cost")setCost(null);else setResolution(null);
     try{
-      const result=await api("research/events/"+kind,{market_id:market.market_id,...(kind==="quote"?{outcome_index:index}:{})});
-      if(kind==="quote")setQuote(result);else setResolution(result);
+      const result=await api("research/events/"+kind,{market_id:market.market_id,...(kind==="quote"?{outcome_index:index}:kind==="cost"?{outcome_index:index,...costValues}:{})});
+      if(kind==="quote")setQuote(result);else if(kind==="cost")setCost(result);else setResolution(result);
     }catch(e){setError(e instanceof Error?e.message:"公开详情读取失败");}
     finally{setBusy("");}
   };
@@ -63,14 +65,33 @@ function EventMarketDetails({market}:{market:Row}){
     <h3>公开详情 · 市场 #{market.market_id}</h3>
     <p>{market.title}</p>
     <p>以下为查询时快照，不是持续行情订阅；没有订单提交、钱包、实际资金兑付或自动结算操作。</p>
-    <Field label="盘口结果选择"><select aria-label="盘口结果选择" disabled={!!busy} value={index} onChange={e=>{setIndex(Number(e.target.value));setQuote(null);setError("");}}>
+    <Field label="盘口结果选择"><select aria-label="盘口结果选择" disabled={!!busy} value={index} onChange={e=>{setIndex(Number(e.target.value));setQuote(null);setCost(null);setError("");}}>
       {market.outcomes.map((o:Row,i:number)=><option key={o.token_id} value={i}>{o.name}</option>)}
     </select></Field>
     <div className="buttons">
       <button disabled={!!busy} onClick={()=>read("quote")}>{busy==="quote"?"正在读取盘口…":"读取盘口与基准费率"}</button>
       <button disabled={!!busy} onClick={()=>read("resolution")}>{busy==="resolution"?"正在查询结算…":"查询官方结算"}</button>
     </div>
+    <details className="pad" data-event-cost-controls>
+      <summary>费用曲线与逐档成本研究</summary>
+      <p>只研究已核验的 v1、taker-only、指数1曲线；逐档计算费用和滑点，不把基准bps当完整费率。不读取账户资金，不创建模拟或真实成交。</p>
+      <fieldset disabled={!!busy} style={{border:0,padding:0,margin:0,minWidth:0}}><div className="formgrid">
+        {[["目标研究份额","shares"],["研究预算（参考USDC）","budget"],["最大研究滑点 %","max_slippage_pct"]].map(([label,key])=><Field key={key} label={label}><input aria-label={label} type="number" step="any" value={costValues[key as keyof typeof costValues]} onChange={e=>{setCostValues(v=>({...v,[key]:Number(e.target.value)}));setCost(null);setError("");}}/></Field>)}
+      </div></fieldset>
+      <button disabled={!!busy} onClick={()=>read("cost")}>{busy==="cost"?"正在计算成本…":"计算公开盘口成本"}</button>
+    </details>
     {error&&<p role="alert">{error}</p>}
+    {cost&&<div className="panel pad" data-event-cost>
+      <h4>逐档成本研究 · {cost.outcome}</h4>
+      <p>协议 {cost.protocol_version} · 曲线系数 {n(cost.fee_rate)} · 指数 {cost.fee_exponent} · 源时间 {time(cost.source_timestamp)} · {cost.cached?"3秒内研究缓存":"本次查询"}</p>
+      <p>输入 {n(cost.requested_shares)} 份 / 取整目标 {n(cost.rounded_requested_shares)} 份 / 模型覆盖 {n(cost.modeled_shares)} 份 / 未覆盖 {n(cost.unfilled_shares)} 份。</p>
+      <p>研究预算 {n(cost.requested_budget)} · 名义金额 {n(cost.modeled_gross)} · 曲线费用估计 {n(cost.modeled_fee)} · 额外取整预留 {n(cost.rounding_reserve)} · 模型合计 {n(cost.modeled_total)} · 剩余 {n(cost.remaining_budget)}（USDC参考模型单位）。</p>
+      <p>均价 {n(cost.average_price)} · 滑点上限价 {n(cost.price_cap)} · 模型滑点 {n(cost.modeled_slippage_pct)}%。{cost.research_feasible?"保守研究门槛通过":"保守研究门槛未通过"}，不授予模拟或实际执行权限。</p>
+      <p>限制原因：{cost.limits.join("；")||"输入的取整目标在本快照内得到模型覆盖"}。规则最小值 {n(cost.minimum_rule_value)} 同时作份额及名义金额的保守检查；原生最小值单位未用于执行授权。</p>
+      <p>计算步长 {cost.quantity_step} 份；每个费用非零的深度档额外预留0.0001参考USDC，不声称这是实际平台取整方式。{cost.notice}</p>
+      <Table heads={["卖盘价格","研究份额","名义金额","曲线费用估计","取整预留"]} rows={cost.depth_fills.map((r:Row)=>[n(r.price),n(r.shares),n(r.gross),n(r.model_fee),n(r.rounding_reserve)])}/>
+      {cost.depth_rows_truncated&&<p>模型使用全部有效档位，此处只显示前20档明细。</p>}
+    </div>}
     {quote&&<div data-event-quote>
       <p>结果 {quote.outcome} · 源时间 {time(quote.source_timestamp)} · 接收时间 {time(quote.received_at)} · {quote.cached?"3秒内缓存（未重置源时间）":"本次公开快照"}</p>
       <p>买一 {n(quote.best_bid)} / 卖一 {n(quote.best_ask)} / 价差 {n(quote.spread)} · {quote.quote_available?"已核验双边盘口快照":"单边或空盘口，不可作为双边报价"}</p>

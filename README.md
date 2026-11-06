@@ -4,9 +4,9 @@
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-F3%20Read%20Only-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-F4%20Cost%20Research-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前开发检查点：v1.0-F3-readonly-research（2026-11-06）。** F1–F3已实现Polymarket公开市场发现、盘口/基准费率和官方结算证据查询；对应代码检查点`0491e4c`离线回归**692通过、0失败**，前端构建和浏览器检查通过。完整F的费用模型、模拟账本、AI复盘与Brain记忆仍未完成；不是Stable。详见[F1–F3记录](docs/PHASE_F_READONLY_RESULTS.md)、[操作说明](docs/POLYMARKET_RESEARCH.md)和[进度](docs/PROGRESS_STATUS.md)。完整E外部平台与C真实资金验收门槛继续开放；需求以[主计划](docs/SmartMoney_Stable_Plan.md)为准。
+> **当前开发检查点：v1.0-F4-cost-research（2026-11-06）。** F1–F3已接入Polymarket公开发现、盘口/基准费率和官方结算证据；F4新增受限v1费用曲线及逐档成本研究。最新离线回归**725通过、0失败**，前端构建和浏览器检查通过。完整费用/资产执行验收、模拟账本、AI复盘与Brain仍未完成，当前不是Stable。见[F4记录](docs/PHASE_F4_COST_RESEARCH.md)、[F1–F3记录](docs/PHASE_F_READONLY_RESULTS.md)、[操作说明](docs/POLYMARKET_RESEARCH.md)。完整E与C资金门槛仍开放，需求以[主计划](docs/SmartMoney_Stable_Plan.md)为准。
 
 ## 项目概览
 
@@ -75,7 +75,7 @@ flowchart LR
 
 ### F1–F3事件研究
 
-在策略实验室直接发现开放/已关闭的Polymarket市场，查看ID映射、选择结果查询盘口与基准费率、读取官方结算证据。只读路径不读取凭据，不提交订单。完整费用模型和模拟闭环尚未开放；官方micro-USDC兑付单位不以现货USDT假设替代。详见[F记录](docs/PHASE_F_READONLY_RESULTS.md)。
+在策略实验室直接发现开放/已关闭的Polymarket市场，查看ID映射、选择结果查询盘口与基准费率、读取官方结算证据。只读路径不读取凭据，不提交订单。v1指数1费用曲线及成本研究可用；完整实际费用/资产执行验收和模拟闭环尚未开放；官方micro-USDC兑付单位不以现货USDT假设替代。详见[F记录](docs/PHASE_F_READONLY_RESULTS.md)。
 
 ## v1.0 阶段路线图
 
@@ -88,7 +88,7 @@ flowchart LR
 | C · 实盘核心 | 订单、资金、保护与恢复的端到端验收 | 本地实现持续推进；平台 demo 与真实资金验收未通过 |
 | D · 开源组件 | 组件 POC、采用评审、依赖审查和图表回放 | **已完成本阶段组件验收** |
 | E · 多交易所 | Gate / OKX / Binance 单主平台切换与隔离 | **非资金实现与本地验收通过；完整 E 的地区/数据源/私有执行与账户验收缺口仍开放** |
-| F · Brain 与事件研究 | 模拟学习记忆、Polymarket事件研究 | F1–F3只读发现、盘口/基准费率和官方结算证据已实现；完整费用、模拟账本与Brain仍待完成；Gate事件禁用 |
+| F · Brain 与事件研究 | 模拟学习记忆、Polymarket事件研究 | F1–F3只读研究及F4受限费用/成本研究已实现；完整执行条件、模拟账本与Brain仍待完成；Gate事件禁用 |
 | G · 挑战与通知 | 100轮 AI 预测挑战、OpenClaw 飞书/Telegram 异步通知 | 尚未整体验收 |
 | H · UI 与迁移 | AI Intelligence Center、模型迁移、设置与工作台闭环 | 部分设置和保护界面已有实现；完整中心与迁移未完成 |
 | I · Stable 发布 | 全量安装、迁移、平台和发布验收 | 未通过；不得标记 Stable |
@@ -99,7 +99,7 @@ flowchart LR
 
 ## 快速开始（本地历史模拟）
 
-**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为F3只读事件研究检查点，**不是 Stable，完整平台与实盘验收未通过**。
+**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为F4成本研究检查点，**不是 Stable，完整平台与实盘验收未通过**。
 
 **无需安装 Git 也能体验**：点击本仓库的 **Code → Download ZIP**，解压后进入包含 start.bat 的项目根目录，**双击 start.bat**。喜欢命令行的开发者可以通过 Git 克隆：
 
@@ -140,7 +140,7 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ~~~
 
-当前692项回归在Windows本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；F3结果见[F测试摘要](docs/F_TEST_RESULTS.json)；E历史结果仍见[E测试摘要](docs/E_TEST_RESULTS.json)。事件浏览器复验见`tests/event_research_browser.py`。
+当前725项回归在Windows本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；当前结果见[F测试摘要](docs/F_TEST_RESULTS.json)；E历史结果仍见[E测试摘要](docs/E_TEST_RESULTS.json)。事件浏览器复验见`tests/event_research_browser.py`。
 
 ## 项目文档
 
