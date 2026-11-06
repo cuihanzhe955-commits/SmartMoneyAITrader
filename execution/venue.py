@@ -62,7 +62,14 @@ class Venue:
                 self.client.enable_demo_trading(True)
             else:
                 self.client.set_sandbox_mode(True)
-        self.client.load_markets()
+        try:
+            self.client.load_markets()
+        except Exception:
+            try:
+                self.client.session.close()
+            except Exception:
+                pass
+            raise
 
     def pair(self, s):
         return s + "/USDT" + (":USDT" if self.swap else "")
@@ -88,7 +95,19 @@ class Venue:
                 result.errors[k] = "交易对不可用"
                 continue
             try:
-                rows = self.client.fetch_ohlcv(pair, "1m", limit=245)
+                original_timeout = self.client.timeout
+                try:
+                    if deadline is not None:
+                        remaining_ms = int((deadline - time.monotonic()) * 1000)
+                        if remaining_ms < 1:
+                            raise ValueError("行情任务已取消或超时")
+                        self.client.timeout = min(original_timeout, remaining_ms)
+                    rows = self.client.fetch_ohlcv(pair, "1m", limit=245)
+                finally:
+                    self.client.timeout = original_timeout
+                if ((cancel is not None and cancel.is_set()) or
+                        (deadline is not None and time.monotonic() >= deadline)):
+                    raise ValueError("行情任务已取消或超时")
                 closed = [
                     (int(t) // 1000 + 60, o, h, l, c, v * c)
                     for t, o, h, l, c, v in rows
@@ -98,6 +117,9 @@ class Venue:
                     raise ValueError("缺少有效收盘线")
                 result[k] = closed
             except Exception as err:
+                if ((cancel is not None and cancel.is_set()) or
+                        (deadline is not None and time.monotonic() >= deadline)):
+                    raise ValueError("行情任务已取消或超时") from None
                 if (isinstance(err, (ccxt.AuthenticationError, ccxt.PermissionDenied)) or
                         "451" in str(err) or "restricted location" in str(err).lower()):
                     raise

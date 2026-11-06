@@ -34,6 +34,8 @@ def test_background_paper_fetch_is_nonblocking_and_applies_verified_result(tmp_p
             state=rt.db.load();assert state["feed_valid"] and state["last_scan"]
             assert state["market_fetch"]["status"]=="READY"
             assert factory.call_args.args==("okx","spot","public")
+            v.client.session.close.assert_not_called()
+            rt.public_market_client.close()
             v.client.session.close.assert_called_once()
     finally:release.set();rt.shutdown();rt.db.db.close()
 
@@ -52,12 +54,12 @@ def test_pause_discards_result_without_resuming_or_writing_closed_ledger(tmp_pat
 
 
 def test_timeout_rejects_late_market_data(tmp_path):
-    rt=setup(tmp_path);entered,release=threading.Event(),threading.Event();clock=[0];rt.market_worker.clock=lambda:clock[0];v=Mock()
+    rt=setup(tmp_path);entered,release=threading.Event(),threading.Event();clock=[time.monotonic()];rt.market_worker.clock=lambda:clock[0];v=Mock()
     def slow(*args,**kwargs):entered.set();assert release.wait(3);return bars()
     v.bars.side_effect=slow
     try:
         with patch("terminal.runtime.Venue",return_value=v):
-            rt.tick();assert entered.wait(2);clock[0]=31;rt.tick()
+            rt.tick();assert entered.wait(2);clock[0]+=31;rt.tick()
             state=rt.db.load();assert state["lifecycle_status"]=="DATA_STALE" and not state["feed_valid"]
             assert not rt.db.entries("fills",state["id"])
             release.set();assert rt.market_worker.flight.done.wait(2)
@@ -73,7 +75,7 @@ def test_shutdown_does_not_wait_for_public_fetch_or_let_it_touch_ledger(tmp_path
         rt.tick();assert entered.wait(2);task=rt.market_worker.flight
         start=time.monotonic();rt.shutdown();assert time.monotonic()-start<.3
         rt.db.db.close();release.set();assert task.done.wait(2)
-        assert not task.failed
+        assert task.cancel.is_set() and task.value is None
         v.client.session.close.assert_called_once()
 
 
@@ -94,4 +96,19 @@ def test_regional_refusal_still_pauses_instead_of_retrying_as_ordinary_network_e
             assert rt.db.load()["lifecycle_status"]=="PAUSED"
             assert "451" in rt.db.load()["latest"]
             rt.tick();assert factory.call_count==1
+    finally:rt.shutdown();rt.db.db.close()
+
+
+def test_runtime_reuses_public_client_across_two_completed_scan_cycles(tmp_path):
+    rt=setup(tmp_path);v=Mock();v.bars.side_effect=lambda *a,**k:bars()
+    try:
+        with patch("terminal.runtime.Venue",return_value=v) as factory:
+            for _ in range(2):
+                with rt.db.db:
+                    state=rt.db.load();state["next_scan"]=int(time.time())-1;rt.db.save(state)
+                rt.tick();assert rt.market_worker.flight.done.wait(2);rt.tick()
+                assert rt.db.load()["feed_valid"]
+            assert factory.call_count==1 and v.bars.call_count==2
+            v.client.session.close.assert_not_called()
+            rt.shutdown();v.client.session.close.assert_called_once()
     finally:rt.shutdown();rt.db.db.close()

@@ -7,7 +7,7 @@
   "files": {
     ".env.example": "05f3f27b70523c728102179c2596c6b51db43262776f408494de1e042e470002",
     ".gitignore": "42ffa014e11eedc02abec4419ae90dbae6acb7c5ce726db9b06c3fe575631047",
-    "README.md": "b1d404df39663d0ec62be3974f17d862322380d9932acccccb23ec5f6e37f8b5",
+    "README.md": "040b352391f0fbc5035b0ae13726287eb8b984b1bb08de031720fb14d0057610",
     "THIRD_PARTY_NOTICES.md": "9e2bcc78cb0eb1a6ac237c4373d46f2da4d0a20f320c6500d870431af4318510",
     "install.bat": "1d476b96108d50cf23415ade02f93ac203dbdd167dea585dfa5e295d4e55f0ec",
     "launch.py": "8da0e047c3c0b5ba822523de0f1a78f9b643ce0b3df9edec3380a42a887ea280",
@@ -78,7 +78,7 @@
     "docs/PHASE_D_COMPONENTS.md": "c3b00c9c6dd856328a8b009a9ba72a6607b1d53bdaa5d007fe4ca9b8f0452f7a",
     "docs/PHASE_D_RESULTS.md": "4fbf3aff3b8e9b37e7f67d2134345e749839733af30b265e3e84072b86485e4e",
     "docs/PRODUCT_DECISION_POOL.md": "2ec355ec91aad09d1b7b3b8cc8c5f5a5ed0a34001a888dfccb75538e879ded2a",
-    "docs/PROGRESS_STATUS.md": "245233f01fec61cb8476afd09dcd151b5e47115de914824d1b340a1cf845836b",
+    "docs/PROGRESS_STATUS.md": "0d2e7962e1ec3f80d5c2cb4022923f1b80210b6917012369015181ecad2c901e",
     "docs/README.md": "5d869d2ae769fbb49348473cf6c4abeb212da4e39f72ac8db46ab27d6bea3f31",
     "docs/SmartMoney_Stable_Plan.md": "cf5b1e661eb21f25702045a22c7c4c3e8911cea0732483f23b12b481a7baf5cb",
     "docs/V1_ROADMAP.md": "20173d352cf625bcb3fc41cc6ff8573c423b84a238286555987bda293ed08b6d",
@@ -100,7 +100,7 @@
     "execution/stop_maintenance.py": "cb2292bdba9a950103b8dde12b67518564995854c77922cb7be31b7dc61dbdb0",
     "execution/stop_recovery.py": "192721647574e7ade223672ef1169f9b9d9fb2ac5d24bc02024a107524b8a404",
     "execution/stop_transport.py": "19cbf5bcc6a3607f8fd7760bdd9665f1b984b1f8e0c0b28e7422b71577ef5894",
-    "execution/venue.py": "20b5db0e3604a5d6481740f334ce4659729c9e7f9dc8c7dfe19a5d135c2390ea",
+    "execution/venue.py": "2fd870e437d5aa21da1ac9a8b77a698fc0ab985256265b4271088f2e13d6e606",
     "frontend/index.html": "0cd89608281fa56ec40f984f25a0a6d44ba9cdf9faed5cadd3b87186fd4af4f9",
     "frontend/package-lock.json": "16dcf329a1664e86ef074572e9b9dc135993fa8034ad3d15e1fdac8463bec349",
     "frontend/package.json": "a607527a57bdb2d3c5df0a52a56bc7079c4bcdbf45ac02a85ba8886990f9a9a6",
@@ -139,7 +139,7 @@
     "terminal/api.py": "2dfea48f566baa3f00174082783eb63dd7a6bdaa4ed2d2d004808d8b9a79e01d",
     "terminal/config.py": "7a4e13588af5ceb3fa1741ac6181955169b7e5d04501969c8117736afcaaf605",
     "terminal/replay.py": "45df5fa7da5915e9a73b457121cd79be2823f2702219fdde9843845843bd3b3d",
-    "terminal/runtime.py": "360de23d9b3d160802691d2facfe6c0547ca9f422287565a636159409fa8bf90",
+    "terminal/runtime.py": "981a487a3be51e20802f6b1e878d62284b02651434d4c4c0d2e4917776250078",
     "terminal/settings.py": "e780d1614bf89c7c04963a67f23799d9b6fcbb3aefddf6c00e03689e29f05e35",
     "tests/acceptance_browser.py": "951cf65adf119b5b9d05c8d565d7923c5e22a806ecda2456d58a13301dad50a1",
     "tests/browser.py": "56d9aa010d9a501aafc61c419b619b70c890ec5e8f69fbd3bca570a9b1f70fea",
@@ -194,14 +194,16 @@
     "web/style.css": "2f33179dd143f53c45bf51c803ff43a9ce9e84b4716456e0bdb5b8587035e62f",
     "market/worker.py": "f2c49c8aa4715185fa2d5edc07a586a305fb434a7f2da7d5552b17a07266d241",
     "tests/test_market_worker.py": "04bbb0f725a59339fdc8342a8664b590d8a07349684e02636bb463a6ca31f649",
-    "tests/test_async_market_runtime.py": "b9f13a0765a4d48b133bf2dc0f59935db8bc3077eff601b7c0ecdf15a986c53a"
+    "tests/test_async_market_runtime.py": "d8d25b8718d25063c65d5ae198f194894457fea344241bdf79c593087f4f6115",
+    "market/public_client.py": "3fb0094bf63a745a3968e65ebcd86c545c15ccf3bf4dcb1e10fb7cde4ae16bec",
+    "tests/test_public_client.py": "dc11a4aafc3f2e2192d305fe7dc7d70f1c26f74ab14fa510149bf8d9f387809c"
   },
   "sensitive_scan": {
     "matches": 0,
     "method": "allowlist + known token/private key/chat ID/profile path patterns; not a proof of absence"
   },
   "development_step": {
-    "name": "background public-paper market I/O integration",
+    "name": "public-paper deadline cancellation and bounded public transport reuse",
     "runtime_integrated": true,
     "live_path_changed": false,
     "dynamic_entries_enabled": false

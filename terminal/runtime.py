@@ -13,6 +13,7 @@ from execution.identity import digest, scope, position_version
 from market.feeds import historical, START, SYMBOLS
 from market.pool import plan as monitor_plan
 from market.worker import MarketWorker
+from market.public_client import PublicClientCache
 from market.imports import parse_csv, window
 from ai.provider import Provider
 from terminal.settings import Vault, AIConfig
@@ -52,6 +53,7 @@ class Runtime:
         self.clients = {}
         self.ai = Coordinator()
         self.market_worker = MarketWorker()
+        self.public_market_client = PublicClientCache()
         self.order_mutex = threading.Lock()
         self.health_mutex = threading.Lock()
         self.background = False
@@ -96,6 +98,7 @@ class Runtime:
     def shutdown(self):
         self.exit.set()
         self.market_worker.close()
+        self.public_market_client.close()
         with self.lock:
             self.ai.worker.invalidate()
         for thread in self.threads:
@@ -411,12 +414,9 @@ class Runtime:
             return result
         exchange, product = c["exchange"], c["product"]
         symbols, required = tuple(pool["monitor"]), tuple(pool["required"])
+        client = self.public_market_client
         def fetch(cancel, deadline):
-            venue = Venue(exchange, product, "public")
-            try:
-                return venue.bars(symbols, required=required, cancel=cancel, deadline=deadline)
-            finally:
-                venue.client.session.close()
+            return client.fetch(Venue, exchange, product, symbols, required, cancel, deadline)
         self.market_worker.submit(expected, fetch, 30)
         return {"status": "WAITING", "value": None}
 
