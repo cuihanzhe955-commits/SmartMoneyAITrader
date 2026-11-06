@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-06",
+  "phase": "G1",
+  "baseline": "2d55453",
+  "scope": "bounded automatic reference-paper prediction challenge",
+  "full_G_complete": false,
+  "stable": false,
+  "real_funds_verified": false,
+  "latest_regression": {
+    "passed": 840,
+    "failed": 0,
+    "seconds": 52.75,
+    "offline": true
+  },
+  "new_tests": 26,
+  "targeted_tests": {
+    "passed": 95,
+    "failed": 0,
+    "seconds": 17.62
+  },
+  "browser": {
+    "passed": true,
+    "synthetic_data": true,
+    "model_mock": true,
+    "viewports": [
+      "1366x768",
+      "1920x1080"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "pause_resume_stop_reload": true,
+    "report_export": true
+  },
+  "mock_100_rounds": {
+    "valid_predictions": 100,
+    "reference_participation": 100,
+    "settled": 100,
+    "restart_after_round": 50,
+    "duplicates": 0,
+    "real_market_or_ai_run": false
+  },
+  "public_readonly_discovery": {
+    "scanned": 5,
+    "future_v1_markets": 5,
+    "market_ids": [
+      "6709484",
+      "6709487",
+      "6709508",
+      "6709509",
+      "6709516"
+    ],
+    "account_access": false,
+    "order_writes": false
+  },
+  "database_schema_changed": true,
+  "migration": "Additive prediction_challenges and prediction_challenge_rounds; existing data preserved",
+  "dependencies_changed": false,
+  "user_runtime_changed": false,
+  "notifications_verified": false,
+  "shadow_mode_control_verified": false,
+  "real_100_rounds_verified": false,
+  "known_warnings": [
+    "Existing Starlette/httpx deprecation and frontend module/bundle warnings"
+  ],
+  "windows_smoke": {
+    "dependency_verification": true,
+    "pip_check": true,
+    "server_started": true,
+    "graceful_shutdown": true,
+    "isolated_database": true,
+    "historical_replay_candles": 240,
+    "account_access": false,
+    "orders_submitted": false,
+    "new_windows_machine": false
+  },
+  "integration_main_baseline": "234d8335c6c3240bf654f280de3c9c3ccf89df85",
+  "delivery_branch": "ai/codex/g1-automatic-prediction-challenge",
+  "delivery_method": "draft PR for owner review; no direct main push/merge",
+  "f_browser_regression": true,
+  "environment": {
+    "os": "Windows 11",
+    "python": "3.12.2",
+    "node": "24.22.2"
+  }
+}
