@@ -82,6 +82,10 @@ def worker(db):
 
 
 class Handler(BaseHTTPRequestHandler):
+    def local_source(self):
+        from terminal.local_access import local_source
+        return local_source(self.client_address[0], self.headers.get("Host", ""))
+
     def log_message(self, *args):
         pass
 
@@ -103,6 +107,8 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(raw)
 
     def do_GET(self):
+        if not self.local_source():
+            return self.send({"error": "仅允许本机访问"}, status=403)
         url = urlsplit(self.path)
         p = url.path
         q = {k: v[0] for k, v in parse_qs(url.query).items()}
@@ -256,6 +262,9 @@ class Handler(BaseHTTPRequestHandler):
             self.send({"error": str(e)}, status=400)
 
     def do_POST(self):
+        host = self.headers.get("Host", "")
+        if not self.local_source() or self.headers.get("Origin", "http://" + host) != "http://" + host:
+            return self.send({"error": "仅允许本机访问"}, status=403)
         try:
             if (
                 self.headers.get("Content-Type") != "application/json"

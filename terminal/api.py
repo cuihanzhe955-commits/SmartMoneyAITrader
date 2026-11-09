@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, SecretStr
 from typing import Literal
 from terminal.runtime import Runtime, DONE, safe_error
+from terminal.local_access import local_source
 from challenge.clock import market_time
 from terminal.settings import AIConfig
 from terminal.config import Session
@@ -146,14 +147,13 @@ def create_app(path=None):
     @app.middleware("http")
     async def local(request, call_next):
         host = request.headers.get("host", "")
-        if host.split(":")[0] not in ("127.0.0.1", "localhost", "testserver"):
+        peer = request.client.host if request.client else None
+        if not (local_source(peer, host) or (peer == 'testclient' and host == 'testserver')):
             return JSONResponse({"error": "本机服务"}, 403)
         if request.method != "GET" and (
             request.headers.get("sec-fetch-site") == "cross-site"
             or request.headers.get("origin", "http://" + host) != "http://" + host
-            or not request.headers.get("content-type", "").startswith(
-                "application/json"
-            )
+            or request.headers.get("content-type", "").split(';', 1)[0].strip().lower() != 'application/json'
         ):
             return JSONResponse({"error": "来源不符"}, 403)
         return await call_next(request)
@@ -599,7 +599,7 @@ def create_app(path=None):
     async def ws(sock: WebSocket):
         host = sock.headers.get("host", "")
         if (
-            host.split(":")[0] not in ("127.0.0.1", "localhost")
+            not local_source(sock.client.host if sock.client else None, host)
             or sock.headers.get("origin") != "http://" + host
         ):
             return await sock.close(code=1008)
