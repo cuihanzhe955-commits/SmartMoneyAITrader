@@ -22,6 +22,7 @@ DOCS.update({"PHASE_F_READONLY_RESULTS.md", "POLYMARKET_RESEARCH.md", "F_TEST_RE
 DOCS.update({"PHASE_F4_COST_RESEARCH.md", "PHASE_F5_OBSERVATIONS.md"})
 DOCS.update({"PHASE_F_RESULTS.md", "BRAIN_MEMORY_DESIGN.md", "POLYMARKET_API_RESEARCH.md", "TEST_REPORT.md", "RELEASE_READINESS.md"})
 DOCS.update({"PHASE_G1_CHALLENGE.md", "G_TEST_RESULTS.json", "G1_TASK_HANDOFF.md", "AI_DEVELOPMENT_COLLABORATION.md"})
+DOCS.add("PR1_REVIEW_FINDINGS.md")
 VERSION = "1.0-G1-challenge-checkpoint"
 BANNED = {"runtime", ".git", ".venv", "node_modules", "__pycache__", ".pytest_cache", "screenshots"}
 PATTERNS = {
