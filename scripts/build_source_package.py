@@ -97,6 +97,8 @@ def build(root, destination):
             if file.is_symlink() or root not in file.resolve().parents:
                 raise ValueError("拒绝导出符号链接或工程外文件："+name)
             files[name]=file.read_bytes()
+            if file.suffix.lower() in {".bat", ".cmd"}:
+                files[name] = files[name].replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
     required={"terminal/api.py","frontend/dist/index.html","frontend/package-lock.json","data/BTCUSDT-1m-2024-08-05.zip"}
     if not required <= files.keys(): raise ValueError("缺少源码、已构建前端或回测数据")
     findings=[hit for name,data in files.items() for hit in scan_content(name,data)]
