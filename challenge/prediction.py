@@ -89,6 +89,7 @@ class PredictionChallenges:
                 official_resolved_at=d.get('settlement',{}).get('resolved_at'),settled_at=d.get('settled_at'),
                 reason=d.get('risk_reasons',[]),error=d.get('error',''),has_snapshot=bool(snap))
             receipt.update(reference_cash_after_entry=d.get('reference_cash_after_entry'),
+                refunded=bool(d.get('invalid_resolution') and d.get('order')),
                 reference_cash_after_settlement=d.get('reference_cash_after_settlement'),
                 estimated_fee=snap.get('modeled_fee'),rounding_reserve=snap.get('rounding_reserve'),modeled_slippage_pct=snap.get('modeled_slippage_pct'))
             db.execute('UPDATE prediction_challenge_rounds SET observed_status=?,receipt=? WHERE challenge_id=? AND ordinal=?',
@@ -105,12 +106,15 @@ class PredictionChallenges:
         binary=[r for r in completed if r.get('payout') in (0,1) and r['probability']!=.5]
         correct=[(r['probability']>.5)==(r['payout']==1) for r in binary]
         trades=[r for r in completed if r.get('participated')]
+        open_orders = [r['order'] for r in receipts if r.get('status') == 'WAITING' and r.get('order')]
         equity=peak=float(capital);dd=0.;wins=losses=max_win=max_loss=0
         for r in sorted(trades,key=lambda r:(r['settled_at'],r['round_id'])):
             pnl=float(r['realized']);equity+=pnl;peak=max(peak,equity);dd=max(dd,100*(peak-equity)/peak)
             wins=wins+1 if pnl>0 else 0;losses=losses+1 if pnl<0 else 0
             max_win=max(max_win,wins);max_loss=max(max_loss,losses)
         return dict(scheduled=len(rows),predicted=len(predicted),participated=sum(r.get('participated',False) for r in receipts),
+            open_reference_cost=float(sum((D(order['cost']) for order in open_orders), D(0))),
+            open_positions=len(open_orders),refunded=sum(bool(r.get('refunded')) for r in receipts),
             settled=sum(r.get('status')=='SETTLED' for r in receipts),valid_completed=len(completed),
             skipped=sum(r.get('action')=='SKIP' and r.get('valid_prediction',False) for r in receipts),
             failed=sum(r['observed_status']=='FAILED' and not r['cancelled'] for r in rows),cancelled=sum(bool(r['cancelled']) for r in rows),

@@ -51,7 +51,7 @@ export function PredictionChallengePanel(){
       <progress value={stats.valid_completed} max={current.config.rounds} aria-label="挑战有效轮次进度" style={{width:"100%"}}/>
       <p>{current.detail} · 最近统计 {time(current.statistics_as_of)}</p>
       <p>已预测 {stats.predicted} · 参考参与 {stats.participated} · 官方结算 {stats.settled} · 有效SKIP {stats.skipped} · 失败 {stats.failed} · 取消 {stats.cancelled} · 等待结果 {stats.waiting}。</p>
-      <p>参考现金 {number(current.account?.cash)} · 已结算参考收益 {number(current.account?.realized)} · 已预留模型调用 {current.account?.calls??0} 次。</p>
+      <p>参考现金 {number(current.account?.cash)} · 待结算持仓成本 {number(stats.open_reference_cost)} · 已退款轮次 {number(stats.refunded)} · 已结算参考收益 {number(current.account?.realized)} · 已预留模型调用 {current.account?.calls??0} 次。</p>
       <p>方向正确率 {stats.accuracy==null?"暂无可评分样本":number(stats.accuracy*100)+"%"}（{stats.accuracy_samples}个二元方向样本） · 参考交易胜率 {stats.trade_win_rate==null?"暂无成交结果":number(stats.trade_win_rate*100)+"%"} · 最长交易连胜/连败 {stats.longest_trade_win_streak}/{stats.longest_trade_loss_streak} · 成本基础最大回撤 {number(stats.max_cost_basis_drawdown_pct)}%。</p>
       <div className="buttons">{[["pause","暂停新轮次"],["resume","恢复挑战"],["stop","结束挑战"]].map(([action,title])=><button key={action} disabled={busy||["COMPLETED","STOPPED","STOPPING","INITIALIZING"].includes(current.status)} onClick={()=>act(()=>api("research/challenges/command",{id,action}))}>{title}</button>)}<button disabled={busy} onClick={()=>act(exportReport)}>导出挑战报告</button></div>
       <p>结束会停止新预测，已有轮次继续等待官方结果。未结算收益不计入已实现收益；回撤口径为现金加持仓成本。通知通道尚待G2验收。</p>

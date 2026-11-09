@@ -230,6 +230,21 @@ def test_unknown_results_do_not_count_as_completed_or_realized(tmp_path):
     result=m.view(cid)['challenges'][0]
     assert result['status']=='ACTIVE' and result['statistics']['valid_completed']==0
     assert result['statistics']['reference_realized']==0 and result['statistics']['waiting']==1
+    stats = result['statistics']
+    assert stats['open_positions'] == 1 and stats['accuracy'] is None and stats['trade_win_rate'] is None
+    assert float(result['account']['cash']) + stats['open_reference_cost'] == pytest.approx(c.capital)
+
+
+def test_fractional_and_neutral_forecasts_have_separate_scoring_denominators():
+    rows = []
+    for ordinal, (p, payout, realized) in enumerate([(.9, .5, -2), (.5, 0, -4), (.7, 1, 3)]):
+        receipt = dict(status='SETTLED', valid_prediction=True, probability=p, payout=payout,
+                       participated=True, realized=realized, round_id=str(ordinal), settled_at=ordinal)
+        rows.append(dict(receipt=receipt, observed_status='SETTLED', cancelled=False))
+    stats = PredictionChallenges.stats(rows, 100)
+    assert stats['accuracy_samples'] == stats['fractional_results'] == 1
+    assert stats['accuracy'] == 1 and stats['trade_win_rate'] == pytest.approx(1 / 3)
+    assert stats['reference_realized'] == -3 and stats['max_cost_basis_drawdown_pct'] == 6
 
 
 def test_no_candidates_and_source_failure_are_bounded_not_fake_rounds(tmp_path):
@@ -376,6 +391,7 @@ def test_resolution_known_before_model_finishes_is_not_counted_as_success(tmp_pa
     final=m.view(cid)['challenges'][0]
     assert final['status'] == 'STOPPED'
     assert final['statistics']['failed'] == 1 and final['statistics']['predicted'] == 0
+    assert final['statistics']['refunded'] == 1 and final['statistics']['open_reference_cost'] == 0
     lab.settle(stale)
     with lab.brain.db() as db:
         entries = dict(db.execute('SELECT kind,amount FROM event_lab_cash WHERE round_id=?', (stale['id'],)))
