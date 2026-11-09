@@ -109,6 +109,37 @@ def test_pause_resume_and_stop_preserve_pending_settlement(tmp_path):
     assert lab.reconcile(final['session_id'])['verified']
 
 
+def test_paused_history_does_not_starve_initialization_or_active_rounds(tmp_path):
+    manager, lab, first, clock, _, config = system(tmp_path, rounds=2, engine='rules')
+    manager.command(first, 'pause')
+    for _ in range(50):
+        paused = manager.create(config.model_copy(update={'request_id': str(uuid4())}))['id']
+        manager.command(paused, 'pause')
+
+    new_config = config.model_copy(update={'request_id': str(uuid4())})
+    with patch.object(manager, '_initialize', side_effect=KeyboardInterrupt), pytest.raises(KeyboardInterrupt):
+        manager.create(new_config)
+    recovered = PredictionChallenges(lab, manager.discovery, clock=lambda: clock[0])
+    recovered.tick()
+    latest = recovered.view()['challenges'][0]
+    assert latest['status'] == 'ACTIVE'
+    cid = latest['id']
+    recovered.tick()
+    lab.tick('work')
+    recovered.command(cid, 'pause')
+    clock[0] += 61
+    lab.tick('settle')
+    recovered.tick()
+    paused = recovered.view(cid)['challenges'][0]
+    assert paused['status'] == 'PAUSED'
+    assert paused['statistics']['scheduled'] == paused['statistics']['settled'] == 1
+    recovered.command(cid, 'stop')
+    assert recovered.view(cid)['challenges'][0]['status'] == 'STOPPED'
+    recovered.command(first, 'resume')
+    recovered.tick()
+    assert recovered.view(first)['challenges'][0]['statistics']['scheduled'] == 1
+
+
 def test_slow_fetch_cannot_resurrect_a_cancelled_round(tmp_path):
     m,lab,cid,clock,provider,c=system(tmp_path)
     m.tick();started=threading.Event();release=threading.Event();original=lab.details.cost

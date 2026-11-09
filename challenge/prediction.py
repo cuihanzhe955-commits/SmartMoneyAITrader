@@ -7,6 +7,11 @@ from events.observations import canonical
 from market.predictions import EventQuery
 
 
+_ROUND_CHANGED = """(m.observed_status != r.status OR
+    (m.observed_status = 'WAITING' AND COALESCE(json_extract(m.receipt,'$.error'),'') !=
+                                      COALESCE(json_extract(r.data,'$.error'),'')))"""
+
+
 class PredictionConfig(LabConfig):
     request_id: str = Field(pattern=r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$")
     name: str = Field(default="100轮预测研究",min_length=1,max_length=80)
@@ -68,9 +73,8 @@ class PredictionChallenges:
         return dict(id=cid,duplicate=duplicate)
 
     def _sync(self,db,cid):
-        rows=db.execute("""SELECT m.ordinal,r.* FROM prediction_challenge_rounds m JOIN event_lab_rounds r ON r.id=m.round_id
-            WHERE m.challenge_id=? AND (m.observed_status!=r.status OR
-                (m.observed_status='WAITING' AND COALESCE(json_extract(m.receipt,'$.error'),'')!=COALESCE(json_extract(r.data,'$.error'),'')))
+        rows=db.execute(f"""SELECT m.ordinal,r.* FROM prediction_challenge_rounds m JOIN event_lab_rounds r ON r.id=m.round_id
+            WHERE m.challenge_id=? AND {_ROUND_CHANGED}
             ORDER BY m.ordinal""",(cid,)).fetchall()
         for r in rows:
             d=json.loads(r['data']);snap=d.get('snapshot',{});f=d.get('forecasts',{}).get('selected',{})
@@ -217,7 +221,18 @@ class PredictionChallenges:
         if not self.mutex.acquire(False):return
         try:
             if self.stop.is_set():return
-            with self.brain.db() as db:rows=db.execute("SELECT id FROM prediction_challenges WHERE json_extract(state,'$.status') NOT IN ('COMPLETED','STOPPED') ORDER BY rowid LIMIT 50").fetchall()
+            # Paused sessions may still receive a settlement for an existing round.
+            # Only schedule those sessions when there is actually a receipt to sync.
+            with self.brain.db() as db:
+                rows = db.execute(f"""
+                    SELECT c.id FROM prediction_challenges c
+                    WHERE json_extract(c.state,'$.status') IN ('INITIALIZING','ACTIVE','STOPPING')
+                       OR (json_extract(c.state,'$.status') = 'PAUSED' AND EXISTS (
+                           SELECT 1 FROM prediction_challenge_rounds m
+                           JOIN event_lab_rounds r ON r.id = m.round_id
+                           WHERE m.challenge_id = c.id AND {_ROUND_CHANGED}))
+                    ORDER BY (json_extract(c.state,'$.status') = 'PAUSED'), c.rowid
+                """).fetchall()
             for row in rows:
                 if self.stop.is_set():break
                 try:self._advance(row['id']);self.error=''
