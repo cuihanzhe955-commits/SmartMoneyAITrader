@@ -81,7 +81,9 @@ def test_invalid_time_identity_or_result_never_creates_a_false_settlement(tmp_pa
     if mutation=="resolved_before_prediction":evidence["resolved_at"]=NOW-1
     obj.details.resolution.return_value=evidence;obj.details.resolution.side_effect=None
     obj.tick()
-    assert obj.view(sid)["rounds"][0]["status"]=="WAITING"
+    expected = "FAILED" if mutation == "resolved_before_prediction" else "WAITING"
+    assert obj.view(sid)["rounds"][0]["status"] == expected
+    assert obj.reconcile(sid)["verified"]
     with obj.brain.db() as db:assert db.execute("SELECT COUNT(*) FROM event_lab_cash WHERE kind='PAYOUT'").fetchone()[0]==0
 
 

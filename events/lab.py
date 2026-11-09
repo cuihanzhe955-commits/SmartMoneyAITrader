@@ -155,6 +155,11 @@ class EventLab:
             entries={r["kind"]:D(r["amount"]) for r in db.execute("SELECT * FROM event_lab_cash WHERE round_id=?",(row["id"],))}
             if order:
                 if entries.get("DEBIT")!=-D(order["cost"]):raise ValueError("研究账本扣款与持仓不一致，停止新交易并保留记录")
+                if row["status"] == "FAILED" and data.get("invalid_resolution"):
+                    if entries != {"DEBIT": -D(order["cost"]), "REFUND": D(order["cost"])}:
+                        raise ValueError("无效轮次退款与原始扣款不一致")
+                elif "REFUND" in entries:
+                    raise ValueError("研究轮次存在意外退款")
                 if row["status"]=="SETTLED":
                     if entries.get("PAYOUT")!=D(data["proceeds"]):raise ValueError("研究账本兑付不一致，保留未决状态")
                     realized+=D(data["realized"])
@@ -255,7 +260,9 @@ class EventLab:
             sr=db.execute("SELECT state FROM event_lab_sessions WHERE id=?",(row["session_id"],)).fetchone();s=json.loads(sr[0])
             if s["status"]!="ACTIVE":reasons.append("研究会话已暂停")
             if cost>D(s["cash"]) or cost>D(config.per_trade):reasons.append("独立研究预算不足")
-            open_count=db.execute("SELECT COUNT(*) FROM event_lab_cash c JOIN event_lab_rounds r ON r.id=c.round_id WHERE r.session_id=? AND c.kind='DEBIT' AND r.status!='SETTLED'",(row["session_id"],)).fetchone()[0]
+            open_count=db.execute("""SELECT COUNT(*) FROM event_lab_cash c JOIN event_lab_rounds r ON r.id=c.round_id
+                WHERE r.session_id=? AND c.kind='DEBIT' AND r.status!='SETTLED' AND NOT EXISTS
+                (SELECT 1 FROM event_lab_cash f WHERE f.round_id=r.id AND f.kind='REFUND')""",(row["session_id"],)).fetchone()[0]
             if open_count>=config.max_positions:reasons.append("研究持仓数量上限")
             if D(s["realized"])<=-D(s["initial"])*D(config.max_loss_pct)/100:reasons.append("研究累计亏损停机阈值")
             if db.execute("SELECT 1 FROM event_lab_rounds WHERE session_id=? AND id!=? AND status='WAITING' AND json_extract(data,'$.snapshot.condition_id')=? AND json_extract(data,'$.order') IS NOT NULL",(row["session_id"],row["id"],snap["condition_id"])).fetchone():reasons.append("同一条件已有未结算研究持仓")
@@ -277,13 +284,14 @@ class EventLab:
         if self.stop.is_set():return
         if not evidence["settlement_verified"]:
             with self.brain.db(True) as db:
+                if db.execute("SELECT status FROM event_lab_rounds WHERE id=?", (row["id"],)).fetchone()[0] != "WAITING":
+                    return
                 data.pop('error',None)
                 data["last_resolution"]=evidence;self._save_round(db,row,data,"WAITING",self.clock()+60)
             return
         payouts=evidence.get("payouts") or []
         chosen=[p for p in payouts if p["token_id"]==snap["token_id"]]
         if evidence["condition_id"]!=snap["condition_id"] or len(chosen)!=1: raise ValueError("结算条件或结果Token不匹配")
-        if evidence["resolved_at"]<=data["decision_at"]: raise ValueError("该结果早于预测完成，拒绝未来信息泄漏/事后预测计分")
         payout=D(chosen[0]["payout"])
         if not payout.is_finite() or not 0<=payout<=1:raise ValueError("官方兑付比例无效")
         data.pop('error',None)
@@ -292,6 +300,17 @@ class EventLab:
             live=db.execute("SELECT status FROM event_lab_rounds WHERE id=?",(row["id"],)).fetchone()
             if live[0]!="WAITING":return
             sr=db.execute("SELECT state FROM event_lab_sessions WHERE id=?",(row["session_id"],)).fetchone();s=json.loads(sr[0])
+            if evidence["resolved_at"] <= data["decision_at"]:
+                if data["order"]:
+                    refund = D(data["order"]["cost"])
+                    db.execute("INSERT INTO event_lab_cash VALUES(?, 'REFUND', ?)", (row["id"], str(refund)))
+                    s["cash"] = str(D(s["cash"]) + refund)
+                    db.execute("UPDATE event_lab_sessions SET state=? WHERE id=?", (canonical(s), row["session_id"]))
+                data.update(invalid_resolution=True, settlement=evidence, reflection_status="not_applicable",
+                            error="官方结果早于预测完成或与其同时，此轮作废",
+                            reference_cash_after_settlement=s["cash"])
+                self._save_round(db, row, data, "FAILED")
+                return
             proceeds=payout*D(data["order"]["shares"]) if data["order"] else Decimal(0)
             cost=D(data["order"]["cost"]) if data["order"] else Decimal(0)
             if data["order"]:

@@ -77,7 +77,7 @@ class PredictionChallenges:
             p=f.get('probability');valid=(type(p) in (int,float) and math.isfinite(p) and 0<=p<=1
                 and d.get('decision_at',math.inf)<d.get('expires_at',-math.inf))
             receipt=dict(round_id=r['id'],created_at=r['created_at'],status=r['status'],model=d.get('model'),action=d.get('action'),
-                probability=p,valid_prediction=valid,source_timestamp=snap.get('source_timestamp'),decision_at=d.get('decision_at'),
+                probability=p,valid_prediction=valid and not d.get('invalid_resolution', False),source_timestamp=snap.get('source_timestamp'),decision_at=d.get('decision_at'),
                 snapshot_sha256=d.get('snapshot_sha256'),market_id=snap.get('market_id'),condition_id=snap.get('condition_id'),outcome=snap.get('outcome'),
                 participated=bool(d.get('order')),order=d.get('order'),payout=d.get('payout'),realized=d.get('realized'),
                 official_resolved_at=d.get('settlement',{}).get('resolved_at'),settled_at=d.get('settled_at'),

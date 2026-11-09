@@ -276,7 +276,8 @@ def test_legacy_f_round_retry_is_normalized_without_reenqueue(tmp_path):
     assert lab.enqueue(q)==dict(id=rid,duplicate=True)
 
 
-def test_resolution_known_before_model_finishes_is_not_counted_as_success(tmp_path):
+@pytest.mark.parametrize('resolved_offset', [5, 10])
+def test_resolution_known_before_model_finishes_is_not_counted_as_success(tmp_path, resolved_offset):
     m,lab,cid,clock,provider,c=system(tmp_path)
     original=provider.chat.side_effect
     def slow(prompt,data):clock[0]+=10;return original(prompt,data)
@@ -284,9 +285,25 @@ def test_resolution_known_before_model_finishes_is_not_counted_as_success(tmp_pa
     m.tick();lab.tick('work')
     def early(q):
         meta=normalize(market(q.market_id),clock[0])
-        return resolution_evidence(dict(data=[dict(condition_id=meta['condition_id'],status='resolved',payouts=[1000000,0],resolved_at=str(NOW+5),last_update_timestamp=str(clock[0]))]),meta,clock[0])
+        return resolution_evidence(dict(data=[dict(condition_id=meta['condition_id'],status='resolved',payouts=[1000000,0],resolved_at=str(NOW+resolved_offset),last_update_timestamp=str(clock[0]))]),meta,clock[0])
+    sid = m.view(cid)['challenges'][0]['session_id']
+    with lab.brain.db() as db:
+        stale = db.execute("SELECT * FROM event_lab_rounds WHERE session_id=?", (sid,)).fetchone()
+    m.command(cid, 'stop')
+    m = PredictionChallenges(lab, m.discovery, clock=lambda: clock[0])
+    lab.details.resolution = Mock(side_effect=TimeoutError())
+    clock[0] += 61
+    lab.tick('settle'); m.tick()
+    assert m.view(cid)['challenges'][0]['status'] == 'STOPPING'
     lab.details.resolution=early;clock[0]+=61;lab.tick('settle');m.tick()
     final=m.view(cid)['challenges'][0]
+    assert final['status'] == 'STOPPED'
+    assert final['statistics']['failed'] == 1 and final['statistics']['predicted'] == 0
+    lab.settle(stale)
+    with lab.brain.db() as db:
+        entries = dict(db.execute('SELECT kind,amount FROM event_lab_cash WHERE round_id=?', (stale['id'],)))
+    assert set(entries) == {'DEBIT', 'REFUND'}
+    assert lab.reconcile(sid)['verified'] and float(final['account']['cash']) == 1000
     assert final['statistics']['settled']==final['statistics']['valid_completed']==0
     assert '早于预测完成' in final['rounds'][0]['receipt']['error']
 
