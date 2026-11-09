@@ -68,8 +68,13 @@ def run_phase(root, phase, window):
         f, sid, clock, _, _ = make_f(root)
         enqueue(f, sid)
         f.tick(); clock[0] += 100; f.tick(); f.tick('work')
-        with f.brain.db() as db:
+        with f.brain.db(True) as db:
             assert not db.execute("SELECT 1 FROM sqlite_master WHERE name='prediction_challenges'").fetchone()
+            # F predates G1's condition guard and both cash snapshot fields.
+            db.execute("""UPDATE event_lab_rounds SET
+                inputs=json_remove(inputs,'$.expected_condition_id'),
+                data=json_remove(data,'$.reference_cash_after_entry','$.reference_cash_after_settlement')
+                WHERE session_id=?""", (sid,))
         legacy = history(root, sid)
         assert len(legacy[2]) == 2
     else:
