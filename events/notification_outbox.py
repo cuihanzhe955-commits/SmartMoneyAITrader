@@ -90,7 +90,7 @@ class NotificationOutbox:
                 raise ValueError('通知记录不存在')
             return self._status(db,key)
 
-    def claim(self,token,timeout,max_attempts):
+    def claim(self,token,timeout,max_attempts,channel=None):
         """Expired SENDING is UNKNOWN, never silently sent again after restart."""
         if not self.path.exists():return None
         try:
@@ -106,7 +106,9 @@ class NotificationOutbox:
                 db.execute("UPDATE notification_dispatch SET state='UNKNOWN',error='发送进程中断或租约过期，需核对结果；未自动重发' WHERE state='SENDING' AND lease_until<=?",(now,))
                 row=db.execute("""SELECT o.id,o.event_json,d.attempts,d.max_attempts FROM notification_outbox o
                     LEFT JOIN notification_dispatch d ON d.id=o.id
-                    WHERE d.id IS NULL OR (d.state='RETRY' AND d.next_try<=?) ORDER BY o.created_at,o.id LIMIT 1""",(now,)).fetchone()
+                    WHERE (d.id IS NULL OR (d.state='RETRY' AND d.next_try<=?))
+                    AND (? IS NULL OR json_extract(o.event_json,'$.channel')=?)
+                    ORDER BY o.created_at,o.id LIMIT 1""",(now,channel,channel)).fetchone()
                 if not row:return None
                 attempt=(row[2] or 0)+1;limit=row[3] or max_attempts
                 if attempt>limit:

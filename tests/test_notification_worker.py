@@ -78,6 +78,31 @@ def test_restart_recovery_and_attempt_token_fence(tmp_path):
     assert not box.finish(key,'invented-token','RETRY')
 
 
+@pytest.mark.parametrize('blocked,healthy', [('feishu','telegram'), ('telegram','feishu')])
+def test_stalled_channel_does_not_block_other_channel(tmp_path, blocked, healthy):
+    release = threading.Event()
+    def sender(event, key):
+        if event['channel'] == blocked:
+            assert release.wait(4)
+        return SendAcknowledgement('synthetic')
+    clock = [100.]
+    box = NotificationOutbox(tmp_path/'queue.db', clock=lambda: clock[0])
+    first = box.enqueue(intent(channel=blocked))['id']
+    worker = NotificationWorker(box, sender, timeout=1)
+    try:
+        worker.step()
+        clock[0] += 2
+        other = box.enqueue(intent(channel=healthy))['id']
+        worker.step()
+        assert worker.flights[healthy].done.wait(1)
+        worker.step()
+        assert box.status(other)['state'] == 'ACKNOWLEDGED'
+        assert box.status(first)['state'] == 'UNKNOWN'
+    finally:
+        release.set()
+        worker.close()
+
+
 def test_two_workers_cannot_submit_the_same_intent(tmp_path):
     calls=[];guard=threading.Lock()
     def sender(event,key):
