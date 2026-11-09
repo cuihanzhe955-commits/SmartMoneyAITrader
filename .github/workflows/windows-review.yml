@@ -11,9 +11,11 @@ jobs:
     timeout-minutes: 25
     env:
       PYTHONDONTWRITEBYTECODE: "1"
-      SMART_MONEY_RUNTIME: ${{ runner.temp }}/paper-runtime
-      SMART_MONEY_UI_OUTPUT: ${{ runner.temp }}/paper-browser
     steps:
+      - name: Set isolated paths
+        run: |
+          "SMART_MONEY_RUNTIME=$env:RUNNER_TEMP/paper-runtime" >> $env:GITHUB_ENV
+          "SMART_MONEY_UI_OUTPUT=$env:RUNNER_TEMP/paper-browser" >> $env:GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
