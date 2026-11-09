@@ -30,6 +30,8 @@ class PredictionChallenges:
     def __init__(self,lab,discovery,clock=time.time):
         self.lab,self.brain,self.discovery,self.clock=lab,lab.brain,discovery,clock
         self.stop=threading.Event();self.mutex=threading.Lock();self.error=""
+        self.lifecycle_lock = threading.Lock()
+        self.thread = None
         with self.brain.db(True) as db:
             db.execute("CREATE TABLE IF NOT EXISTS prediction_challenges(id TEXT PRIMARY KEY,request_id TEXT UNIQUE,config TEXT,state TEXT)")
             db.execute("""CREATE TABLE IF NOT EXISTS prediction_challenge_rounds(
@@ -237,6 +239,8 @@ class PredictionChallenges:
                 if self.stop.is_set():break
                 try:self._advance(row['id']);self.error=''
                 except Exception as err:
+                    if self.stop.is_set():
+                        return
                     self.error=str(err)[:220] if type(err) is ValueError else '自动挑战暂不可用；原轮次保留'
                     try:
                         with self.brain.db(True) as db:
@@ -261,8 +265,16 @@ class PredictionChallenges:
     def start(self):
         def run():
             while not self.stop.wait(1):self.tick()
-        self.thread=threading.Thread(target=run,name='smart-money-prediction-challenge',daemon=True);self.thread.start()
+        with self.lifecycle_lock:
+            if self.stop.is_set() or self.thread is not None:
+                return
+            self.thread = threading.Thread(target=run, name='smart-money-prediction-challenge', daemon=True)
+            self.thread.start()
 
     def close(self):
-        self.stop.set();self.discovery.close()
-        if getattr(self,'thread',None):self.thread.join(timeout=.2)
+        with self.lifecycle_lock:
+            self.stop.set()
+            thread = self.thread
+        self.discovery.close()
+        if thread and thread is not threading.current_thread():
+            thread.join()

@@ -53,6 +53,8 @@ class EventLab:
         self.brain,self.details,self.provider_factory,self.clock=brain,details,provider_factory,clock
         self.stop=threading.Event();self.error="";self.active_provider=None
         self.work_mutex=threading.Lock();self.settle_mutex=threading.Lock()
+        self.lifecycle_lock = threading.Lock()
+        self.threads = []
         self.challenges=None
         with brain.db(True) as db:
             db.execute("CREATE TABLE IF NOT EXISTS event_lab_sessions(id TEXT PRIMARY KEY,request_id TEXT UNIQUE,config TEXT,state TEXT)")
@@ -197,6 +199,8 @@ class EventLab:
             query=query.model_copy(update={"budget":float(min(D(query.budget),D(config.per_trade),D(s["cash"])))})
             if query.budget<=0: raise ValueError("研究会话没有可用参考现金")
             snap=self.details.cost(query)
+            if self.stop.is_set():
+                return
             cutoff=self.clock()
             if (snap.get("provider")!="polymarket" or snap.get("product")!="event" or snap.get("market_id")!=request.market_id
                     or snap.get("protocol_version")!="v1" or snap.get("execution_enabled") is not False
@@ -377,6 +381,8 @@ class EventLab:
             else:self.reflect(row)
             self.error=""
         except Exception as err:
+            if self.stop.is_set():
+                return
             self.error=str(err)[:220] if type(err) is ValueError else "事件研究任务失败；交易与保护继续运行"
             if row is not None:
                 try:
@@ -397,12 +403,22 @@ class EventLab:
     def start(self):
         def loop(kind):
             while not self.stop.wait(1):self.tick(kind)
-        self.threads=[]
-        for kind in ("work","settle"):
-            thread=threading.Thread(target=loop,args=(kind,),name="smart-money-event-"+kind,daemon=True);thread.start();self.threads.append(thread)
-        if self.challenges:self.challenges.start()
+        with self.lifecycle_lock:
+            if self.stop.is_set() or self.threads:
+                return
+            for kind in ("work", "settle"):
+                thread = threading.Thread(target=loop, args=(kind,), name="smart-money-event-"+kind, daemon=True)
+                thread.start()
+                self.threads.append(thread)
+            if self.challenges:
+                self.challenges.start()
 
     def close(self):
-        if self.challenges:self.challenges.close()
-        self.stop.set()
-        for thread in getattr(self,"threads",[]):thread.join(timeout=.2)
+        with self.lifecycle_lock:
+            self.stop.set()
+            threads = tuple(self.threads)
+        if self.challenges:
+            self.challenges.close()
+        for thread in threads:
+            if thread is not threading.current_thread():
+                thread.join()

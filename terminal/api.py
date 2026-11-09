@@ -74,7 +74,19 @@ class ProtectionAction(BaseModel):
 def create_app(path=None):
     @asynccontextmanager
     async def lifespan(app):
-        rt = Runtime(path or os.environ.get("SMART_MONEY_RUNTIME", ROOT / "runtime"))
+        import msvcrt
+        root = Path(path or os.environ.get("SMART_MONEY_RUNTIME", ROOT / "runtime"))
+        root.mkdir(parents=True, exist_ok=True)
+        # Recovery mutates persistent rows. Acquire ownership before creating any services.
+        with (root / "terminal.lock").open("a+b") as owner:
+            owner.seek(0)
+            msvcrt.locking(owner.fileno(), msvcrt.LK_NBLCK, 1)
+            async with services(app, root):
+                yield
+
+    @asynccontextmanager
+    async def services(app, root):
+        rt = Runtime(root)
         app.state.rt = rt
         app.state.discovery = Discovery()
         app.state.event_research = EventResearch()
@@ -101,12 +113,6 @@ def create_app(path=None):
         try:app.state.event_lab=make_lab()
         except ValueError:
             app.state.event_lab=None
-        # Enforce one scheduler per ledger even when the app starts on a second port.
-        import msvcrt
-
-        owner = open(rt.root / "terminal.lock", "a+b")
-        owner.seek(0)
-        msvcrt.locking(owner.fileno(), msvcrt.LK_NBLCK, 1)
         rt.start_worker()
         if app.state.event_lab:app.state.event_lab.start()
         try:
@@ -119,7 +125,6 @@ def create_app(path=None):
             app.state.event_research.close()
             rt.shutdown()
             rt.db.db.close()
-            owner.close()
             app.state.discovery.close()
 
     app = FastAPI(

@@ -158,6 +158,52 @@ def test_slow_fetch_cannot_resurrect_a_cancelled_round(tmp_path):
     provider.chat.assert_not_called()
 
 
+@pytest.mark.parametrize('lane', ['discover', 'cost'])
+def test_shutdown_drains_late_network_failure_before_reopening(tmp_path, lane):
+    manager, lab, cid, _, _, _ = system(tmp_path)
+    lab.challenges = manager
+    entered, release = threading.Event(), threading.Event()
+    def delayed(*_):
+        entered.set()
+        assert release.wait(5)
+        raise ValueError('late failure')
+    if lane == 'discover':
+        manager.discovery.run.side_effect = delayed
+    else:
+        manager.tick()
+        lab.details.cost = delayed
+    lab.start()
+    try:
+        lab.start()
+        assert entered.wait(3)
+        before = manager.view(cid)['challenges'][0]
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            shutdown = pool.submit(lab.close)
+            assert lab.stop.wait(1)
+            assert not shutdown.done()
+            release.set()
+            shutdown.result(3)
+        assert not any(t.is_alive() for t in lab.threads + [manager.thread])
+        after = manager.view(cid)['challenges'][0]
+        assert after['statistics'] == before['statistics'] and after['detail'] == before['detail']
+        assert not manager.error and not lab.error
+        lab.close(); lab.start()
+        assert not any(t.is_alive() for t in lab.threads + [manager.thread])
+    finally:
+        release.set()
+        lab.close()
+
+
+def test_second_service_cannot_recover_rows_while_first_owns_ledger(tmp_path):
+    from fastapi.testclient import TestClient
+    from terminal.api import create_app
+    with TestClient(create_app(tmp_path)):
+        with patch('terminal.api.Runtime') as runtime:
+            with pytest.raises(OSError), TestClient(create_app(tmp_path)):
+                pass
+            runtime.assert_not_called()
+
+
 def test_late_fetch_error_cannot_resurrect_cancelled_round(tmp_path):
     m,lab,cid,clock,provider,c=system(tmp_path);m.tick()
     def cancelled(_):
