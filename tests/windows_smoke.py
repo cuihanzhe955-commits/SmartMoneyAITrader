@@ -4,18 +4,26 @@ import time
 import json
 from pathlib import Path
 import subprocess
+import socket
 import tempfile
 from urllib.request import urlopen,Request
 ROOT=Path(__file__).resolve().parents[1]
-URL='http://127.0.0.1:18788'
+URL=''
 def get(path,body=None):
     return json.load(urlopen(Request(URL+path,data=None if body is None else json.dumps(body).encode(),headers={'Content-Type':'application/json'}),timeout=15))
 def run():
+    global URL
+    with socket.socket() as sock:
+        sock.bind(('127.0.0.1',0))
+        port=str(sock.getsockname()[1])
+    URL='http://127.0.0.1:'+port
     with tempfile.TemporaryDirectory() as tmp:
         env=dict(os.environ,SMART_MONEY_RUNTIME=tmp)
         def boot():
-            p=subprocess.Popen(['cmd','/c','start.bat','--no-browser','--port','18788'],cwd=ROOT,env=env)
+            p=subprocess.Popen(['cmd','/c','start.bat','--no-browser','--port',port],cwd=ROOT,env=env)
             for _ in range(100):
+                if p.poll() is not None:
+                    raise AssertionError(f'launcher exited before health check: {p.returncode}')
                 try:get('/api/health');return p
                 except OSError:time.sleep(.15)
             raise AssertionError('startup timed out')
@@ -34,7 +42,7 @@ def run():
             assert d['report']['fills']==272 and abs(d['report']['nav']-943.8943549007662)<1e-7,d['report']
             print('PASS Windows launch, interrupted full replay, identical 272 fills and NAV.')
         finally:
-            subprocess.run(['cmd','/c','stop.bat','--port','18788'],cwd=ROOT,check=True)
+            subprocess.run(['cmd','/c','stop.bat','--port',port],cwd=ROOT,check=True)
             p.wait(timeout=12)
 if __name__=='__main__':run()
 
