@@ -642,7 +642,7 @@ v0.1 AI 默认关闭。开启后仅解释规则信号、列明风险或复盘历
 2. 86,401 点回放图表内存失败；
 3. G1 Worker 遇 Brain 数据库 busy 后异常退出；
 4. 浏览器验收的 ConnectionResetError；
-5. PR #2 较早 HEAD `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows CI 曾因依赖审计 JSON 的 npm lock SHA 与实际 lockfile 不匹配而出现 937 passed / 1 failed。最新 PR HEAD `e5677c00e77234a4b508878d30a935fbcbe87c41` 尚无 Actions/check 结果；必须在最新 HEAD 上完成适当验证，并重新执行依赖审计，不能只手改 SHA、降低测试或跳过测试。
+5. 较早提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows CI 曾因依赖审计 JSON 的 npm lock SHA 与实际 lockfile 不匹配而出现 937 passed / 1 failed。2026-11-11 只读核验时，后续 PR HEAD 为 `40f47c3f58a31eab8786016b8e29320112b7f527`，但该 HEAD 没有 Actions/check 结果；因此旧失败不是后续 HEAD 的测试结果，后续 HEAD 也不能视为已通过。文档更新后 PR HEAD 会继续变化，必须在最终 HEAD 上重新执行依赖审计与适当 CI；不能只手改 SHA、降低测试或跳过测试。
 
 v0.1 发布还需干净 Windows 目录安装/启动/停止/恢复证据、前端构建、关键浏览器流程、全量离线测试和 GitHub Actions 必需检查通过。测试日志有未解释异常时，即使退出码为 0 也不能算通过。
 
