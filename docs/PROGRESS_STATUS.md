@@ -1,89 +1,6 @@
-# 项目进度与验收状态
+# 项目进度口径与当前验收状态
 
-更新日期：2026-11-10。**当前 GitHub main：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`。** 本文区分当前源码、历史测试证据、已批准产品目标和未完成事项。本次文档更新未运行代码测试。
-
-## 当前结论
-
-项目仍处于开发检查点，**不是 Stable**。PR #1 已合并；PR #2 是尚未合并的 Draft 文档 PR，不改变 main 的代码状态。
-
-main 集成记录报告：离线后端回归 **938 passed / 0 failed / 0 skipped**，TypeScript/Vite 构建通过。该结果是既有报告证据，不代表本次重新运行，也不代表浏览器全部通过、真实 AI 可用、真实账户验收通过或策略已经盈利。
-
-## 当前已知阻断
-
-以下四项来自 [MAIN_INTEGRATION_20261110.md](MAIN_INTEGRATION_20261110.md)，尚未关闭：
-
-1. 保护单浏览器验收等待第二条“核对完成 · 已释放”超时，复测还出现旧脚本 bind/health 异常。
-2. 86,401 点图表压力场景出现 Node driver 内存分配失败。
-3. G1 工作线程遇到 Brain 数据库忙异常后退出。
-4. 浏览器验收日志出现 ConnectionResetError。即使退出码为 0，只要异常未解释，也不能判定通过。
-
-## 用户已批准的当前产品范围
-
-- **主线：** 数字资产现货和永续合约。
-- **交易模式：** 模拟优先测试，但现货与永续最终都必须支持真实交易；不能将产品降为纯模拟软件。
-- **AI：** 先让一个 AI 决策流程真正稳定、及时、可解释，再评估多角色协作。
-- **盈利验证：** 以扣除手续费、滑点和永续资金费后的结果为准，必须进行样本外、Walk-forward 和前向模拟，不承诺盈利。
-- **开源复用：** 每项能力先检查现有实现，再评估 GitHub 开源项目；适配合适时优先复用，不必全部自行开发。
-- **Polymarket：** 延后到现货与永续基础版本稳定之后。
-- **24小时翻倍挑战：** 已批准移出产品范围；代码尚未清理，需先检查依赖，只移除专属部分。
-- **必须保留：** 通知系统、Brain、G1/G2 已有成果、策略实验室、历史回测、实验报告、交易流水、账户/持仓管理和其他未经用户明确批准删除的功能。
-
-详细范围见 [主计划 §16.12](SmartMoney_Stable_Plan.md) 与 [产品决策池](PRODUCT_DECISION_POOL.md)。
-
-## 当前源码能力与实际边界
-
-| 能力 | 当前代码证据 | 尚未通过/未完成 |
-|---|---|---|
-| 工作台 | React/TypeScript、FastAPI、本地启动入口 | 干净 Windows 安装、全站端到端和发布验收 |
-| 现货 | 公开行情、规则策略、模拟、受限实盘执行/只读核对路径 | 交易所 demo 与真实账户完整成交、托管保护、费用/余额/重启对账 |
-| 永续 | CCXT swap 连接类型及部分历史兼容代码 | 新建实盘会话目前明确拒绝非 spot；完整模拟与真实交易闭环未验收 |
-| AI | Provider、Coordinator、单任务 Worker、结构化提案和 Brain 代码 | 默认模型名为空；真实 Provider 稳定性、决策价值、成本后增量收益未证明 |
-| 风控 | 仓位/规则校验、订单状态和异常阻断相关代码 | 各产品/平台真实保护与异常恢复仍需验收 |
-| 通知 | Outbox、Worker、Gateway 发送协议适配器 | 生产 WebSocket 认证连接、Runtime 生命周期、UI 和真实消息通道闭环未完成 |
-| G1 | 自动预测挑战、逐轮恢复和统计相关代码 | 100轮 Mock 不代表真实模型/市场表现；其他运行场景继续验收 |
-| G2 | 持久化队列、发送状态机、通道隔离和 Gateway 适配 | 不能声称已送达；生产集成仍未完成 |
-| 24小时挑战 | 历史代码和文档仍存在 | 已批准移除，等待依赖审计与定向清理 |
-
-AI 默认设置来自 `terminal/settings.py`：模型名称默认为空、超时 15 秒、调用间隔 120 秒、调用预算 40、提案 TTL 90 秒。它们是代码默认值，不代表用户当前实际配置或模型调用状态。
-
-## 本阶段建议顺序
-
-1. 只读检查本机工程、所有工作树和远端 main，确认哪些本地更新尚未同步；不覆盖、不重置、不清理未知文件。
-2. 复现并处理上述四项集成阻断。
-3. 完成现货基础闭环，保留真实交易路径并逐项补平台验收。
-4. 完成永续模拟与真实交易闭环。
-5. 让现有 AI 决策流程真正可用，并验证提案时效。
-6. 完成成本后策略评价、样本外和前向验证。
-7. 整合 UI、通知、Brain、报告和安装发布体验。
-
-以上为顺序，不代表并行开发许可。每次只处理一个明确任务。
-
-## 开源项目评估入口
-
-- [开源组件评估](OPEN_SOURCE_AUDIT.md)：当前依赖、可复用项目、许可证和采用流程。
-- [组件采用历史决定](COMPONENT_DECISIONS.md)：此前 POC 和“不采用/条件采用”结论；新决策需补充证据，不自动沿用旧结论。
-- [产品决策池](PRODUCT_DECISION_POOL.md)：Polymarket、多角色 AI、高级策略和其他延后功能。
-
-## 进度与验收口径
-
-分别标记：已规划、源码已实现、指定离线测试通过、交易所 demo 联调通过、真实账户验收通过。Mock、历史回放、公开只读行情、模拟成交、浏览器静态展示和文档更新不能相互替代。
-
-## 证据入口
-
-- [2026-11-10 main 集成记录](MAIN_INTEGRATION_20261110.md)
-- [实盘验证状态](LIVE_TRADING_VERIFICATION.md)
-- [G1 自动预测挑战历史记录](PHASE_G1_CHALLENGE.md)
-- [G2 通知检查点](G2_OUTBOX_CHECKPOINT.md)
-- [Brain 记忆设计](BRAIN_MEMORY_DESIGN.md)
-- [主实施计划](SmartMoney_Stable_Plan.md)
-- [开源组件评估](OPEN_SOURCE_AUDIT.md)
-- [产品决策池](PRODUCT_DECISION_POOL.md)
-
----
-
-## 历史进度快照（2026-11-06；保留作历史证据，不代表当前状态）
-
-更新日期：2026-11-06。
+历史基线日期：2026-11-06。以下 A–I 阶段记录保留当时的工程证据；当前决策和状态见文末 2026-11-11 补充。
 
 **当前证据：** G1自动挑战调度、恢复、统计和UI已实现；840项离线回归通过，100轮Model Mock与浏览器检查通过。见[G1验收](PHASE_G1_CHALLENGE.md)、[G测试摘要](G_TEST_RESULTS.json)。真实100轮、通知闭环及独立影子/观察模式未验收，不能将测试替身当真实成绩。F历史814项与真实公开SKIP闭环证据保留。
 
@@ -197,7 +114,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 - [F结构化测试摘要](F_TEST_RESULTS.json)
 - [事件研究操作说明](POLYMARKET_RESEARCH.md)
 - [主实施计划书](SmartMoney_Stable_Plan.md)
-- [开发与交付规范](AI_DEVELOPMENT_COLLABORATION.md)
+- [AI 协作开发规范](AI_DEVELOPMENT_COLLABORATION.md)
 - [D 阶段最终验收](PHASE_D_RESULTS.md)
 - [组件测试结果](COMPONENT_TEST_RESULTS.json)
 - [依赖审查](DEPENDENCY_AUDIT.json)
@@ -209,3 +126,45 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 - [E1 工作器基础提交](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/6d4b296a8d25cca59171f099f469daca75900cb0)
 - [E1 后台 paper runtime 接入提交](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/bcf96a4282b3ff7c1ee2d2f3090fbac9d6ded343)
 
+
+
+---
+
+# 当前状态补充（2026-11-11，优先于下方历史 A–I 快照）
+
+## 当前共享基线
+
+- GitHub main：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`（本次读取时核验）。
+- PR #2：文档方向分支，当前仍未合并；本次会继续修订。PR 不能替代本机工程核验。
+- 2026-11-10 历史本机审计记录：主运行目录 `E:\\user\\ChatGPT\\SmartMoneyAITrader`（无 Git）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件，必须只读保留。
+
+## 按证据分类，而非按模块数量宣称完成
+
+| 分类 | 当前例子 | 不能推导出的结论 |
+|---|---|---|
+| 有源码并有局部离线证据 | FastAPI/React 工作台、历史/公开行情、规则策略、纸面会话、SQLite、部分风险/订单状态 | 不能推导为干净安装或完整用户工作流通过 |
+| 有代码但端到端未验收 | 现货受限实盘路径、swap/永续连接兼容、AI Provider/Worker、Brain、通知 Outbox/Worker/Gateway、保护和恢复 | 不能推导为真实平台、生产 AI 或生产通知已可用 |
+| 主要由 Mock/测试替身证明 | Mock AI、模拟成交、测试保护/恢复、G1 100 轮 Model Mock | 不能推导为真实模型质量、平台成交或策略收益 |
+| 尚未证明/未完成 | 真实 AI 增量价值、成本后盈利、完整永续交易、平台 demo/真实账户闭环、生产通知、干净 Windows 安装升级回滚 | 不得在 README/界面中宣传为已完成 |
+
+## v0.1 当前交付目标
+
+以 [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md) 为准：一个通过本机核验的公开现货数据源、1–3 个交易对、一套现有规则策略、纸面交易、费用后净值/回撤、暂停/停止/重启恢复、交易导出；AI 默认关闭，仅可选解释/复盘。v0.1 不开放实盘、永续和事件合约执行。
+
+这只是第一里程碑。v1.0 仍保留现货与永续、模拟与真实交易的产品目标；不得把 v0.1 的阶段限制写成永久取消。
+
+## 已采纳的保留规则
+
+通知、Brain、G1/G2、事件研究、策略实验室、历史回测、实验报告、交易流水、账户/持仓、真实交易相关代码、永续连接器和测试全部保留。非核心入口可隐藏/下沉，不删除代码、数据、API、数据库表或测试。24 小时翻倍挑战已批准退出，先依赖审计，再定向清理挑战专属代码。
+
+## 当前 GitHub Actions 阻断
+
+PR #2 HEAD `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression：**937 passed / 1 failed**。唯一失败为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，当前 `docs/DEPENDENCY_AUDIT.json` 的 npm lock SHA 与 `frontend/package-lock.json` 不一致。必须重新执行依赖审计；不能只手改 hash 或放宽测试。
+
+## 当前集成问题
+
+以下问题仍需复现/关闭：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收 ConnectionResetError。历史 938 项离线回归通过记录不能覆盖这些问题，也不能覆盖当前 CI 的 937/1 结果。
+
+## 下一步唯一任务
+
+Copilot 先做只读本机与远端基线核验，提交工作树差异和风险清单；之后按 v0.1 范围合同完成最小垂直切片。不得先重写 UI、重构交易引擎或删除研究模块。
