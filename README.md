@@ -6,7 +6,7 @@
 
 ![Development](https://img.shields.io/badge/Status-v0.1%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、图表压力、Brain Worker 和 ConnectionResetError 仍有未关闭问题。较早提交 `d64371a` 曾记录 937 passed / 1 failed（依赖审计 JSON 中的 npm lock SHA 与 lockfile 不一致），该结果只属于当时提交。提交 `40f47c3` 曾触发 Windows paper regression run #5，当时离线回归步骤仍在运行；此后的 PR 提交状态会变化，不能沿用旧检查结果。最新提交与 CI 结果请以 [PR #2 Checks](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
+> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、图表压力、Brain Worker 和 ConnectionResetError 仍有未关闭问题。历史 Windows run #5（检查点 `40f47c3`）已结束：前端构建通过，离线回归 937 passed / 1 failed，唯一失败为 Windows checkout 的 CRLF 行尾转换导致 npm lock SHA 不匹配。PR 已加入 `.gitattributes` 强制该 lockfile 使用 LF；检查点 `83a092c` 的 Windows workflow run #9 已排队，尚未通过。后续文档提交会触发新检查，最终状态以 [PR #2 Checks](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 的最新 HEAD 为准。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
 > **当前交付目标：v0.1 单一现货纸面交易垂直切片。** 这只是第一里程碑；v1.0 仍保留现货/永续、模拟/真实交易的最终产品目标。
 
 ## 项目概览

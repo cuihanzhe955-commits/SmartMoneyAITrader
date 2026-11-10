@@ -642,7 +642,7 @@ v0.1 AI 默认关闭。开启后仅解释规则信号、列明风险或复盘历
 2. 86,401 点回放图表内存失败；
 3. G1 Worker 遇 Brain 数据库 busy 后异常退出；
 4. 浏览器验收的 ConnectionResetError；
-5. 较早提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows CI 曾因依赖审计 JSON 的 npm lock SHA 与实际 lockfile 不匹配而出现 937 passed / 1 failed。后续提交 `40f47c3f58a31eab8786016b8e29320112b7f527` 曾触发 Windows paper regression run #5，当时离线回归步骤仍在运行；当前分支后续提交的检查状态必须以 PR #2 实时 Checks 为准。以上是历史快照，不代表最终 PR HEAD 已通过。必须在最终 HEAD 上重新执行依赖审计与适当 CI；不能只手改 SHA、降低测试或跳过测试。
+5. 历史 Windows workflow run #5 针对检查点 `40f47c3f58a31eab8786016b8e29320112b7f527` 已结束：前端构建成功，离线回归 937 passed / 1 failed。唯一失败是依赖审计 SHA 断言：Windows checkout 将 `frontend/package-lock.json` 从 Git blob 的 LF 行尾转换为 CRLF，导致工作树字节哈希与依赖审计 JSON 中的提交内容哈希不同。PR 已在 `.gitattributes` 中加入 `frontend/package-lock.json text eol=lf`；检查点 `83a092c` 的 Windows workflow run #9 已排队，尚无通过结果。文档修订会触发新的 HEAD 检查，必须以最终 HEAD 的 Windows CI 为准；不得删测试、手改审计值或放宽断言。
 
 v0.1 发布还需干净 Windows 目录安装/启动/停止/恢复证据、前端构建、关键浏览器流程、全量离线测试和 GitHub Actions 必需检查通过。测试日志有未解释异常时，即使退出码为 0 也不能算通过。
 

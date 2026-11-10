@@ -159,7 +159,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 当前 GitHub Actions 阻断
 
-历史提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression 曾记录 **937 passed / 1 failed**，失败项为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，原因是 `docs/DEPENDENCY_AUDIT.json` 中的 npm lock SHA 与 `frontend/package-lock.json` 不一致。该结果只属于历史 SHA。后续提交 `40f47c3f58a31eab8786016b8e29320112b7f527` 曾触发 Windows paper regression run #5（当时在 `tests/run_offline.py` 步骤运行中）；当前分支后续提交的检查状态必须以 PR #2 实时 Checks 为准。每次提交后都要确认检查对应最新 HEAD。依赖审计必须重新执行并生成可复核报告，不能只手改 hash 或放宽测试。
+历史 Windows workflow run #5 针对检查点 `40f47c3f58a31eab8786016b8e29320112b7f527` 已结束：前端构建成功，离线回归 **937 passed / 1 failed**。唯一失败是 Windows checkout 将 package-lock 从 LF 转为 CRLF，导致依赖审计 SHA 断言失败。PR 已在 `.gitattributes` 中强制该 lockfile 使用 LF；检查点 `83a092c` 的 Windows workflow run #9 已排队，尚无通过结果。必须在最新 HEAD 验证修复，不得手改审计值、删除测试或放宽断言。
 
 ## 当前集成问题
 
@@ -173,4 +173,4 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 ### PR #2 状态核验规则（2026-11-11）
 
 - PR #2 是文档/产品范围提案，仍为 Draft / Open，未合并；main 不因本 PR 自动改变。
-- 提交 `40f47c3` 曾有 Windows paper regression run #5；当时离线回归步骤仍在运行。该结果不等于最终成功。后续提交的 head SHA、与 main 的 ahead/behind 数量、变更文件数和 Checks 状态会变化，不在静态文档中固定写死；请以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最新 head 并通过。
+- 提交 `40f47c3` 的 Windows run #5 已失败（937 passed / 1 failed），根因为 Windows checkout 行尾转换。PR 已加入 `.gitattributes` 的 LF 规则；检查点 `83a092c` 对应 run #9 已排队。后续文档提交会触发新检查，最终以最新 HEAD 的 Checks 为准。head SHA、ahead/behind 数量和变更文件数不固定写死；请以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最新 head 并通过。
