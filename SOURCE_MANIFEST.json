@@ -3,7 +3,7 @@
   "stable": false,
   "real_funds_verified": false,
   "components_reviewed": true,
-  "built_at": "2026-11-06T12:29:53.003940+00:00",
+  "built_at": "2026-11-06T15:33:20.084456+00:00",
   "files": {
     ".env.example": "05f3f27b70523c728102179c2596c6b51db43262776f408494de1e042e470002",
     ".gitignore": "42ffa014e11eedc02abec4419ae90dbae6acb7c5ce726db9b06c3fe575631047",
@@ -155,7 +155,7 @@
     "risk/limits.py": "5b1de65ec982614ad3d1b433d3e3bef4237af6b4cc92ad60418b9f5c85a65d88",
     "risk/parameters.py": "be584308fba58bd4bd5405cf0aca3c536cb37258478d393f090457f7b4a1b230",
     "scripts/audit_components.py": "4a4c259c5030b64337abb918f57366054e43942d6abaf145baeac94967d70e69",
-    "scripts/build_source_package.py": "28561a387318dfb6b85bcf785f9e1c8e5b6c01fd2acbc83ffdc278f89cc47fa8",
+    "scripts/build_source_package.py": "125b066e87cae5386e265468ec60af155da41d2022828c7547c31ed017a75b1d",
     "scripts/check_public_platforms.py": "48692f92744064974595f7d74e43f86850628131ce666a4cc2476d83296c0c08",
     "scripts/launcher.py": "467b6b0e82c1bb7c585495c1b2b7695ccf11d127b629a6bdad587dbc5966b4f5",
     "scripts/verify_indicator_reference.py": "e326a9e3d152004bb1859f4d38524dea78a96b95c5272d0ef4869b08b1594e83",
@@ -244,7 +244,14 @@
     "web/app.js": "ab78e15449c894787e76428bdb56af4dffa5360b10bac4a19272622f4fa65a6f",
     "web/index.html": "eed90aae7452da475d8bcb401c26ab9e8eb7b0418c640806e5d06350ac84ed81",
     "web/style.css": "2f33179dd143f53c45bf51c803ff43a9ce9e84b4716456e0bdb5b8587035e62f",
-    "使用说明.md": "bd244d18ddccb23baf411465697b4e4451e52ff3e69c75a791c5bdcc8b5a5e3c"
+    "使用说明.md": "bd244d18ddccb23baf411465697b4e4451e52ff3e69c75a791c5bdcc8b5a5e3c",
+    "events/notification_outbox.py": "6d2860a657c544a69f6a892a10133328e440de7fbda61af4e3cafd8347818ad7",
+    "tests/test_notification_outbox.py": "0ceae3b5d1c9fa072c1d7021756397553e97b6146047cde31ff2605d7cce4a63",
+    "docs/G2_OUTBOX_CHECKPOINT.md": "3c53f57c3b06e024a9ef248f7ca09e98dc23c2a4ca24a8efc13a6c49d4e51397",
+    "events/notification_worker.py": "7c61a4fea135ac8271d1f83d9263807e80a9726a6a9b24981091f329d86706cd",
+    "tests/test_notification_worker.py": "19b3ffa2346262bd75a187e4ee81200194a0f0e8fbefc09d3221496609869624",
+    "events/notification_gateway.py": "5441cb86a0299ca309eb573e71f76b6644aea69dde81a8e2291d277df50ad473",
+    "tests/test_notification_gateway.py": "6ecaadb8029f79f6e2e6a4af339253d4c85435b55273165b9432c455b0701d68"
   },
   "sensitive_scan": {
     "matches": 0,
