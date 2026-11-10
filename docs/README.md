@@ -1,72 +1,47 @@
 # 项目文档导航
 
-> 适用范围：Smart Money AI Trader 公开仓库。文档状态以具体版本、日期和测试证据为准。
-> 本页是**文档入口**，不是新的开发计划，也不代表功能已通过验收。
+> 文档按用途组织。计划说明目标，验收记录说明已经证明的事实，决策池记录延后候选；三者不可混用。
 
-## 建议阅读顺序
+## 推荐阅读顺序
 
-1. **首次了解项目**：[仓库首页](../README.md) → [v1.0 公开路线图](V1_ROADMAP.md)。
-2. **希望运行软件**：[完整使用说明](../使用说明.md) → [Windows 快速启动](WINDOWS_QUICK_START.md)。
-3. **需要判断当前真实完成度**：[阶段与验收口径](PROGRESS_STATUS.md) → [C2 工程验收记录](PHASE_C2_DIAGNOSTICS.md) → [C3 联调准备](PHASE_C3_READINESS.md) → [D1 组件记录](PHASE_D_COMPONENTS.md) → [D2 协议对照](PHASE_D2_CCXT.md) → [D3 市场发现](PHASE_D3_DISCOVERY.md) → [D4 监控池](PHASE_D4_MONITOR_POOL.md) → [D最终验收](PHASE_D_RESULTS.md) → [E非资金验收](PHASE_E_RESULTS.md) → [F1–F3只读记录](PHASE_F_READONLY_RESULTS.md) → [F4成本研究](PHASE_F4_COST_RESEARCH.md) → [F5.1研究记录](PHASE_F5_OBSERVATIONS.md) → [F工程验收](PHASE_F_RESULTS.md) → [G1自动挑战](PHASE_G1_CHALLENGE.md) → [Brain说明](BRAIN_MEMORY_DESIGN.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)；[C1 记录](PHASE_C1_RESULTS.md)保留为历史证据。
-4. **查看尚未采用的新想法**：[产品决策池](PRODUCT_DECISION_POOL.md)。
+1. 首次了解项目：[仓库首页](../README.md) → [产品路线图](V1_ROADMAP.md)。
+2. 安装和运行：[完整使用说明](../使用说明.md) → [Windows 快速启动](WINDOWS_QUICK_START.md)。
+3. 了解当前真实状态：[项目进度](PROGRESS_STATUS.md) → [集成阻断记录](MAIN_INTEGRATION_20261110.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)。
+4. 了解产品目标：[主实施计划 §16.12](SmartMoney_Stable_Plan.md) → [产品决策池](PRODUCT_DECISION_POOL.md)。
+5. 评估第三方项目：[开源组件评估](OPEN_SOURCE_AUDIT.md) → [组件采用历史决定](COMPONENT_DECISIONS.md)。
 
-## 文档按职责划分
+## 文档索引
 
-| 类型 | 当前文件 | 主要职责 |
-|---|---|---|
-| 项目介绍 | [README](../README.md) | 产品定位、核心模块、公开状态及快速开始 |
-| 公开开发计划 | [V1_ROADMAP.md](V1_ROADMAP.md) | v1.0 A–I 阶段、目标和验收边界的公开摘要 |
-| 用户操作 | [使用说明](../使用说明.md)、[WINDOWS_QUICK_START.md](WINDOWS_QUICK_START.md) | 使用方法、启动与排障 |
-| 验收证据 | [PHASE_C1_RESULTS.md](PHASE_C1_RESULTS.md)、[LIVE_TRADING_VERIFICATION.md](LIVE_TRADING_VERIFICATION.md) | 历史阶段测试结果与实盘未通过项 |
-| 已发生的功能变更 | [CHALLENGE_TEMPLATE_UPDATE.md](CHALLENGE_TEMPLATE_UPDATE.md) | 挑战模板 UI 调整的历史记录 |
-| 仓库维护 | [GITHUB_UPLOAD.md](GITHUB_UPLOAD.md) | 公开仓库状态及上传说明的历史兼容信息 |
-| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | Codex 与 Copilot 的职责、分支、交接、测试和安全规范 |
-| 未来候选 | [PRODUCT_DECISION_POOL.md](PRODUCT_DECISION_POOL.md) | 新模块、研究方向及延后理由，**不构成当前开发指令** |
+| 文档 | 用途 |
+|---|---|
+| [README](../README.md) | 产品定位、当前状态、快速开始 |
+| [使用说明](../使用说明.md) | Windows 运行、配置和操作说明 |
+| [Windows 快速启动](WINDOWS_QUICK_START.md) | 安装、启动与常见问题 |
+| [主实施计划](SmartMoney_Stable_Plan.md) | 当前产品范围、实施顺序与验收标准 |
+| [项目进度](PROGRESS_STATUS.md) | 当前代码状态、历史测试证据和未完成门槛 |
+| [v1.0 路线图](V1_ROADMAP.md) | 基础版本的产品能力和交付顺序 |
+| [产品决策池](PRODUCT_DECISION_POOL.md) | 延后功能和候选方向 |
+| [开源组件评估](OPEN_SOURCE_AUDIT.md) | 开源项目筛选、许可证和复用决定 |
+| [组件采用历史决定](COMPONENT_DECISIONS.md) | 既有 POC 和采用/不采用证据 |
+| [实盘验证状态](LIVE_TRADING_VERIFICATION.md) | 按平台和产品记录真实交易验收边界 |
+| [集成阻断记录](MAIN_INTEGRATION_20261110.md) | Windows、G1、G2 集成后的已知问题 |
+| [G1 自动预测挑战](PHASE_G1_CHALLENGE.md) | G1 历史实现和测试证据 |
+| [G2 通知检查点](G2_OUTBOX_CHECKPOINT.md) | 通知队列、发送状态和生产接入边界 |
+| [Brain 记忆设计](BRAIN_MEMORY_DESIGN.md) | 记忆来源、验证和隔离原则 |
+| [开发与交付规范](AI_DEVELOPMENT_COLLABORATION.md) | 单一写入者、分支、测试、开源与安全要求 |
 
-## 状态与优先级
+## 状态口径
 
-- **计划**回答“准备做什么”；**验收记录**回答“实际上证明完成了什么”；**决策池**回答“将来可能做什么”。三者不可混用。
-- 公开 v1.0 路线图不扩充原定功能范围。新增想法先评估是否属于既定阶段，再决定是否进入未来候选。
-- C1 是开发检查点；真实资金成交闭环和交易所托管保护单全生命周期尚未在公开证据中通过验收。不能用模拟回放、Mock 测试或 UI 展示替代。
-- 某次阶段报告是**历史记录**，其测试数量和当时状态不可不加说明地当成当前源码的重新验证结果。
-- 公开仓库仅存放适合对外披露的说明。不要提交私有密钥、用户运行数据库、本机工作目录、内部执行指令或个人数据。
+- **已规划**：需求已确认，尚不代表代码存在。
+- **已实现**：源码存在，不代表外部平台已经接通。
+- **离线测试通过**：指定测试环境/Mock/历史数据通过。
+- **平台联调通过**：有目标平台 demo 或受支持接口的可复核证据。
+- **真实账户验收通过**：有明确授权及订单、成交、费用、余额、退出和保护状态对账证据。
 
-## 现有目录结构
+模拟、Mock、公开只读行情、浏览器展示和文档更新不能替代真实平台验收。
 
-```text
-SmartMoneyAITrader/
-├── README.md                 # 项目首页
-├── 使用说明.md               # 用户手册
-├── docs/                     # 本页归档与文档导航
-│   ├── README.md
-│   ├── V1_ROADMAP.md
-│   ├── PHASE_C1_RESULTS.md
-│   ├── LIVE_TRADING_VERIFICATION.md
-│   ├── PRODUCT_DECISION_POOL.md
-│   ├── WINDOWS_QUICK_START.md
-│   ├── CHALLENGE_TEMPLATE_UPDATE.md
-│   └── GITHUB_UPLOAD.md
-├── market/                   # 行情获取与导入
-├── strategy/                 # 指标、规则与策略组合
-├── ai/                       # AI 提案与异步协调
-├── risk/                     # 仓位与风险约束
-├── execution/                # 模拟/交易所执行与订单状态
-├── challenge/                # 策略实验生命周期与报告
-├── events/                   # 持久化事件账本
-├── terminal/                 # 本机服务与会话调度
-├── frontend/                 # React / TypeScript 工作台
-├── tests/                    # 自动化测试
-├── scripts/                  # 启动及源码打包辅助脚本
-├── data/                     # 受控的历史数据与市场规则样本
-└── assets/                   # 静态资源
-```
+## 兼容与历史记录
 
-**兼容性决定：** 当前不物理移动或重命名已有文档和程序目录；现有 README 链接、历史文档引用、测试与源码打包白名单依赖这些路径。以后确需迁移时，应单独审计引用、更新打包规则并完成回归测试。
+阶段报告保留当时测试结果和边界。旧阶段中关于 24 小时挑战的说明属于历史记录；该功能已获准移出产品范围，代码清理需另行完成。G1 自动预测挑战、通知、Brain、回测、实验报告和其他未获准删除的能力继续保留。
 
-## F事件研究补录
-
-- [F1–F3实现与验证](PHASE_F_READONLY_RESULTS.md)：两个已上传源码检查点、692项离线回归及只读边界。
-- [Polymarket研究使用说明](POLYMARKET_RESEARCH.md)：发现、结果选择、盘口/费用参数、关闭市场及官方结算查询。
-- [结构化测试摘要](F_TEST_RESULTS.json)：历史检查点与未完成项，不能代替真实资金验收。
-
-- [F4费用与成本研究](PHASE_F4_COST_RESEARCH.md)：曲线限定、逐档预算/滑点/深度计算和实际执行边界。
+公开仓库不得存放密钥、私人数据库、个人账户流水、运行日志或本机工作目录。
