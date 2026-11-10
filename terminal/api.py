@@ -146,6 +146,10 @@ def create_app(path=None):
 
     @app.middleware("http")
     async def local(request, call_next):
+        expected = getattr(app.state, "instance_id", None)
+        supplied = request.headers.get("x-smart-money-instance")
+        if (supplied and supplied != expected) or (getattr(app.state, "isolated_instance", False) and request.method != "GET" and supplied != expected):
+            return JSONResponse({"error": "服务实例不匹配"}, 409)
         host = request.headers.get("host", "")
         peer = request.client.host if request.client else None
         if not (local_source(peer, host) or (peer == 'testclient' and host == 'testserver')):
@@ -171,6 +175,8 @@ def create_app(path=None):
     @app.get("/api/health")
     def health():
         return {
+            "instance_id": getattr(app.state, "instance_id", None),
+            "pid": os.getpid(),
             "product": "Smart Money AI Trader",
             "version": "1.0 Beta",
             "database": rt().db.db.execute("SELECT 1").fetchone()[0] == 1,
@@ -193,6 +199,12 @@ def create_app(path=None):
     @app.get("/api/protection-report")
     def protection_report(id: int, client_id: str, before: int = 0):
         return rt().hosted_report(id, client_id, before)
+
+    @app.post("/api/instances/{instance_id}/shutdown")
+    def instance_shutdown(instance_id: str, body: dict):
+        if instance_id != getattr(app.state, "instance_id", None):
+            return JSONResponse({"error": "服务实例不匹配"}, 409)
+        return shutdown(body)
 
     @app.post("/api/shutdown")
     def shutdown(body: dict):

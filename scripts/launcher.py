@@ -143,15 +143,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--install-only", action="store_true", help="只检查并安装依赖，不启动服务")
     parser.add_argument("--no-browser", action="store_true", help="启动后不自动打开浏览器")
     parser.add_argument("--port", type=int, default=8785, help="本地服务端口，默认 8785")
+    parser.add_argument("--instance-id")
+    parser.add_argument("--ready-file")
     parsed = parser.parse_args(argv)
     if sys.version_info < (3, 11):
         announce("[错误] 需要 Python 3.11 或以上。官方下载：https://www.python.org/downloads/windows/")
         return 2
-    if not 1 <= parsed.port <= 65535:
+    if not (0 <= parsed.port <= 65535) or (parsed.port == 0 and not (parsed.instance_id and parsed.ready_file)):
         parser.error("--port 必须在 1 至 65535 之间")
 
     os.chdir(ROOT)
-    if not parsed.install_only:
+    if not parsed.install_only and not parsed.instance_id:
         check = status(parsed.port)
         if check == "ours":
             announce(f"[就绪] 检测到已运行的 {PRODUCT}：http://127.0.0.1:{parsed.port}")
@@ -174,6 +176,10 @@ def main(argv: list[str] | None = None) -> int:
     if parsed.no_browser:
         command.append("--no-browser")
     command.extend(["--port", str(parsed.port)])
+    if parsed.instance_id:
+        command.extend(["--instance-id", parsed.instance_id])
+    if parsed.ready_file:
+        command.extend(["--ready-file", parsed.ready_file])
     announce(f"[启动] 工作台地址：http://127.0.0.1:{parsed.port}")
     announce("[提示] 请保持此窗口打开；仅打开工作台不会主动创建交易会话。")
     try:
