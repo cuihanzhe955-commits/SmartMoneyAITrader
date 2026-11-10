@@ -134,7 +134,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 当前共享基线
 
-- GitHub main：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`（本次读取时核验）。
+- 本轮文档修订前 GitHub main 基线：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`；文档合并后以最新 main SHA 为准。
 - PR #2：文档方向分支，当前仍未合并；本次会继续修订。PR 不能替代本机工程核验。
 - 2026-11-10 历史本机审计记录：主运行目录 `E:\\user\\ChatGPT\\SmartMoneyAITrader`（无 Git）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件，必须只读保留。
 
