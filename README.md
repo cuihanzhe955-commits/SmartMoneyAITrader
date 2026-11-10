@@ -6,7 +6,7 @@
 
 ![Development](https://img.shields.io/badge/Status-G1%20Checkpoint-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、图表压力、Brain Worker 和 ConnectionResetError 仍有未关闭问题。PR #2 的 Windows CI 最近记录为 937 passed / 1 failed，失败原因是依赖审计 JSON 中的 npm lock SHA 过期。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
+> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、图表压力、Brain Worker 和 ConnectionResetError 仍有未关闭问题。PR #2 较早测试的 HEAD `d64371a` 曾记录 937 passed / 1 failed，失败原因是依赖审计 JSON 中的 npm lock SHA 与 lockfile 不一致；当前 PR HEAD `e5677c0` 尚无 Actions/check 结果，不能视为已通过。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
 > **当前交付目标：v0.1 单一现货纸面交易垂直切片。** 这只是第一里程碑；v1.0 仍保留现货/永续、模拟/真实交易的最终产品目标。
 
 ## 项目概览
