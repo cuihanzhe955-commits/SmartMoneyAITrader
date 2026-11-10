@@ -159,7 +159,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 当前 GitHub Actions 阻断
 
-PR #2 较早 HEAD `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression：**937 passed / 1 failed**。当前 PR 最新 HEAD 已更新为 `e5677c00e77234a4b508878d30a935fbcbe87c41`，截至本次核验该 SHA 的 Actions workflow runs 与 check runs 均为 0；因此旧失败仍是未关闭风险，且最新 HEAD 尚未获得 CI 验证。旧失败项为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，当前 `docs/DEPENDENCY_AUDIT.json` 的 npm lock SHA 与 `frontend/package-lock.json` 不一致。必须重新执行依赖审计；不能只手改 hash 或放宽测试。
+较早提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression：**937 passed / 1 failed**。这不是后续 PR HEAD 的测试结果。2026-11-11 只读核验时，PR #2 后续 HEAD 为 `40f47c3f58a31eab8786016b8e29320112b7f527`，该 SHA 的 Actions workflow runs 与 commit/check status 均为空；因此不能把旧的 937/1 归到最新 HEAD，也不能把没有检查结果视为通过。失败项为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，当时报告指出 `docs/DEPENDENCY_AUDIT.json` 的 npm lock SHA 与 `frontend/package-lock.json` 不一致。必须重新执行依赖审计并在最终 HEAD 运行检查；不能只手改 hash 或放宽测试。
 
 ## 当前集成问题
 
@@ -172,6 +172,6 @@ Copilot 先做只读本机与远端基线核验，提交工作树差异和风险
 
 ### PR #2 最新状态（2026-11-11）
 
-- PR #2 仍为 Draft / Open，未合并；当前 head `e5677c00e77234a4b508878d30a935fbcbe87c41`，base main `4dbda5fc797f87b45c258456ff16dcfad3ac126c`。
-- 与 main 比较：ahead 29、behind 0；涉及 11 个文档文件。最新 head 没有 Actions workflow run 或 check run。不得把旧 head 的 937/1 结果说成最新 head 的测试结果。
+- PR #2 仍为 Draft / Open，未合并；2026-11-11 只读核验时 head 为 `40f47c3f58a31eab8786016b8e29320112b7f527`，base main `4dbda5fc797f87b45c258456ff16dcfad3ac126c`。这是更新文档前的状态快照；此后任何提交都会推进 head，实时 SHA 以 PR 页面为准。
+- 与 main 比较：核验时 ahead 45、behind 0；涉及 11 个文档文件。该 head 没有 Actions workflow run 或 check run。不得把旧提交的 937/1 结果说成最新 head 的测试结果。
 - 合并前必须确保针对最新 head 的适当检查已运行并通过；GitHub 官方说明，要求的状态检查必须在最新 commit SHA 上成功，旧 SHA 的成功结果不能替代。
