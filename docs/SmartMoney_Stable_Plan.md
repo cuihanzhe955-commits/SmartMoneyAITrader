@@ -495,7 +495,7 @@ UI 必须显示提案生成时间、行情源时间、参考价格、剩余有�
 ### 16.11 Codex 下一阶段接续提示词（S0 稳定性优先）
 
 ~~~text
-继续 SmartMoneyAITrader。唯一开发基线为 GitHub main 4dbda5fc797f87b45c258456ff16dcfad3ac126c。先完整阅读 docs/SmartMoney_Stable_Plan.md 的第1、2、3、4、12、13、15、16节，以及 docs/PROGRESS_STATUS.md、docs/MAIN_INTEGRATION_20261110.md、G1/G2相关检查点和 AI_DEVELOPMENT_COLLABORATION.md。不得用旧分支、旧本地摘要或历史测试数字替代当前源码与证据。
+继续 SmartMoneyAITrader。唯一代码开发基线为 GitHub main 4dbda5fc797f87b45c258456ff16dcfad3ac126c。产品升级规范目前记录在尚待所有者审核的 Draft PR #2（分支 docs/v1.1-product-roadmap-and-proposal-freshness-20261110）中；若 PR #2 尚未合并，先只读 fetch 该分支，并通过 git show 读取该分支的 docs/SmartMoney_Stable_Plan.md 第16节及 docs/PROGRESS_STATUS.md，不要合并 PR。然后阅读 main 基线中的主计划第1、2、3、4、12、13、15节、docs/MAIN_INTEGRATION_20261110.md、G1/G2检查点和 AI_DEVELOPMENT_COLLABORATION.md。不得用旧分支、旧本地摘要或历史测试数字替代当前源码与证据。
 
 本轮只执行 S0 集成稳定性修复，不同时启动 UI 大改、多角色 AI 重构或策略参数优化。先只读核验当前分支、工作树、main HEAD、相关调用链、测试入口和已知失败日志；重点调查：
 1. protection_browser.py 的保护单释放确认超时；
