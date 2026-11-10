@@ -2,7 +2,7 @@
 
 历史基线日期：2026-11-06。以下 A–I 阶段记录保留当时的工程证据；当前决策和状态见文末 2026-11-11 补充。
 
-**当前证据：** G1自动挑战调度、恢复、统计和UI已实现；840项离线回归通过，100轮Model Mock与浏览器检查通过。见[G1验收](PHASE_G1_CHALLENGE.md)、[G测试摘要](G_TEST_RESULTS.json)。真实100轮、通知闭环及独立影子/观察模式未验收，不能将测试替身当真实成绩。F历史814项与真实公开SKIP闭环证据保留。
+**历史工程证据（截至 2026-11-06）：** G1 自动挑战调度、恢复、统计和 UI 已实现；当时记录 840 项离线回归通过，100 轮 Model Mock 与浏览器检查通过。此处是历史证据，不代表本轮或当前 HEAD 重新运行。见[G1验收](PHASE_G1_CHALLENGE.md)、[G测试摘要](G_TEST_RESULTS.json)。真实100轮、通知闭环及独立影子/观察模式未验收，不能将测试替身当真实成绩。F历史814项与真实公开SKIP闭环证据保留。
 
 ## 1. 进度口径
 
@@ -18,7 +18,7 @@
 
 Mock、历史回放、公开只读行情、模拟成交、界面展示和文档声明均不能相互替代。
 
-## 2. A–I 阶段当前状态
+## 2. A–I 阶段历史状态快照（基于 2026-11-06 工程记录）
 
 | 阶段 | 当前可确认状态 | 尚未关闭的门槛 |
 |---|---|---|
@@ -75,13 +75,13 @@ E1/E2/E3 非资金工程验收通过，完整 E 平台门槛仍开放。详见 [
 
 D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)，市场发现见 [PHASE_D3_DISCOVERY.md](PHASE_D3_DISCOVERY.md)，监控池边界见 [PHASE_D4_MONITOR_POOL.md](PHASE_D4_MONITOR_POOL.md)。
 
-## 4. 当前优先未完成项
+## 4. 历史 A–I 开发队列（截至 2026-11-06；不再代表当前执行优先级）
 
 1. **E 外部门槛继续单列。** Binance地区限制、Gate源时间与私有执行能力缺口、三平台真实/demo账户联调及资金验收未关闭；不能用本地通过数抵消。
-2. **当前阶段：F非资金工程收尾。** 研究与参考模拟/Brain实现和验收见[F记录](PHASE_F_RESULTS.md)，下一阶段G可按主计划启动；不据此关闭外部平台或资金验收。
+2. **历史阶段记录：F 非资金工程收尾。** 该条反映 2026-11-06 的 A–I 阶段安排；当前产品交付顺序已由 2026-11-11 的 v0.1 范围合同更新，不应据此启动 G2 或其他扩张任务。
 3. **F：事件闭环。** 已有受限v1参考账本、官方幂等结算、状态恢复与真实公开SKIP闭环；平台忠实成本/资产与其他协议仍待逐项验收。
 4. **F：AI Memory。** 已实现paper观察/结果与AI复盘、持久化/版本/检索/导入导出和配对评价；真实Provider联调与策略有效性证据未证明。
-5. **G：下一步为G2异步通知。** G1自动挑战已有离线100轮和UI证据；完整消息闭环、观察/影子模式及真实持续运行待完成。
+5. **历史 G 阶段安排：** G2 异步通知曾列为下一工程任务；通知系统仍保留，但当前先完成 v0.1 垂直切片，不因本条自动启动 G2。
 6. **H：AI Intelligence Center 与模型迁移。** 完成 Provider 配置、连接测试、预算、回退、模型切换、通知和记忆管理的 UI 闭环。
 7. **I：发布准备。** 完成干净 Windows 环境、安装/升级/回滚、日志脱敏、依赖复审、完整回归和按平台/产品划分的能力清单。
 
@@ -107,7 +107,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 7. 权威计划与证据入口
 
-后续任务以 GitHub main 的 [SmartMoney_Stable_Plan.md](SmartMoney_Stable_Plan.md) 最新版本为需求真源；若其他路线图或旧本地记录冲突，以主计划最新修订和当前源码/验收证据为准。
+需求范围以主计划最新修订和 [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md) 为准；PR #2 尚未合并时，其变更仍是待审查提案，不得描述为 main 已包含。实际完成状态以当前源码、测试和阶段证据为准；旧本地记录与 GitHub 状态不一致时先只读核验，不覆盖本地独有成果。
 
 - [F4成本研究记录](PHASE_F4_COST_RESEARCH.md)
 - [F1–F3只读记录](PHASE_F_READONLY_RESULTS.md)
@@ -159,7 +159,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 当前 GitHub Actions 阻断
 
-较早提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression：**937 passed / 1 failed**。这不是后续 PR HEAD 的测试结果。2026-11-11 只读核验时，PR #2 后续 HEAD 为 `40f47c3f58a31eab8786016b8e29320112b7f527`，该 SHA 的 Actions workflow runs 与 commit/check status 均为空；因此不能把旧的 937/1 归到最新 HEAD，也不能把没有检查结果视为通过。失败项为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，当时报告指出 `docs/DEPENDENCY_AUDIT.json` 的 npm lock SHA 与 `frontend/package-lock.json` 不一致。必须重新执行依赖审计并在最终 HEAD 运行检查；不能只手改 hash 或放宽测试。
+历史提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression 曾记录 **937 passed / 1 failed**，失败项为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，原因是 `docs/DEPENDENCY_AUDIT.json` 中的 npm lock SHA 与 `frontend/package-lock.json` 不一致。该结果只属于历史 SHA。后续提交 `40f47c3f58a31eab8786016b8e29320112b7f527` 曾触发 Windows paper regression run #5（当时在 `tests/run_offline.py` 步骤运行中）；当前分支后续提交的检查状态必须以 PR #2 实时 Checks 为准。每次提交后都要确认检查对应最新 HEAD。依赖审计必须重新执行并生成可复核报告，不能只手改 hash 或放宽测试。
 
 ## 当前集成问题
 
@@ -167,11 +167,10 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 下一步唯一任务
 
-Copilot 先做只读本机与远端基线核验，提交工作树差异和风险清单；之后按 v0.1 范围合同完成最小垂直切片。不得先重写 UI、重构交易引擎或删除研究模块。
+当前唯一开发主线是 v0.1 垂直切片。Copilot 开始写代码前，先只读核验远端 main、PR #2 和本机全部候选工程/工作树，提交差异与风险清单；确认后再按 v0.1 范围合同分步实现。不得先重写 UI、重构交易引擎或删除研究模块；24 小时翻倍挑战按 §16.13.2 单独审计后清理，其他既有模块不得连带删除。
 
 
-### PR #2 最新状态（2026-11-11）
+### PR #2 状态核验规则（2026-11-11）
 
-- PR #2 仍为 Draft / Open，未合并；2026-11-11 只读核验时 head 为 `40f47c3f58a31eab8786016b8e29320112b7f527`，base main `4dbda5fc797f87b45c258456ff16dcfad3ac126c`。这是更新文档前的状态快照；此后任何提交都会推进 head，实时 SHA 以 PR 页面为准。
-- 与 main 比较：核验时 ahead 45、behind 0；涉及 11 个文档文件。该 head 没有 Actions workflow run 或 check run。不得把旧提交的 937/1 结果说成最新 head 的测试结果。
-- 合并前必须确保针对最新 head 的适当检查已运行并通过；GitHub 官方说明，要求的状态检查必须在最新 commit SHA 上成功，旧 SHA 的成功结果不能替代。
+- PR #2 是文档/产品范围提案，仍为 Draft / Open，未合并；main 不因本 PR 自动改变。
+- 提交 `40f47c3` 曾有 Windows paper regression run #5；当时离线回归步骤仍在运行。该结果不等于最终成功。后续提交的 head SHA、与 main 的 ahead/behind 数量、变更文件数和 Checks 状态会变化，不在静态文档中固定写死；请以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最新 head 并通过。

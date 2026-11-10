@@ -52,7 +52,7 @@ v0.1 AI 默认关闭。开启后仅解释规则信号、列明风险或复盘历
 ## 7. 发布与协作风险
 
 - 938 项离线回归是历史工程证据，不能代替浏览器、Windows 干净安装、平台 demo 或真实账户验收。
-- 较早提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression 曾记录 **937 passed / 1 failed**。失败测试为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，报告原因是 `docs/DEPENDENCY_AUDIT.json` 中的 npm lock SHA 与 `frontend/package-lock.json` 当时内容不一致。2026-11-11 对后续 PR #2 HEAD `40f47c3f58a31eab8786016b8e29320112b7f527` 的只读核验未发现 Actions workflow run 或 commit/check status；这不是最新 HEAD 的测试结果，也不构成通过证据。必须在最终 HEAD 重新执行依赖审计并验证，不能只手改 SHA、降低测试或跳过测试。
+- 较早提交 `d64371abfcef4ebdbd71d05a62ebe0e6ce6ab57d` 的 Windows paper regression 曾记录 **937 passed / 1 failed**。失败测试为 `tests/test_component_audit.py::test_published_audit_matches_exact_dependency_inputs_and_known_advisory_results`，报告原因是 `docs/DEPENDENCY_AUDIT.json` 中的 npm lock SHA 与 `frontend/package-lock.json` 当时内容不一致。后续提交 `40f47c3f58a31eab8786016b8e29320112b7f527` 曾触发 Windows paper regression run #5（当时离线回归步骤仍在运行）；后续 PR HEAD 的检查状态请以 [PR #2 Checks](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。历史测试记录不能替代最终 HEAD 验收；必须重新执行依赖审计并验证，不能只手改 SHA、降低测试或跳过测试。
 - 其他已知集成阻断：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收存在 ConnectionResetError。
 - 当前本机工作树信息来自 2026-11-10 历史审计；Copilot 开发前必须重新核验，不得将历史 SHA 当成实时状态。
 

@@ -4,9 +4,9 @@
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-G1%20Checkpoint-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-v0.1%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、图表压力、Brain Worker 和 ConnectionResetError 仍有未关闭问题。2026-11-11 对 PR #2 的只读核验显示：核验时分支 HEAD 为 `40f47c3`，相对 main `4dbda5f` ahead 45 / behind 0，涉及 11 个文档文件；该 HEAD 没有 Actions workflow run 或 commit/check status。更早的提交 `d64371a` 曾记录 937 passed / 1 failed，失败原因是依赖审计 JSON 中的 npm lock SHA 与 lockfile 不一致；这不是 `40f47c3` 的测试结果。后续提交会改变 PR HEAD，实时状态以 [PR #2](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
+> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、图表压力、Brain Worker 和 ConnectionResetError 仍有未关闭问题。较早提交 `d64371a` 曾记录 937 passed / 1 failed（依赖审计 JSON 中的 npm lock SHA 与 lockfile 不一致），该结果只属于当时提交。提交 `40f47c3` 曾触发 Windows paper regression run #5，当时离线回归步骤仍在运行；此后的 PR 提交状态会变化，不能沿用旧检查结果。最新提交与 CI 结果请以 [PR #2 Checks](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
 > **当前交付目标：v0.1 单一现货纸面交易垂直切片。** 这只是第一里程碑；v1.0 仍保留现货/永续、模拟/真实交易的最终产品目标。
 
 ## 项目概览
@@ -125,7 +125,7 @@ flowchart LR
 
 ## 快速开始（本地历史模拟）
 
-**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为G1开发检查点，**不是 Stable，完整平台与实盘验收未通过**。
+**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为 v0.1 产品范围收敛中的开发检查点，**不是 Stable，v0.1 垂直切片尚待实现与验收，完整平台与实盘验收也未通过**。
 
 **无需安装 Git 也能体验**：点击本仓库的 **Code → Download ZIP**，解压后进入包含 start.bat 的项目根目录，**双击 start.bat**。喜欢命令行的开发者可以通过 Git 克隆：
 
@@ -137,7 +137,7 @@ cd SmartMoneyAITrader
 
 智能启动器会检查 Python 版本、已有本机服务与端口、项目虚拟环境和 requirements.txt 的依赖；**缺少项目依赖时自动安装到 .venv**，已安装则跳过。首次安装需要网络；没有 Python 时，会提示前往官方页面安装，而不是静默修改系统环境。想只准备依赖、不启动服务，可使用 install.bat。
 
-正常启动后访问 **http://127.0.0.1:8785**；运行期间保持命令行窗口打开。进入总览，选择「配置普通交易」→ **内置历史归档 + 规则引擎 + 本地模拟**，创建会话后再点击「开始运行」。结束时使用 stop.bat 安全退出。也可创建公开现货的动态模拟会话；地区或源时间不满足条件时显示拒绝原因，内置历史模拟仍可使用。
+正常启动后访问 **http://127.0.0.1:8785**；运行期间保持命令行窗口打开。**注意：当前源码界面尚未完成 v0.1 四入口收敛，以下操作仍按现有 G1 检查点的界面组织说明，不代表目标 UI 已交付。**进入总览，选择「配置普通交易」→ **内置历史归档 + 规则引擎 + 本地模拟**，创建会话后再点击「开始运行」。结束时使用 stop.bat 安全退出。也可创建公开现货的动态模拟会话；地区或源时间不满足条件时显示拒绝原因，内置历史模拟仍可使用。
 
 **遇到 Python 未识别、pip 安装失败、端口占用或刷新后打不开？** 请查看 [Windows 快速启动与常见问题](docs/WINDOWS_QUICK_START.md)。交易所接入、CSV 格式、风控细节及运行边界请阅读 [完整使用说明](使用说明.md)。
 
