@@ -28,3 +28,12 @@
 因此上一轮整体自主验收结论仍为 FAIL。合并用于保存最新开发成果，不改变该结论。
 
 完整本地报告、日志、临时数据库、安装目录和用户路径不进入公开提交。
+
+## 合并后验证
+
+- 集成提交 09792e4：`python -X utf8 -B tests/run_offline.py`，**938 passed / 0 failed / 0 skipped**，77.89 秒，退出码 0。
+- `npm run build --prefix frontend`：TypeScript 与 Vite 通过，退出码 0；保留第三方 use client 提示。
+- 源码包白名单敏感形态扫描：253 个跟踪文件，0 命中。未包含本地完整报告、凭据、数据库、日志、venv 或 node_modules。
+- 唯一合并冲突为打包文档白名单，保留 PR1_REVIEW_FINDINGS.md 与 G2_OUTBOX_CHECKPOINT.md，并加入本摘要。
+- main 用作统一开发基线；原分支保留历史，不 force-push、不删除分支。G2 仍未接入生产 Runtime/UI，不据模块合并声称通知闭环完成。
+- 本轮没有重新执行上一节失败的浏览器压力/保护单项目；已知验收阻碍不因 938 项后端通过而消失。

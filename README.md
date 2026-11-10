@@ -6,7 +6,7 @@
 
 ![Development](https://img.shields.io/badge/Status-G1%20Checkpoint-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前开发检查点：v1.0-G1-challenge-checkpoint（2026-11-06）。** G1自动预测挑战已接入策略实验室，支持逐轮发现、预测、官方结算推进、恢复与报告；全量隔离回归**840通过、0失败**，前端和浏览器检查通过。100轮证据为Model Mock工程验证，G通知闭环和真实市场/模型持续运行仍待验收。见[G1记录](docs/PHASE_G1_CHALLENGE.md)、[G测试摘要](docs/G_TEST_RESULTS.json)。[F研究候选](docs/PHASE_F_RESULTS.md)保持历史证据，当前不是Stable。
+> **当前为 G1 + G2 开发集成检查点（2026-11-10），不是 Stable。** 已汇总 G1 修复、Windows 实例隔离和 G2 通知检查点。合并后后端 **938 通过、0 失败**，前端构建通过；保护单浏览器、图表压力与 Brain 工作线程异常仍待解决，完整验收未通过。G2 生产 Runtime/UI 通知闭环及真实账户验证尚未完成。见[集成结果与已知问题](docs/MAIN_INTEGRATION_20261110.md)。[G1 历史记录](docs/PHASE_G1_CHALLENGE.md)与[F 历史记录](docs/PHASE_F_RESULTS.md)保留原验收时点。
 
 ## 项目概览
 
