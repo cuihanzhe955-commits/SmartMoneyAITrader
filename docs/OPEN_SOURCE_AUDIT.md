@@ -42,16 +42,8 @@ python scripts/verify_indicator_reference.py --reference-path <研究环境site-
 日常启动不需要运行审计命令，也不需要安装 TA-Lib。开发审查不读取 API 密钥、不连接交易账户。
 
 
-## 2026-11-11 后续候选补充（未安装、未批准集成）
+## 2026-11-11 开发复用审查规则
 
-以下项目来自新一轮产品审计候选，须与本文件前文 D 阶段已经完成的 POC/许可证决定区分。列为候选不代表已完成采用或依赖变更。
+本轮不预先指定必须新增的第三方依赖。每项功能开发前，先检查当前仓库已有模块、接口和测试，再搜索维护活跃、许可证兼容的成熟开源实现。仅当确认现有实现存在明确缺口时，才提出候选。
 
-| 项目 | 初步许可证 | 可评估方向 | 采用前置条件 |
-|---|---|---|---|
-| [QuantStats](https://github.com/ranaroussi/quantstats) | Apache-2.0 | 净值、回撤、风险统计和报告 | 核对输入口径、维护状态、版本、Windows 兼容与报告测试；不替代交易账本 |
-| [Optuna](https://github.com/optuna/optuna) | MIT | 离线参数搜索 | 先建立样本外/Walk-forward 和过拟合控制，不在生产运行时自动调参 |
-| [Hypothesis](https://github.com/HypothesisWorks/hypothesis) | MPL-2.0 | 订单状态、资金守恒、风险边界的属性测试 | 评估依赖与许可证，先写隔离属性测试 POC |
-
-Hummingbot、Jesse、Freqtrade 仍沿用本文件和 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md) 的历史结论；不要把“研究参考”改写成“批准复制代码”。Freqtrade GPL-3.0 必须先做分发合规审查。
-
-新候选采用流程：固定 tag/commit → 许可证/NOTICE → 维护与安全 → Windows/Python/Node 兼容 → 现有实现重叠 → 隔离 POC → 回归 → 回滚方案。现有实现足够时不引入依赖。
+每个候选必须记录固定 tag/commit、许可证与 NOTICE、维护和安全状态、Windows/Python/Node 兼容性、与现有实现的重叠、依赖体积、隔离 POC、回归结果和回滚方案。研究参考不等于批准复制代码或新增依赖；必须先获得项目所有者批准。现有实现足够时优先复用，不为追求技术栈数量引入新依赖。
