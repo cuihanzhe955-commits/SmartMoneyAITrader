@@ -239,16 +239,20 @@ class Brain:
                     db.execute("INSERT INTO brain_cursors VALUES(?,?) ON CONFLICT(id) DO UPDATE SET value=excluded.value",(table,row["id"]))
 
     def reflection_tick(self,provider_factory,stop):
-        if stop.is_set():return
+        if stop.is_set() or not self.ready:return
         settings=self.settings()
-        if not settings["enabled"] or not settings["auto_reflect"]:return
+        if not settings["enabled"] or not settings["auto_reflect"]:
+            self.reflection_error=""
+            return
         now=self.clock()
         with self.db() as db:
             row=db.execute("""SELECT * FROM brain_reflections
                 WHERE status IN ('PENDING','RUNNING') AND next_try<=?
                 ORDER BY rowid LIMIT 1""",(now,)).fetchone()
         if row is None:
-            self.reflection_error=""
+            with self.db() as db:
+                active=db.execute("SELECT 1 FROM brain_reflections WHERE status='RUNNING' LIMIT 1").fetchone()
+            if not active:self.reflection_error=""
             return
         result_id=digest(row["scope"]+":"+row["id"]+":ai-reflection")
         # If the result was committed but the job acknowledgement was interrupted,
