@@ -324,6 +324,8 @@ def test_reflection_interval_throttles_next_job_after_completion(tmp_path):
     with b.db() as db:
         states={r['id']:r['status'] for r in db.execute("SELECT id,status FROM brain_reflections")}
         assert states=={'first':'COMPLETED','second':'PENDING'}
+    # The throttle survives a process restart; it is not inferred from a live worker.
+    b=Brain(b.path,clock=lambda:clock[0]);b.setup()
     blocked=Mock(side_effect=AssertionError("global interval must block the next provider call"))
     b.reflection_tick(blocked,threading.Event())
     blocked.assert_not_called()
@@ -414,6 +416,25 @@ def test_concurrent_reflection_ticks_claim_one_job_once(tmp_path):
         job=db.execute("SELECT status,attempts,lease_token FROM brain_reflections WHERE id='job'").fetchone()
         assert job["status"]=="COMPLETED" and job["attempts"]==1 and job["lease_token"]==""
         assert db.execute("SELECT calls FROM brain_ai_usage").fetchone()[0]==1
+
+
+
+def test_reflection_daily_budget_reservation_limits_distinct_jobs(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        for job in ('first','second'):
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+                VALUES(?, 'spot:okx:1', '{}','PENDING',0,0,'','',0)""",(job,))
+    p=Mock();p.c=dict(model='mock',timeout=5,calls=1,interval=0)
+    p.chat.return_value=json.dumps(dict(observation='结果',hypothesis='待验证',invalidation='证据不符'))
+    b.reflection_tick(lambda:p,threading.Event())
+    b.reflection_tick(lambda:p,threading.Event())
+    assert p.chat.call_count==1
+    with b.db() as db:
+        assert db.execute("SELECT calls FROM brain_ai_usage").fetchone()[0]==1
+        states={r['id']:r['status'] for r in db.execute("SELECT id,status FROM brain_reflections")}
+        assert states=={'first':'COMPLETED','second':'PENDING'}
 
 
 def test_successful_brain_sync_does_not_clear_runtime_error(tmp_path):
