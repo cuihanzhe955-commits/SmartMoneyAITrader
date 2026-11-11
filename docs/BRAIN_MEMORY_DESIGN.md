@@ -35,3 +35,16 @@ SQLite增量表：`brain_preferences`、`brain_memories`、`brain_versions`、`b
 `GET /api/brain`搜索；`POST /api/brain/settings`开关；`POST /api/brain/correct`版本纠错；`GET /api/brain/export`导出；`POST /api/brain/restore`恢复（8MB上限）；`POST /api/brain/retry`重试失败复盘。完整导出上限5000条记忆、20000个历史版本；UI最近50条，来源列表有界。
 
 校验SHA256检测意外损坏，不是来源签名或资金验证。导出可能包含私人研究记录，保存在用户选择的位置，不进入公开发布包。回滚保留当前库及新增表。
+
+
+## 2026-11-11：复盘任务租约与幂等恢复
+
+现货 AI 复盘任务使用 `brain_reflections.next_try` 作为到期时间，并新增 `lease_token` 标识当前任务持有者。旧数据库通过 `PRAGMA table_info` 检查后执行增量 `ALTER TABLE`，不重建或覆盖已有表和任务。
+
+任务领取在 SQLite 写事务中完成；同一 Brain 数据库同一时刻只允许一个未过期的 RUNNING 复盘租约。进程中断或数据库忙导致任务未确认时，租约到期后可重新领取。完成和失败状态更新必须匹配当前 lease_token，过期 worker 不能覆盖新持有者的状态。手动 retry 不得抢占仍有效的租约。
+
+AI 结果以 `digest(scope + ':' + job_id + ':ai-reflection')` 作为稳定记忆 ID。若结果记忆已写入、但任务 COMPLETED 确认因锁冲突失败，下一次领取会先检查该 ID，直接补齐任务状态，不再次调用模型。SQLite 事务不跨越模型网络调用。
+
+外部模型调用无法与本地 SQLite 事务构成分布式 exactly-once：若进程在模型响应返回后、结果持久化前崩溃，恢复时可能再次调用模型。系统保证的是任务可恢复、已持久化结果幂等、旧租约不能覆盖新状态；不宣称外部模型调用严格一次。
+
+Brain 同步、AI 复盘和 EventLab/Runtime 外部错误分别保存；API 的 `error` 字段聚合展示，避免某个工作线程成功时清空另一个线程仍存在的错误。
