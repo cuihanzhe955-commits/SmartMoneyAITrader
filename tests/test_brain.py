@@ -117,7 +117,9 @@ def test_brain_api_does_not_touch_execution_and_has_actionable_errors(tmp_path):
 
 def test_spot_reflection_is_durable_budgeted_and_schema_checked(tmp_path):
     b,clock=brain(tmp_path);source={'record':{'pnl':1,'fee':.1},'source_id':1,'source_table':'fills'}
-    with b.db(True) as db:db.execute("INSERT INTO brain_reflections VALUES('job','spot:okx:1',?,'PENDING',0,0,'')",(canonical(source),))
+    with b.db(True) as db:db.execute("""INSERT INTO brain_reflections
+        (id,scope,data,status,attempts,next_try,error,lease_token)
+        VALUES('job','spot:okx:1',?,'PENDING',0,0,'','')""",(canonical(source),))
     p=Mock();p.c=dict(model='mock',timeout=5,calls=1,interval=1);p.chat.return_value=json.dumps(dict(observation='本轮盈利',hypothesis='需要更多样本',invalidation='样本外不通过'))
     stop=threading.Event();b.reflection_tick(lambda:p,stop)
     assert b.search()['rows'][0]['status']=='hypothesis'
@@ -129,15 +131,104 @@ def test_spot_reflection_is_durable_budgeted_and_schema_checked(tmp_path):
 
 def test_spot_reflection_failure_preserves_source_and_recovery(tmp_path):
     b,clock=brain(tmp_path);b.put('spot:okx:1','fill1','reflection',{'pnl':1},NOW,status='confirmed_result')
-    with b.db(True) as db:db.execute("INSERT INTO brain_reflections VALUES('job','spot:okx:1','{}','PENDING',0,0,'')")
+    with b.db(True) as db:db.execute("""INSERT INTO brain_reflections
+        (id,scope,data,status,attempts,next_try,error,lease_token)
+        VALUES('job','spot:okx:1','{}','PENDING',0,0,'','')""")
     p=Mock();p.c=dict(model='mock',timeout=5,calls=4,interval=1);p.chat.return_value='bad json'
     b.reflection_tick(lambda:p,threading.Event());assert b.search()['reflection_jobs'][0]['status']=='FAILED'
     assert b.search()['rows'][0]['status']=='confirmed_result'
     b.retry('job');clock[0]+=2;p.chat.return_value=json.dumps(dict(observation='证据',hypothesis='待验证',invalidation='不匹配'))
     b.reflection_tick(lambda:p,threading.Event());assert len(b.search()['rows'])==2
-    with b.db(True) as db:db.execute("UPDATE brain_reflections SET status='RUNNING'")
+    with b.db(True) as db:
+        db.execute("UPDATE brain_reflections SET status='RUNNING',next_try=?",(clock[0]+1,))
+    clock[0]+=2
     b.recover();assert b.search()['reflection_jobs'][0]['status']=='PENDING'
 
+
+
+def test_legacy_reflection_table_is_migrated_without_losing_jobs(tmp_path):
+    path=tmp_path/'legacy.db'
+    with sqlite3.connect(path) as db:
+        db.execute("""CREATE TABLE brain_reflections(
+            id TEXT PRIMARY KEY,scope TEXT,data TEXT,status TEXT,attempts INTEGER,next_try REAL,error TEXT)""")
+        db.execute("INSERT INTO brain_reflections VALUES('legacy','spot:okx:1','{}','PENDING',0,0,'')")
+    b=Brain(path,clock=lambda:float(NOW));b.setup()
+    with b.db() as db:
+        columns={row["name"] for row in db.execute("PRAGMA table_info(brain_reflections)")}
+        assert "lease_token" in columns
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='legacy'").fetchone()[0]=="PENDING"
+
+
+def test_reflection_result_is_reused_after_busy_completion_ack(tmp_path):
+    b,clock=brain(tmp_path)
+    source={'record':{'pnl':1,'fee':.1},'source_id':1,'source_table':'fills'}
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token)
+            VALUES('job','spot:okx:1',?,'PENDING',0,0,'','')""",(canonical(source),))
+    p=Mock();p.c=dict(model='mock',timeout=5,calls=4,interval=1)
+    p.chat.return_value=json.dumps(dict(observation='结果',hypothesis='只保存一次',invalidation='后续证据不符'))
+    original_put=b.put
+    held={}
+    def put_then_lock(scope,source_key,kind,data,source_time,**kwargs):
+        mid=original_put(scope,source_key,kind,data,source_time,**kwargs)
+        lock=sqlite3.connect(b.path,timeout=.05)
+        lock.execute("BEGIN IMMEDIATE")
+        held["db"]=lock
+        return mid
+    b.put=put_then_lock
+    with pytest.raises(Exception) as caught:
+        b.reflection_tick(lambda:p,threading.Event())
+    assert isinstance(caught.value, __import__('ai.worker_policy',fromlist=['BrainBusy']).BrainBusy)
+    held["db"].rollback();held["db"].close()
+    with b.db() as db:
+        job=db.execute("SELECT status,next_try FROM brain_reflections WHERE id='job'").fetchone()
+        assert job["status"]=="RUNNING"
+        assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==1
+    clock[0]+=36
+    unavailable=Mock(side_effect=AssertionError("saved result must not call AI again"))
+    b.reflection_tick(unavailable,threading.Event())
+    unavailable.assert_not_called()
+    assert p.chat.call_count==1
+    assert b.search()["reflection_jobs"][0]["status"]=="COMPLETED"
+    assert b.search()["total"]==1
+
+
+def test_expired_reflection_lease_fences_stale_worker_result(tmp_path):
+    b,clock=brain(tmp_path)
+    source={'record':{'pnl':1},'source_id':2,'source_table':'fills'}
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token)
+            VALUES('job','spot:okx:1',?,'PENDING',0,0,'','')""",(canonical(source),))
+    p2=Mock();p2.c=dict(model='second',timeout=5,calls=4,interval=1)
+    p2.chat.return_value=json.dumps(dict(observation='第二次',hypothesis='新租约结果',invalidation='证据反驳'))
+    p1=Mock();p1.c=dict(model='first',timeout=5,calls=4,interval=1)
+    def slow_first_call(*args):
+        clock[0]+=36
+        b.reflection_tick(lambda:p2,threading.Event())
+        return json.dumps(dict(observation='第一次',hypothesis='过期租约结果',invalidation='证据反驳'))
+    p1.chat.side_effect=slow_first_call
+    b.reflection_tick(lambda:p1,threading.Event())
+    assert p1.chat.call_count==1 and p2.chat.call_count==1
+    with b.db() as db:
+        job=db.execute("SELECT status,attempts,lease_token FROM brain_reflections WHERE id='job'").fetchone()
+        assert job["status"]=="COMPLETED" and job["attempts"]==2 and job["lease_token"]==""
+    memory=b.search()["rows"][0]
+    assert memory["data"]["hypothesis"]=="新租约结果"
+
+
+def test_manual_retry_waits_for_running_lease_expiry(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token)
+            VALUES('job','spot:okx:1','{}','RUNNING',1,?,'','active')""",(clock[0]+5,))
+    with pytest.raises(ValueError,match="租约"):
+        b.retry("job")
+    clock[0]+=6
+    assert b.retry("job")=={"ok":True}
+    assert b.search()["reflection_jobs"][0]["status"]=="PENDING"
 
 def test_live_events_are_never_ingested_into_paper_memory(tmp_path):
     rt=Runtime(tmp_path)
