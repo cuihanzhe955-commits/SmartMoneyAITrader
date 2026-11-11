@@ -288,12 +288,14 @@ class Brain:
             db.execute("""UPDATE brain_reflections
                 SET status='PENDING',lease_token='',lease_until=0,next_try=0
                 WHERE status='RUNNING' AND lease_until<=?""",(now,))
+            active=db.execute("""SELECT 1 FROM brain_reflections
+                WHERE status='RUNNING' AND lease_until>? LIMIT 1""",(now,)).fetchone()
+            if active:return
             row=db.execute("""SELECT * FROM brain_reflections
                 WHERE status='PENDING' AND next_try<=?
                 ORDER BY rowid LIMIT 1""",(now,)).fetchone()
             if row is None:
-                active=db.execute("SELECT 1 FROM brain_reflections WHERE status='RUNNING' LIMIT 1").fetchone()
-                if not active:self.reflection_error=""
+                self.reflection_error=""
                 return
             result_id=digest(row["scope"]+":"+row["id"]+":ai-reflection")
             # Legacy versions could commit a result before acknowledging the job.
