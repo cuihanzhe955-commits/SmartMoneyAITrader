@@ -66,6 +66,8 @@ AI 结果使用稳定 ID：`digest(scope + ':' + job_id + ':ai-reflection')`。�
 
 短暂 SQLite 锁冲突时，当前 Worker 最多进行四次提交尝试，采用可被 stop 中断的 50/100/200ms 退避，重用已经获得的同一份模型响应，不立即再次请求模型。若锁持续不可用、进程在结果持久化前崩溃，租约到期后仍可能再次调用模型；外部模型服务与本地 SQLite 无法构成分布式 exactly-once。系统保证已持久化结果幂等、旧令牌不能覆盖新状态，不宣称外部模型请求严格一次。
 
+恢复会扫描 PENDING、RUNNING、FAILED 任务的稳定结果 ID；发现旧版本已经持久化的结果时，直接补齐 COMPLETED，不再次调用模型。手动 retry 同样先检查稳定结果，避免把旧版“结果已保存、状态未确认”的任务重新送入模型。
+
 旧数据库通过 `PRAGMA table_info` 增量增加缺失字段，不重建表、不删除任务。升级时将旧 RUNNING 任务的 `next_try` 迁移为 `lease_until`；首次创建全局节流状态时，如发现旧版仍在冷却的任务或当天已有调用记录，则从迁移时刻保守开始计算 interval，避免升级后立即绕过旧节流。
 
 ### Worker 状态隔离
@@ -76,7 +78,7 @@ Runtime 初始化/恢复、EventLab 学习、Brain 同步、AI 复盘分别保�
 
 - 旧表无 lease_token、已有 lease_token 但无 lease_until 两种迁移路径；保留有效旧租约与全局冷却。
 - 过期租约恢复、未过期租约禁止手动 retry、过期令牌即使没有新 Worker 接管也不能提交。
-- 同一任务结果稳定 ID 恢复、结果与 COMPLETED 原子提交、瞬时 SQLite 锁冲突复用同一模型响应、持续锁冲突到期后恢复。
+- 同一任务结果稳定 ID 恢复（含旧版 FAILED/PENDING/RUNNING 遗留记录）、结果与 COMPLETED 原子提交、瞬时 SQLite 锁冲突复用同一模型响应、持续锁冲突到期后恢复。
 - 多线程同时 tick 只允许一个 Worker 领取；有效租约存在时即使 interval=0 也不启动第二个模型调用。
 - 完成后跨任务 interval、重启后 interval 持久化、手动 retry 不绕过 interval、每日调用预算对不同任务生效。
 - Runtime 与 Brain 同步错误隔离；原有并发 SQLite 4 线程/80 条唯一记录及 `PRAGMA integrity_check` 压力测试保留。
