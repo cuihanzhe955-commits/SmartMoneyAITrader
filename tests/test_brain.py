@@ -326,9 +326,10 @@ def test_reflection_interval_throttles_next_job_after_completion(tmp_path):
         assert states=={'first':'COMPLETED','second':'PENDING'}
     # The throttle survives a process restart; it is not inferred from a live worker.
     b=Brain(b.path,clock=lambda:clock[0]);b.setup()
-    blocked=Mock(side_effect=AssertionError("global interval must block the next provider call"))
-    b.reflection_tick(blocked,threading.Event())
-    blocked.assert_not_called()
+    blocked=Mock();blocked.c=dict(model='blocked',timeout=5,calls=10,interval=60)
+    blocked.chat.side_effect=AssertionError("global interval must block the next provider call")
+    b.reflection_tick(lambda:blocked,threading.Event())
+    blocked.chat.assert_not_called()
     clock[0]+=61
     second=Mock();second.c=dict(model='second',timeout=5,calls=10,interval=60);second.chat.return_value=result
     b.reflection_tick(lambda:second,threading.Event())
