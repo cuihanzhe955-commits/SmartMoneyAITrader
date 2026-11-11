@@ -287,11 +287,11 @@ class Brain:
             if (not current or current["status"] not in ("PENDING","RUNNING")
                     or current["next_try"]>now):return
             if db.execute("""SELECT 1 FROM brain_reflections
-                    WHERE status='RUNNING' AND next_try>? AND id!=?""",(now,current["id"])).fetchone():return
+                    WHERE status IN ('RUNNING','COMPLETED','FAILED') AND next_try>? AND id!=?""",(now,current["id"])).fetchone():return
             if db.execute("SELECT 1 FROM brain_memories WHERE id=?",(result_id,)).fetchone():
-                db.execute("""UPDATE brain_reflections SET status='COMPLETED',error='',
-                    lease_token='',next_try=? WHERE id=? AND status IN ('PENDING','RUNNING')
-                    AND next_try<=?""",(now,current["id"],now))
+                db.execute("""UPDATE brain_reflections SET status='COMPLETED',error='',lease_token=''
+                    WHERE id=? AND status IN ('PENDING','RUNNING') AND next_try<=?""",
+                    (current["id"],now))
                 self.reflection_error=""
                 return
         provider=provider_factory()
@@ -309,11 +309,11 @@ class Brain:
             if (not current or current["status"] not in ("PENDING","RUNNING")
                     or current["next_try"]>now):return
             if db.execute("""SELECT 1 FROM brain_reflections
-                    WHERE status='RUNNING' AND next_try>? AND id!=?""",(now,current["id"])).fetchone():return
+                    WHERE status IN ('RUNNING','COMPLETED','FAILED') AND next_try>? AND id!=?""",(now,current["id"])).fetchone():return
             if db.execute("SELECT 1 FROM brain_memories WHERE id=?",(result_id,)).fetchone():
-                db.execute("""UPDATE brain_reflections SET status='COMPLETED',error='',
-                    lease_token='',next_try=? WHERE id=? AND status IN ('PENDING','RUNNING')
-                    AND next_try<=?""",(now,current["id"],now))
+                db.execute("""UPDATE brain_reflections SET status='COMPLETED',error='',lease_token=''
+                    WHERE id=? AND status IN ('PENDING','RUNNING') AND next_try<=?""",
+                    (current["id"],now))
                 self.reflection_error=""
                 return
             usage=db.execute("SELECT calls FROM brain_ai_usage WHERE day=?",(day,)).fetchone()
