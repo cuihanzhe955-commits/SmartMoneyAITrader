@@ -144,7 +144,8 @@ def test_spot_reflection_failure_preserves_source_and_recovery(tmp_path):
     with b.db(True) as db:
         db.execute("UPDATE brain_reflections SET status='RUNNING',next_try=?,lease_until=?",(clock[0]+1,clock[0]+1))
     clock[0]+=2
-    b.recover();assert b.search()['reflection_jobs'][0]['status']=='PENDING'
+    # The durable result already exists, so recovery must acknowledge it, not requeue AI.
+    b.recover();assert b.search()['reflection_jobs'][0]['status']=='COMPLETED'
 
 
 
