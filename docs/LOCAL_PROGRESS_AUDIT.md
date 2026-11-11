@@ -63,7 +63,7 @@ Windows CI run #44（精确 HEAD `73c2843`）：**951 passed / 0 failed / 1 warn
 
 ## 第三轮第二批：租约/节流分离、旧结果恢复与错误通道修正（2026-11-11）
 
-本节修正并取代上一节中间态的时间字段设计：`next_try` 不再兼任 RUNNING 租约或全局 AI 冷却。验证代码提交为 `97c97fe2d91ac8e1aa01c74de3245c9149e708cb`；其后的 `08bfaa2` 仅更新设计文档。当前开发分支 HEAD 为 `08bfaa289ff97b98ac7aed7f2f32113a19dd4b84`。main 仍为 `4559f4282f659160273f5cc614b6884c879eca04`，PR #10 仍 open/Draft、未合并，base/head 未改变为 main。所有改动仅在 `feat/v0-1-first-release-completion`；未操作本地工作树、运行数据库、生产凭据或 tests.zip。
+本节修正并取代上一节中间态的时间字段设计：`next_try` 不再兼任 RUNNING 租约或全局 AI 冷却。验证代码提交为 `97c97fe2d91ac8e1aa01c74de3245c9149e708cb`；其后的 `08bfaa2` 更新设计文档，`651aa68` 更新本审计记录。当前开发分支 HEAD 为 `651aa681cd8a90ff6aaf0a771b827cf031e288a6`。main 仍为 `4559f4282f659160273f5cc614b6884c879eca04`，PR #10 仍 open/Draft、未合并，base/head 未改变为 main。所有改动仅在 `feat/v0-1-first-release-completion`；未操作本地工作树、运行数据库、生产凭据或 tests.zip。
 
 ### 最终实现方案
 
@@ -84,7 +84,8 @@ Windows CI run #44（精确 HEAD `73c2843`）：**951 passed / 0 failed / 1 warn
 
 - Windows CI run #61（代码提交 `d9d7791`）：959 passed / 0 failed / 1 warning，174.32 秒；构建和两项浏览器测试通过。
 - Windows CI run #65（代码提交 `9768971`）：960 passed / 0 failed / 1 warning；构建和两项浏览器测试通过。
-- Windows CI run #68（代码提交 `97c97fe`）：**961 passed / 0 failed / 1 warning，148.24 秒**；npm ci、Vite 构建、`tests/event_research_browser.py`、`tests/prediction_challenge_browser.py` 全部通过。唯一 warning 为既有 Starlette/httpx TestClient 弃用提示。运行记录：https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43038792657 。
+- Windows CI run #68（代码提交 `97c97fe`）：961 passed / 0 failed / 1 warning，148.24 秒；npm ci、Vite 构建及两项浏览器测试全部通过。唯一 warning 为既有 Starlette/httpx TestClient 弃用提示。运行记录：https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43038792657 。
+- Windows CI run #70（精确 HEAD `651aa68`，本次审计文档提交）：**961 passed / 0 failed / 1 warning，221.46 秒**；npm ci、Vite 构建、Event Research 与 Prediction Challenge 浏览器测试全部通过。运行记录：https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43039753858 。
 - 中间回归失败均保留并已修正：全局 interval 测试曾把异常 Mock 放在 provider_factory，修正为断言 provider.chat 未被调用；旧版结果已存在的恢复测试预期从 PENDING 更正为 COMPLETED。没有删除测试或降低断言。
 
 ### 仍未验收的事项
