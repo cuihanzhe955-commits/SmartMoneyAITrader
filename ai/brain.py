@@ -314,6 +314,9 @@ class Brain:
             lease_until=now+lease_seconds
             day=time.strftime('%Y-%m-%d',time.gmtime(now))
             if (not current or current["status"]!="PENDING" or current["next_try"]>now):return
+            if db.execute("""SELECT 1 FROM brain_reflections
+                    WHERE status='RUNNING' AND lease_until>? AND id!=? LIMIT 1""",
+                    (now,current["id"])).fetchone():return
             throttle=db.execute("SELECT last_call_at FROM brain_ai_state WHERE id=1").fetchone()
             if throttle and throttle["last_call_at"]+interval>now:return
             usage=db.execute("SELECT calls FROM brain_ai_usage WHERE day=?",(day,)).fetchone()
