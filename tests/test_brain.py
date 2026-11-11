@@ -160,38 +160,56 @@ def test_legacy_reflection_table_is_migrated_without_losing_jobs(tmp_path):
         assert db.execute("SELECT status FROM brain_reflections WHERE id='legacy'").fetchone()[0]=="PENDING"
 
 
-def test_reflection_result_is_reused_after_busy_completion_ack(tmp_path):
+def test_reflection_result_is_reused_after_interrupted_completion(tmp_path):
     b,clock=brain(tmp_path)
     source={'record':{'pnl':1,'fee':.1},'source_id':1,'source_table':'fills'}
     with b.db(True) as db:
         db.execute("""INSERT INTO brain_reflections
             (id,scope,data,status,attempts,next_try,error,lease_token)
+            VALUES('job','spot:okx:1',?,'RUNNING',1,?, '', 'expired')""",
+            (canonical(source),clock[0]-1))
+        mid=digest("spot:okx:1:job:ai-reflection")
+        body=canonical(dict(observation='结果',hypothesis='已持久化',invalidation='后续证据不符',
+                            source_key='job:ai-reflection',generated_at=clock[0]-1))
+        db.execute("INSERT INTO brain_memories VALUES(?,?,?,?,?,?,1,?)",
+            (mid,'spot:okx:1','hypothesis','hypothesis',clock[0]-1,clock[0]-1,body))
+    unavailable=Mock(side_effect=AssertionError("durable result must not call AI again"))
+    b.reflection_tick(unavailable,threading.Event())
+    unavailable.assert_not_called()
+    assert b.search()["reflection_jobs"][0]["status"]=="COMPLETED"
+    assert b.search()["total"]==1
+
+
+def test_reflection_result_and_completion_are_atomic_after_busy(tmp_path):
+    b,clock=brain(tmp_path)
+    source={'record':{'pnl':1,'fee':.1},'source_id':2,'source_table':'fills'}
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token)
             VALUES('job','spot:okx:1',?,'PENDING',0,0,'','')""",(canonical(source),))
     p=Mock();p.c=dict(model='mock',timeout=5,calls=4,interval=1)
-    p.chat.return_value=json.dumps(dict(observation='结果',hypothesis='只保存一次',invalidation='后续证据不符'))
-    original_put=b.put
+    p.chat.return_value=json.dumps(dict(observation='结果',hypothesis='原子提交',invalidation='后续证据不符'))
     held={}
-    def put_then_lock(scope,source_key,kind,data,source_time,**kwargs):
-        mid=original_put(scope,source_key,kind,data,source_time,**kwargs)
+    def chat_then_lock(*args):
         lock=sqlite3.connect(b.path,timeout=.05)
         lock.execute("BEGIN IMMEDIATE")
         held["db"]=lock
-        return mid
-    b.put=put_then_lock
+        return p.chat.return_value
+    p.chat.side_effect=chat_then_lock
     with pytest.raises(BrainBusy):
         b.reflection_tick(lambda:p,threading.Event())
     held["db"].rollback();held["db"].close()
     with b.db() as db:
         job=db.execute("SELECT status,next_try FROM brain_reflections WHERE id='job'").fetchone()
         assert job["status"]=="RUNNING"
-        assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==1
+        assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==0
     clock[0]+=36
-    unavailable=Mock(side_effect=AssertionError("saved result must not call AI again"))
-    b.reflection_tick(unavailable,threading.Event())
-    unavailable.assert_not_called()
-    assert p.chat.call_count==1
-    assert b.search()["reflection_jobs"][0]["status"]=="COMPLETED"
-    assert b.search()["total"]==1
+    p.chat.side_effect=None
+    b.reflection_tick(lambda:p,threading.Event())
+    assert p.chat.call_count==2
+    with b.db() as db:
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='job'").fetchone()[0]=="COMPLETED"
+        assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==1
 
 
 def test_expired_reflection_lease_fences_stale_worker_result(tmp_path):
