@@ -466,6 +466,7 @@ def test_reflection_daily_budget_reservation_limits_distinct_jobs(tmp_path):
 
 def test_successful_brain_sync_does_not_clear_runtime_error(tmp_path):
     b,clock=brain(tmp_path)
+    b.recovery_required=False
     b.runtime_error="Runtime保护恢复仍有问题"
     b.sync_error="上一次同步失败"
     b.sync_spot=Mock()
@@ -473,6 +474,18 @@ def test_successful_brain_sync_does_not_clear_runtime_error(tmp_path):
     b.sync_spot.assert_called_once_with()
     assert b.sync_error==""
     assert b.runtime_error=="Runtime保护恢复仍有问题"
+
+
+def test_successful_brain_recovery_clears_only_its_runtime_error(tmp_path):
+    b,clock=brain(tmp_path)
+    b.runtime_error="Runtime恢复暂不可用"
+    b.event_error="EventLab仍有错误"
+    b.reflection_error="AI复盘仍有错误"
+    b.sync_spot=Mock()
+    b.sync_tick()
+    assert b.runtime_error==""
+    assert b.event_error=="EventLab仍有错误"
+    assert b.reflection_error=="AI复盘仍有错误"
 
 
 def test_live_events_are_never_ingested_into_paper_memory(tmp_path):
