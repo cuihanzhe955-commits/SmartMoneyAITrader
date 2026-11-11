@@ -114,7 +114,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 - [F结构化测试摘要](F_TEST_RESULTS.json)
 - [事件研究操作说明](POLYMARKET_RESEARCH.md)
 - [主实施计划书](SmartMoney_Stable_Plan.md)
-- [AI 协作开发规范](AI_DEVELOPMENT_COLLABORATION.md)
+- [开发协作规范](AI_DEVELOPMENT_COLLABORATION.md)
 - [D 阶段最终验收](PHASE_D_RESULTS.md)
 - [组件测试结果](COMPONENT_TEST_RESULTS.json)
 - [依赖审查](DEPENDENCY_AUDIT.json)

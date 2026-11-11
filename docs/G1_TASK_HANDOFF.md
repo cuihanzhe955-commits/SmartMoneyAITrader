@@ -3,7 +3,7 @@
 - 任务ID：G1-automatic-prediction-challenge。
 - 起始代码基线：2d55453a658f85172e975d8c1d37b89196402f16。
 - 集成main基线：234d8335c6c3240bf654f280de3c9c3ccf89df85（工作结束前发现新增协作规范，已完整读取并保留其内容/入口）。
-- 专属分支：ai/codex/g1-automatic-prediction-challenge；唯一写入者为本任务Codex。检查时远端仅main，无开放PR。
+- 专属开发分支：g1-automatic-prediction-challenge；本任务采用单一写入者。检查时远端仅main，无开放PR。
 - 目标：在F参考模拟执行器之上增加有界自动预测挑战、持久预约/恢复、防重统计、操作及报告UI。
 - 允许路径：challenge/prediction.py、events/lab.py、market/predictions.py、terminal/api.py、frontend/src/forms.tsx、frontend/src/event-lab.tsx、frontend/src/prediction-challenge.tsx、相关tests、docs、README、SOURCE_MANIFEST和打包白名单。
 - 不在本轮范围：消息发送/OpenClaw配置、影子/只读独立模式入口、生产依赖更新、主计划产品/架构变更、真实账户/资金、Stable发布。

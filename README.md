@@ -173,7 +173,7 @@ npm --prefix frontend run build
 - [项目进度与验收口径](docs/PROGRESS_STATUS.md)：当前事实、历史证据、v0.1 验收和未关闭门槛
 - [v0.1 范围合同](docs/V0_1_SCOPE_CONTRACT.md)：第一里程碑的范围、排除项和验收清单
 - [产品与工程审计记录](docs/PRODUCT_AUDIT_20261111.md)：审计结论、采纳/不采纳决定及证据分类
-- [AI 协作开发规范](docs/AI_DEVELOPMENT_COLLABORATION.md)：额度切换、分支隔离、任务交接、测试和安全边界
+- [开发协作规范](docs/AI_DEVELOPMENT_COLLABORATION.md)：分支隔离、任务交接、测试和安全边界
 - [主实施计划书](docs/SmartMoney_Stable_Plan.md)：v1.0 冻结范围、平台优先级和后续执行依据
 - [文档导航与仓库结构](docs/README.md)：按计划、使用、验收和未来候选分类查看项目资料
 - [v1.0 公开开发路线图](docs/V1_ROADMAP.md)：A–I 阶段目标及验收边界
