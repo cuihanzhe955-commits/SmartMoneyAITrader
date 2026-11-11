@@ -21,7 +21,7 @@ def run():
                 browser=pw.chromium.launch(channel='chrome');page=browser.new_page(viewport={'width':1366,'height':768})
                 errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.goto(url)
                 assert page.request.post(url+'/api/ai',data={'config':{'base':'https://fixture.invalid/v1','model':'ModelMock','timeout':5,'interval':30,'calls':40,'ttl':30,'fallback':'rules'},'key':'synthetic-model-fixture'}).status==200
-                page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
+                page.locator('aside').get_by_role('button',name='实验功能',exact=True).click();page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
                 panel=page.locator('[data-prediction-challenge]');panel.get_by_text('尚未创建自动预测挑战。',exact=True).wait_for()
                 panel.get_by_text('创建并启动自动挑战',exact=True).click()
                 panel.get_by_label('挑战名称',exact=True).fill('合成G1浏览器验收')
@@ -55,7 +55,7 @@ def run():
                 panel.get_by_text('自动运行 · 规则基线',exact=False).wait_for()
                 panel.get_by_role('button',name='结束挑战',exact=True).click()
                 panel.get_by_text('已结束 · 规则基线',exact=False).wait_for(timeout=15000)
-                page.reload();page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
+                page.reload();page.locator('aside').get_by_role('button',name='实验功能',exact=True).click();page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
                 panel=page.locator('[data-prediction-challenge]');panel.get_by_label('查看预测挑战',exact=True).select_option(index=2)
                 panel.get_by_text('目标完成 · AI预测 · 有效完成 1 / 1 轮',exact=False).wait_for()
                 assert page.request.get(url+'/api/state').json()['state'] is None

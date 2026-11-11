@@ -268,7 +268,13 @@ class PredictionChallenges:
 
     def start(self):
         def run():
-            while not self.stop.wait(1):self.tick()
+            while not self.stop.wait(1):
+                try:
+                    self.tick()
+                except Exception:
+                    # A transient scan/database failure must not kill scheduling.
+                    # No task or cash state is advanced here; next tick re-reads it.
+                    self.error = '自动挑战扫描暂不可用；原轮次保留，等待重试'
         with self.lifecycle_lock:
             if self.stop.is_set() or self.thread is not None:
                 return

@@ -404,3 +404,19 @@ def test_resolution_known_before_model_finishes_is_not_counted_as_success(tmp_pa
 @pytest.mark.parametrize('data',[dict(rounds=0),dict(rounds=True),dict(capital=float('nan')),dict(scan_interval_sec=0),dict(execution='live'),dict(request_id='-'*36)])
 def test_bad_or_live_config_is_rejected(data):
     with pytest.raises(ValidationError):PredictionConfig(**dict({'request_id':str(uuid4())},**data))
+
+def test_worker_survives_scan_failure_and_retries(tmp_path):
+    manager,lab,cid,*_=system(tmp_path)
+    retried=threading.Event()
+    def tick():
+        if not retried.is_set():
+            retried.set()
+            raise ValueError('synthetic busy database')
+        manager.stop.set()
+    with patch.object(manager,'tick',side_effect=tick):
+        manager.start()
+        manager.thread.join(timeout=5)
+        assert retried.is_set()
+        assert manager.stop.is_set(), 'worker died instead of retrying after database failure'
+        assert '等待重试' in manager.error
+    manager.close()
