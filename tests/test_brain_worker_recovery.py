@@ -60,3 +60,19 @@ def test_concurrent_brain_writes_preserve_unique_records(tmp_path):
     with recovered.db() as db:
         assert db.execute('SELECT COUNT(*) FROM brain_cursors').fetchone()[0]==80
         assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
+
+
+def test_brain_worker_error_channels_do_not_overwrite_each_other(tmp_path):
+    brain=Brain(tmp_path/'isolated.db')
+    brain.setup()
+    brain.sync_error='模拟事件同步暂不可用'
+    brain.reflection_error='AI复盘数据库暂忙'
+    brain.error='事件研究学习暂不可用'
+    combined=brain.error
+    assert '模拟事件同步暂不可用' in combined
+    assert 'AI复盘数据库暂忙' in combined
+    assert '事件研究学习暂不可用' in combined
+    brain.sync_error=''
+    assert 'AI复盘数据库暂忙' in brain.error
+    assert '事件研究学习暂不可用' in brain.error
+    assert '模拟事件同步暂不可用' not in brain.error
