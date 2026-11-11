@@ -54,6 +54,7 @@ class Brain:
         self.sync_error = ""
         self.reflection_error = ""
         self.ready = False
+        self.recovery_required = False
 
     @property
     def error(self):
@@ -100,6 +101,7 @@ class Brain:
                 db.execute("ALTER TABLE brain_reflections ADD COLUMN lease_token TEXT NOT NULL DEFAULT ''")
             db.execute("CREATE TABLE IF NOT EXISTS brain_ai_usage(day TEXT PRIMARY KEY,calls INTEGER NOT NULL)")
         self.ready=True
+        self.recovery_required=True
 
     def recover(self):
         now = self.clock()
@@ -107,6 +109,7 @@ class Brain:
             db.execute("""UPDATE brain_reflections
                 SET status='PENDING',lease_token='',next_try=?
                 WHERE status='RUNNING' AND next_try<=?""", (now, now))
+        self.recovery_required=False
 
     def settings(self, new=None):
         with self.db(new is not None) as db:
@@ -359,7 +362,9 @@ class Brain:
             self.reflection_error = message
         def sync():
             if not self.ready:
-                self.setup(); self.recover()
+                self.setup()
+            if self.recovery_required:
+                self.recover()
             self.sync_spot()
             self.sync_error = ""
             self.runtime_error = ""
