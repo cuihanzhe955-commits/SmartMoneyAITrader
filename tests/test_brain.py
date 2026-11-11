@@ -329,7 +329,9 @@ def test_active_reflection_lease_blocks_second_job_even_without_interval(tmp_pat
             (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
             VALUES('second','spot:okx:1','{}','PENDING',0,0,'','',0)""")
     p=Mock();p.c=dict(model='mock',timeout=5,calls=10,interval=0)
-    b.reflection_tick(lambda:p,threading.Event())
+    factory=Mock(return_value=p)
+    b.reflection_tick(factory,threading.Event())
+    factory.assert_not_called()
     p.chat.assert_not_called()
     with b.db() as db:
         second=db.execute("SELECT status,attempts FROM brain_reflections WHERE id='second'").fetchone()
