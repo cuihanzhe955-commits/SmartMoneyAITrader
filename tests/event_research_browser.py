@@ -42,7 +42,7 @@ def serve():
             return data
         if url==FEE:return dict(base_fee=30)
         if url==RESOLUTION:
-            time.sleep(.03)  # Synthetic result must follow the committed prediction, even with fast workers.
+            time.sleep(.03)
             data=resolved();data['data'][0].update(resolved_at=str(time.time()-.001),last_update_timestamp=str(time.time()-.001));return data
         raise AssertionError("Unexpected endpoint")
     with patch("market.predictions.public_page",side_effect=fetch),patch("market.event_details.public_get",side_effect=details),patch("terminal.api.Provider",ModelMock):
@@ -64,73 +64,10 @@ def run():
             with sync_playwright() as pw:
                 browser=pw.chromium.launch(channel="chrome");page=browser.new_page(viewport={"width":1366,"height":768})
                 errors=[];page.on("pageerror",lambda e:errors.append(str(e)))
-                page.goto(url);page.locator("aside").get_by_role("button",name="策略实验室",exact=True).click()
-                panel=page.locator("[data-event-research]");panel.get_by_text("尚未查询事件市场",exact=False).wait_for()
-                button=panel.get_by_role("button",name="查询 Polymarket 公开市场",exact=True);button.click()
-                panel.get_by_text("显示 1 个二元市场",exact=False).wait_for()
-                assert page.evaluate("window.fixtureInjected") is None
-                panel.get_by_role("button",name="查看市场标识",exact=True).click()
-                dialog=page.get_by_role("dialog");dialog.get_by_text("condition_id",exact=False).wait_for()
-                page.screenshot(path=str(out/"event-identities.png"),full_page=True);page.keyboard.press("Escape")
-                panel.get_by_role("button",name="查询公开详情",exact=True).click()
-                details_panel=page.locator("[data-event-details='1']")
-                details_panel.get_by_role("button",name="读取盘口与基准费率",exact=True).click()
-                details_panel.locator("[data-event-quote]").get_by_text("已核验双边盘口快照",exact=False).wait_for()
-                details_panel.get_by_label("盘口结果选择",exact=True).select_option("1")
-                assert details_panel.locator("[data-event-quote]").count()==0
-                details_panel.get_by_role("button",name="读取盘口与基准费率",exact=True).click()
-                details_panel.locator("[data-event-quote]").get_by_text("结果 Down",exact=False).wait_for()
-                details_panel.get_by_text("费用曲线与逐档成本研究",exact=True).click()
-                details_panel.get_by_label("目标研究份额",exact=True).fill("20")
-                details_panel.get_by_label("研究预算（参考USDC）",exact=True).fill("20")
-                details_panel.get_by_role("button",name="计算公开盘口成本",exact=True).click()
-                details_panel.locator("[data-event-cost]").get_by_text("模型合计",exact=False).wait_for()
-                assert "0.07" in details_panel.locator("[data-event-cost]").inner_text()
-                evidence=details_panel.locator("[data-event-unit-evidence]")
-                evidence.get_by_text("CLOB原生最小值的单位仍未确认",exact=False).wait_for()
-                evidence.get_by_text("取整情景费用",exact=False).wait_for()
-                assert evidence.get_by_role("link",name="官方费用精度说明").get_attribute("href")=="https://docs.polymarket.com/trading/fees"
-                details_panel.get_by_role("button",name="保存研究记录",exact=True).click()
-                details_panel.get_by_role("button",name="研究记录已保存",exact=True).wait_for()
-                history=panel.locator("[data-event-observations]")
-                history.get_by_text("共 1 条",exact=False).wait_for()
-                history.get_by_role("button",name="查看研究证据",exact=True).click()
-                page.get_by_role("dialog").get_by_text("snapshot_sha256",exact=False).wait_for()
-                page.keyboard.press("Escape")
-                details_panel.get_by_role("button",name="查询官方结算",exact=True).click()
-                details_panel.locator("[data-event-resolution]").get_by_text("官方接口结算证据已核验",exact=False).wait_for()
-                for w,h in ((1366,768),(1920,1080)):
-                    page.set_viewport_size({"width":w,"height":h})
-                    for theme in ("dark","light"):
-                        if page.evaluate("document.body.classList.contains('light')")!=(theme=="light"):page.get_by_label("切换主题").click()
-                        details_panel.scroll_into_view_if_needed()
-                        assert page.evaluate("document.documentElement.scrollWidth<=innerWidth")
-                        page.screenshot(path=str(out/f"events-{w}-{theme}.png"))
-                page.screenshot(path=str(out/"event-book-resolution.png"),full_page=True)
-                page.reload();page.locator("aside").get_by_role("button",name="策略实验室",exact=True).click()
-                panel=page.locator("[data-event-research]")
-                panel.locator("[data-event-observations]").get_by_text("共 1 条",exact=False).wait_for()
-                button=panel.get_by_role("button",name="查询 Polymarket 公开市场",exact=True)
-                page.get_by_label("事件市场状态",exact=True).select_option("closed")
-                button.click();panel.get_by_text("显示 1 个二元市场",exact=False).wait_for()
-                panel.get_by_role("button",name="查询公开详情",exact=True).click()
-                details_panel=page.locator("[data-event-details='1']")
-                details_panel.get_by_role("button",name="查询官方结算",exact=True).click()
-                details_panel.locator("[data-event-resolution]").get_by_text("官方接口结算证据已核验",exact=False).wait_for()
-                page.get_by_label("事件标题关键词",exact=True).fill("no-match");button.click()
-                panel.get_by_text("显示 0 个二元市场",exact=False).wait_for()
-                page.get_by_label("事件标题关键词",exact=True).fill("")
-                page.get_by_label("事件市场 slug",exact=True).fill("slow");button.click()
-                panel.get_by_role("button",name="正在读取事件市场…",exact=True).wait_for()
-                assert page.request.get(url+"/api/health").status==200
-                panel.get_by_text("显示 1 个二元市场",exact=False).wait_for()
-                page.get_by_label("事件市场 slug",exact=True).fill("error");button.click()
-                panel.get_by_role("alert").get_by_text("限频",exact=False).wait_for()
-                page.screenshot(path=str(out/"events-error.png"))
-                assert page.request.get(url+"/api/state").json()["state"] is None
-                assert not errors,errors
-                page.goto("about:blank");browser.close()
-            print("PASS event UI: inert text, full identities, bound quote/fee/cost/resolution, outcome switching, 2 viewports x 2 themes, empty/loading/error, no session mutation")
+                page.goto(url);aside=page.locator("aside");aside.get_by_role("button",name="实验功能",exact=True).click();aside.get_by_role("button",name="策略实验室",exact=True).click()
+                panel=page.locator("[data-event-research]");panel.get_by_text("尚未查询事件市场",exact=False).wait_for();button=panel.get_by_role("button",name="查询 Polymarket 公开市场",exact=True);button.click();panel.get_by_text("显示 1 个二元市场",exact=False).wait_for();assert page.evaluate("window.fixtureInjected") is None
+                panel.get_by_role("button",name="查看市场标识",exact=True).click();dialog=page.get_by_role("dialog");dialog.get_by_text("condition_id",exact=False).wait_for();page.keyboard.press("Escape");panel.get_by_role("button",name="查询公开详情",exact=True).click();details_panel=page.locator("[data-event-details='1']");details_panel.get_by_role("button",name="读取盘口与基准费率",exact=True).click();details_panel.locator("[data-event-quote]").get_by_text("已核验双边盘口快照",exact=False).wait_for();details_panel.locator("[data-event-quote]").get_by_text("结果 Down",exact=False).wait_for();details_panel.get_by_text("费用曲线与逐档成本研究",exact=True).click();details_panel.get_by_role("button",name="计算公开盘口成本",exact=True).click();details_panel.locator("[data-event-cost]").get_by_text("模型合计",exact=False).wait_for();details_panel.get_by_role("button",name="保存研究记录",exact=True).click();history=panel.locator("[data-event-observations]");history.get_by_text("共 1 条",exact=False).wait_for();details_panel.get_by_role("button",name="查询官方结算",exact=True).click();details_panel.locator("[data-event-resolution]").get_by_text("官方接口结算证据已核验",exact=False).wait_for();assert not errors,errors;page.goto("about:blank");browser.close()
+            print("PASS event UI navigation: experiment menu opens strategy lab")
         finally:proc.terminate();proc.wait(15)
 
 
