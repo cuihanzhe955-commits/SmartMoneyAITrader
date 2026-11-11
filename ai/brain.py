@@ -342,7 +342,7 @@ class Brain:
         except Exception:
             if stop.is_set():return
             with self.db(True) as db:
-                db.execute("""UPDATE brain_reflections SET status='FAILED',error='',lease_token='',lease_until=0
+                db.execute("""UPDATE brain_reflections SET status='FAILED',error=?,lease_token='',lease_until=0
                     WHERE id=? AND status='RUNNING' AND lease_token=? AND lease_until>?""",
                     ("AI复盘失败；原成交证据保留，可重试",row["id"],token,self.clock()))
 
