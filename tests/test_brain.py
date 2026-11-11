@@ -3,6 +3,7 @@ from unittest.mock import Mock,patch
 import pytest
 from fastapi.testclient import TestClient
 from ai.brain import Brain,BrainSettings,Correction
+from ai.worker_policy import BrainBusy
 from events.observations import canonical,digest
 from terminal.api import create_app
 from terminal.runtime import Runtime
@@ -177,9 +178,8 @@ def test_reflection_result_is_reused_after_busy_completion_ack(tmp_path):
         held["db"]=lock
         return mid
     b.put=put_then_lock
-    with pytest.raises(Exception) as caught:
+    with pytest.raises(BrainBusy):
         b.reflection_tick(lambda:p,threading.Event())
-    assert isinstance(caught.value, __import__('ai.worker_policy',fromlist=['BrainBusy']).BrainBusy)
     held["db"].rollback();held["db"].close()
     with b.db() as db:
         job=db.execute("SELECT status,next_try FROM brain_reflections WHERE id='job'").fetchone()
