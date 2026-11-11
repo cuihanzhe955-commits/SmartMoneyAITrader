@@ -402,6 +402,7 @@ class Brain:
             self.setup()
         if self.recovery_required:
             self.recover()
+            self.runtime_error=""
         self.sync_spot()
         self.sync_error=""
 
