@@ -49,6 +49,8 @@ class Brain:
     def __init__(self, path, clock=time.time):
         self.path, self.clock = path, clock
         self._external_error = ""
+        self.runtime_error = ""
+        self.event_error = ""
         self.sync_error = ""
         self.reflection_error = ""
         self.ready = False
@@ -56,7 +58,8 @@ class Brain:
     @property
     def error(self):
         return "；".join(message for message in
-                         (self._external_error, self.sync_error, self.reflection_error) if message)
+                         (self._external_error, self.runtime_error, self.event_error,
+                          self.sync_error, self.reflection_error) if message)
 
     @error.setter
     def error(self, message):
@@ -359,7 +362,7 @@ class Brain:
                 self.setup(); self.recover()
             self.sync_spot()
             self.sync_error = ""
-            self._external_error = ""
+            self.runtime_error = ""
         thread = threading.Thread(target=run_worker, args=(sync, stop, report_sync), name="smart-money-brain", daemon=True)
         thread.start()
         if provider_factory:
