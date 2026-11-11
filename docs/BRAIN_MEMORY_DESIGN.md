@@ -43,7 +43,7 @@ SQLite增量表：`brain_preferences`、`brain_memories`、`brain_versions`、`b
 
 任务领取在 SQLite 写事务中完成；同一 Brain 数据库同一时刻只允许一个未过期的 RUNNING 复盘租约。进程中断或数据库忙导致任务未确认时，租约到期后可重新领取。完成和失败状态更新必须匹配当前 lease_token，过期 worker 不能覆盖新持有者的状态。手动 retry 不得抢占仍有效的租约。
 
-AI 结果以 `digest(scope + ':' + job_id + ':ai-reflection')` 作为稳定记忆 ID。若结果记忆已写入、但任务 COMPLETED 确认因锁冲突失败，下一次领取会先检查该 ID，直接补齐任务状态，不再次调用模型。SQLite 事务不跨越模型网络调用。
+AI 结果以 `digest(scope + ':' + job_id + ':ai-reflection')` 作为稳定记忆 ID。新版本将假设记忆写入与任务 COMPLETED 确认放在同一个 SQLite 事务中，锁冲突时二者一起回滚；恢复路径仍先检查稳定 ID，以兼容旧版本已经写入记忆但尚未确认任务状态的记录，不再次调用模型。SQLite 事务不跨越模型网络调用。
 
 外部模型调用无法与本地 SQLite 事务构成分布式 exactly-once：若进程在模型响应返回后、结果持久化前崩溃，恢复时可能再次调用模型。系统保证的是任务可恢复、已持久化结果幂等、旧租约不能覆盖新状态；不宣称外部模型调用严格一次。
 
