@@ -1,5 +1,9 @@
 # G2通知待发送记录：小检查点
 
+> **DOC-01 范围说明（2026-11-11）：** OpenClaw、飞书和 Telegram 完整生产通知链路已纳入
+> v0.1 第一版目标。本文件记录的 Outbox、Worker、Gateway 代码和测试仍只是局部/离线证据；
+> 尚未完成生产认证、真实发送、送达核验、Runtime/UI 闭环，不能标记为第一版已交付。
+
 日期：2026-11-06；依赖G1提交8b94bae。分支ai/codex/g2-outbox-checkpoint，G1的PR尚未合并，此处不修改main。
 
 本轮仅实现events/notification_outbox.py及隔离测试：显式入队、持久化、按平台/产品/环境/会话/事件/通道/账号/目标去重，冲突保留原记录，有界读取，数据库忙返回未确认而非假成功。只有PENDING状态，不声称送达或exactly-once发送。
