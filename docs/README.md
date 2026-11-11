@@ -20,7 +20,7 @@
 | 验收证据 | [PHASE_C1_RESULTS.md](PHASE_C1_RESULTS.md)、[LIVE_TRADING_VERIFICATION.md](LIVE_TRADING_VERIFICATION.md) | 历史阶段测试结果与实盘未通过项 |
 | 已发生的功能变更 | [CHALLENGE_TEMPLATE_UPDATE.md](CHALLENGE_TEMPLATE_UPDATE.md) | 挑战模板 UI 调整的历史记录 |
 | 仓库维护 | [GITHUB_UPLOAD.md](GITHUB_UPLOAD.md) | 公开仓库状态及上传说明的历史兼容信息 |
-| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | 历史交接方式、单一写入者、分支、测试和安全规范 |
+| 开发协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | 交接方式、单一写入者、分支、测试和安全规范 |
 | 未来候选 | [PRODUCT_DECISION_POOL.md](PRODUCT_DECISION_POOL.md) | 新模块、研究方向及延后理由，**不构成当前开发指令** |
 
 ## 状态与优先级
@@ -49,8 +49,8 @@ SmartMoneyAITrader/
 │   └── GITHUB_UPLOAD.md
 ├── market/                   # 行情获取与导入
 ├── strategy/                 # 指标、规则与策略组合
-├── ai/                       # AI 提案与异步协调
-├── risk/                     # 仓位与风险约束
+├── ai/                      # AI 提案与异步协调
+├── risk/                    # 仓位与风险约束
 ├── execution/                # 模拟/交易所执行与订单状态
 ├── challenge/                # 策略实验生命周期与报告
 ├── events/                   # 持久化事件账本
@@ -69,9 +69,7 @@ SmartMoneyAITrader/
 - [F1–F3实现与验证](PHASE_F_READONLY_RESULTS.md)：两个已上传源码检查点、692项离线回归及只读边界。
 - [Polymarket研究使用说明](POLYMARKET_RESEARCH.md)：发现、结果选择、盘口/费用参数、关闭市场及官方结算查询。
 - [结构化测试摘要](F_TEST_RESULTS.json)：历史检查点与未完成项，不能代替真实资金验收。
-
 - [F4费用与成本研究](PHASE_F4_COST_RESEARCH.md)：曲线限定、逐档预算/滑点/深度计算和实际执行边界。
-
 
 ## 2026-11-11 当前决策与审计入口
 
