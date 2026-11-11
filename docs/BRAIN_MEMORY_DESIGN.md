@@ -72,7 +72,7 @@ AI 结果使用稳定 ID：`digest(scope + ':' + job_id + ':ai-reflection')`。�
 
 ### Worker 状态隔离
 
-Runtime 初始化/恢复、EventLab 学习、Brain 同步、AI 复盘分别保存错误状态；API 的 `error` 字段聚合展示。某条工作线程成功只清除自己的错误通道，不清除其他模块尚未解决的问题。Brain 同步成功只清除 `sync_error`；Runtime 恢复成功才清除 `runtime_error`；EventLab 学习成功才清除 `event_error`。
+Runtime 初始化/恢复、EventLab 学习、Brain 同步、AI 复盘分别保存错误状态；API 的 `error` 字段聚合展示。普通 Brain 同步成功只清除 `sync_error`；只有 `recover()` 成功（由 Runtime 启动路径或 Brain `sync_tick` 执行）才清除 `runtime_error`；EventLab 学习成功才清除 `event_error`；AI 复盘成功或确认没有待处理/有效租约任务时才清除 `reflection_error`。一个错误通道不会清除其他模块尚未解决的状态。
 
 ### 专项测试覆盖
 
