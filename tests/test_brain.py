@@ -137,6 +137,7 @@ def test_spot_reflection_failure_preserves_source_and_recovery(tmp_path):
         VALUES('job','spot:okx:1','{}','PENDING',0,0,'','')""")
     p=Mock();p.c=dict(model='mock',timeout=5,calls=4,interval=1);p.chat.return_value='bad json'
     b.reflection_tick(lambda:p,threading.Event());assert b.search()['reflection_jobs'][0]['status']=='FAILED'
+    assert b.search()['reflection_jobs'][0]['error']=="AI复盘失败；原成交证据保留，可重试"
     assert b.search()['rows'][0]['status']=='confirmed_result'
     b.retry('job');clock[0]+=2;p.chat.return_value=json.dumps(dict(observation='证据',hypothesis='待验证',invalidation='不匹配'))
     b.reflection_tick(lambda:p,threading.Event());assert len(b.search()['rows'])==2
@@ -315,6 +316,24 @@ def test_expired_lease_cannot_commit_before_a_replacement_claim(tmp_path):
         assert db.execute("SELECT status FROM brain_reflections WHERE id='job'").fetchone()[0]=="RUNNING"
     b.recover()
     assert b.search()["reflection_jobs"][0]["status"]=="PENDING"
+
+
+
+def test_active_reflection_lease_blocks_second_job_even_without_interval(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('first','spot:okx:1','{}','RUNNING',1,0,'','active',?)""",(clock[0]+60,))
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('second','spot:okx:1','{}','PENDING',0,0,'','',0)""")
+    p=Mock();p.c=dict(model='mock',timeout=5,calls=10,interval=0)
+    b.reflection_tick(lambda:p,threading.Event())
+    p.chat.assert_not_called()
+    with b.db() as db:
+        second=db.execute("SELECT status,attempts FROM brain_reflections WHERE id='second'").fetchone()
+        assert second["status"]=="PENDING" and second["attempts"]==0
 
 
 def test_manual_retry_obeys_global_provider_interval(tmp_path):
