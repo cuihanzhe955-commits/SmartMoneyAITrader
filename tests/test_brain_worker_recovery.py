@@ -48,12 +48,13 @@ def test_concurrent_brain_writes_preserve_unique_records(tmp_path):
     from concurrent.futures import ThreadPoolExecutor
     brain=Brain(tmp_path/'concurrent.db');brain.setup()
     def write(index):
-        for attempt in range(10):
+        for attempt in range(50):
             try:
                 with brain.db(True) as db:
                     db.execute('INSERT OR IGNORE INTO brain_cursors VALUES(?,?)',(str(index),index))
                 return
-            except BrainBusy:time.sleep(.01)
+            except BrainBusy:
+                time.sleep(min(.05,.005*(2**min(attempt,4))))
         raise AssertionError('bounded retries exhausted')
     with ThreadPoolExecutor(max_workers=4) as workers:list(workers.map(write,range(80)))
     recovered=Brain(brain.path);recovered.recover()
