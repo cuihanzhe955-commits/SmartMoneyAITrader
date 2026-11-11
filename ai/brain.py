@@ -254,14 +254,15 @@ class Brain:
 
     def _commit_reflection_result(self,job_id,token,source_data,reflection,model):
         """Atomically persist a reflection only while its lease is still valid."""
-        now=self.clock()
         source_key=job_id+":ai-reflection"
-        body=dict(reflection,source=source_data,model=model,evidence_status="hypothesis",
-                  source_key=source_key,generated_at=now)
         with self.db(True) as db:
+            # Read the clock only after BEGIN IMMEDIATE has acquired the write lock.
+            now=self.clock()
             job=db.execute("SELECT scope,status,lease_token,lease_until FROM brain_reflections WHERE id=?",(job_id,)).fetchone()
             if (not job or job["status"]!="RUNNING" or job["lease_token"]!=token
                     or job["lease_until"]<=now):return False
+            body=dict(reflection,source=source_data,model=model,evidence_status="hypothesis",
+                      source_key=source_key,generated_at=now)
             preferences=db.execute("SELECT data FROM brain_preferences WHERE id=1").fetchone()
             if preferences and json.loads(preferences[0])["enabled"]:
                 mid=digest(job["scope"]+":"+source_key)
