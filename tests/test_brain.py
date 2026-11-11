@@ -178,6 +178,7 @@ def test_legacy_reflection_migration_preserves_active_lease(tmp_path,has_token):
         running=db.execute("SELECT status,lease_until FROM brain_reflections WHERE id='running'").fetchone()
         assert running["status"]=="RUNNING" and running["lease_until"]==clock[0]+5
         assert db.execute("SELECT status FROM brain_reflections WHERE id='pending'").fetchone()[0]=="PENDING"
+        assert db.execute("SELECT last_call_at FROM brain_ai_state WHERE id=1").fetchone()[0]==clock[0]
     b.recover()
     with b.db() as db:
         assert db.execute("SELECT status FROM brain_reflections WHERE id='running'").fetchone()[0]=="RUNNING"
