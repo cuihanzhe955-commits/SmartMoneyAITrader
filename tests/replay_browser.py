@@ -95,12 +95,13 @@ def run():
                 started=time.perf_counter();pressure.goto(url);pressure.locator('[data-chart-points="86401"]').wait_for(timeout=15000)
                 pressure.evaluate("new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))")
                 elapsed=(time.perf_counter()-started)*1000;assert elapsed<5000,elapsed
+                memory=pressure.evaluate("performance.memory ? {used_js_heap:performance.memory.usedJSHeapSize,total_js_heap:performance.memory.totalJSHeapSize,heap_limit:performance.memory.jsHeapSizeLimit} : null")
                 pressure.evaluate("window.originalCanvas=document.querySelector('[data-chart-points] canvas')")
                 value=pressure.locator('[data-chart-last]').get_attribute('data-chart-last')
                 pressure.wait_for_function("v=>document.querySelector('[data-chart-last]').dataset.chartLast!==v",arg=value,timeout=7000)
                 assert pressure.evaluate("window.originalCanvas===document.querySelector('[data-chart-points] canvas')")
                 assert not errors,errors
-                result=dict(browser_version=browser.version,canvas_failure_fallback=True,replay_network_error=True,archive_minutes=1440,ledger_fills=count,replay_read_only=True,synthetic_input_points=100000,visible_points=86401,first_render_ms=elapsed,render_budget_ms=5000,poll_updates=calls[0],page_errors=errors)
+                result=dict(browser_memory=memory,browser_version=browser.version,canvas_failure_fallback=True,replay_network_error=True,archive_minutes=1440,ledger_fills=count,replay_read_only=True,synthetic_input_points=100000,visible_points=86401,first_render_ms=elapsed,render_budget_ms=5000,poll_updates=calls[0],page_errors=errors)
                 (out/'replay-results.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
                 for tab in (pressure,page,fallback,network):tab.goto('about:blank')
                 browser.close()

@@ -1,5 +1,6 @@
 """Scoped, versioned evidence memory. This service cannot change trading settings."""
 from contextlib import contextmanager
+from ai.worker_policy import BrainBusy, run_worker
 import json
 import sqlite3
 import threading
@@ -58,9 +59,11 @@ class Brain:
             if write: db.execute("BEGIN IMMEDIATE")
             yield db
             if write: db.commit()
-        except sqlite3.Error:
+        except sqlite3.Error as error:
             db.rollback()
-            raise ValueError("Brain数据库忙或不可用，请稍后重试") from None
+            if getattr(error, 'sqlite_errorcode', 0) & 255 in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED):
+                raise BrainBusy("Brain数据库暂忙，请稍后重试") from error
+            raise ValueError("Brain数据库不可用，请检查日志") from error
         finally: db.close()
 
     def setup(self):
@@ -234,6 +237,8 @@ class Brain:
             self.put(row["scope"],row["id"]+":ai-reflection","hypothesis",
                 dict(reflection,source=json.loads(row["data"]),model=provider.c["model"],evidence_status="hypothesis"),self.clock(),status="hypothesis")
             with self.db(True) as db:db.execute("UPDATE brain_reflections SET status='COMPLETED',error='' WHERE id=?",(row["id"],))
+        except BrainBusy:
+            raise
         except Exception:
             if stop.is_set():return
             with self.db(True) as db:db.execute("UPDATE brain_reflections SET status='FAILED',error=? WHERE id=?",("AI复盘失败；原成交证据保留，可重试",row["id"]))
@@ -248,17 +253,17 @@ class Brain:
         return {"ok":True}
 
     def start(self, stop, provider_factory=None):
-        def loop():
-            while not stop.wait(1):
-                try:
-                    if not self.ready:self.setup();self.recover()
-                    self.sync_spot(); self.error=""
-                except Exception: self.error="模拟学习暂不可用；交易与保护继续运行"
-        thread=threading.Thread(target=loop,name="smart-money-brain",daemon=True);thread.start()
+        def report(message):
+            self.error = message
+        def sync():
+            if not self.ready:
+                self.setup(); self.recover()
+            self.sync_spot()
+            self.error = ""
+        thread = threading.Thread(target=run_worker, args=(sync, stop, report), name="smart-money-brain", daemon=True)
+        thread.start()
         if provider_factory:
-            def reflection_loop():
-                while not stop.wait(2):
-                    try:self.reflection_tick(provider_factory,stop)
-                    except Exception:pass  # Missing model/DB stays pending; source evidence is durable.
-            threading.Thread(target=reflection_loop,name="smart-money-brain-reflection",daemon=True).start()
+            threading.Thread(target=run_worker,
+                args=(lambda: self.reflection_tick(provider_factory, stop), stop, report, 2),
+                name="smart-money-brain-reflection", daemon=True).start()
         return thread

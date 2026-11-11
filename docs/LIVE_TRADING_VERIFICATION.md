@@ -29,3 +29,6 @@
 
 - [OKX API V5：成交历史与条件单清单](https://www.okx.com/docs-v5/en/)
 - [Binance 现货交易接口](https://developers.binance.com/docs/binance-spot-api-docs/rest-api/trading-endpoints)
+
+
+2026-11-11第二轮：本地锁竞争与Mock回归不构成平台、资金、保护、对账、恢复五项真实平台验收；本轮无真实账户操作。

@@ -1,3 +1,4 @@
+from ai.worker_policy import BrainBusy, run_worker
 """Durable, bounded automatic prediction challenges over the reference-paper lab."""
 import json,math,threading,time
 from uuid import UUID,uuid4,uuid5,NAMESPACE_URL
@@ -242,6 +243,8 @@ class PredictionChallenges:
             for row in rows:
                 if self.stop.is_set():break
                 try:self._advance(row['id']);self.error=''
+                except BrainBusy:
+                    raise
                 except Exception as err:
                     if self.stop.is_set():
                         return
@@ -268,13 +271,7 @@ class PredictionChallenges:
 
     def start(self):
         def run():
-            while not self.stop.wait(1):
-                try:
-                    self.tick()
-                except Exception:
-                    # A transient scan/database failure must not kill scheduling.
-                    # No task or cash state is advanced here; next tick re-reads it.
-                    self.error = '自动挑战扫描暂不可用；原轮次保留，等待重试'
+            run_worker(self.tick, self.stop, lambda message: setattr(self, 'error', message))
         with self.lifecycle_lock:
             if self.stop.is_set() or self.thread is not None:
                 return

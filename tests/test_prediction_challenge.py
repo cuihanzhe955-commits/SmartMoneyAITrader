@@ -411,12 +411,12 @@ def test_worker_survives_scan_failure_and_retries(tmp_path):
     def tick():
         if not retried.is_set():
             retried.set()
-            raise ValueError('synthetic busy database')
+            raise __import__('ai.worker_policy', fromlist=['BrainBusy']).BrainBusy('synthetic busy database')
         manager.stop.set()
     with patch.object(manager,'tick',side_effect=tick):
         manager.start()
         manager.thread.join(timeout=5)
         assert retried.is_set()
         assert manager.stop.is_set(), 'worker died instead of retrying after database failure'
-        assert '等待重试' in manager.error
+        assert '退避重试' in manager.error
     manager.close()

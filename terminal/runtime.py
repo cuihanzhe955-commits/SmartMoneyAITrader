@@ -1,3 +1,4 @@
+from ai.worker_policy import WorkerUnavailable
 import hashlib
 import json
 import threading
@@ -113,7 +114,7 @@ class Runtime:
         self.thread = self.threads[0]
         def reflection_provider():
             cfg=self.vault.values.get("ai_config");key=self.vault.values.get("ai_key","")
-            if not cfg or not key:raise ValueError("未配置AI复盘模型")
+            if not cfg or not key:raise WorkerUnavailable("未配置AI复盘模型")
             return Provider(dict(cfg),key)
         self.threads.append(self.brain.start(self.exit,reflection_provider))
 
