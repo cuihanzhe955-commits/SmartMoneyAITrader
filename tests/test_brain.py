@@ -209,6 +209,31 @@ def test_reflection_result_is_reused_after_interrupted_completion(tmp_path):
     assert b.search()["total"]==1
 
 
+
+def test_recovery_and_manual_retry_reconcile_legacy_durable_results(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        for job in ('recovery','manual'):
+            scope='spot:okx:1';source_key=job+':ai-reflection'
+            mid=digest(scope+':'+source_key)
+            body=canonical(dict(observation='旧版已保存',hypothesis='只补状态',invalidation='证据不符',
+                                source_key=source_key,generated_at=clock[0]))
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+                VALUES(?,?, '{}','FAILED',1,0,'legacy error','',0)""",(job,scope))
+            db.execute("INSERT INTO brain_memories VALUES(?,?,?,?,?,?,1,?)",
+                (mid,scope,'hypothesis','hypothesis',clock[0],clock[0],body))
+    b.recover()
+    assert {r['id']:r['status'] for r in b.search()['reflection_jobs'][:2]}=={
+        'manual':'COMPLETED','recovery':'COMPLETED'}
+    with b.db(True) as db:
+        db.execute("""UPDATE brain_reflections SET status='FAILED',error='legacy error'
+            WHERE id='manual'""")
+    assert b.retry('manual')=={"ok":True,"duplicate":True}
+    assert b.search()['reflection_jobs'][0]['status']=="COMPLETED"
+    assert b.search()['total']==2
+
+
 def test_reflection_result_and_completion_are_atomic_after_busy(tmp_path):
     b,clock=brain(tmp_path)
     source={'record':{'pnl':1,'fee':.1},'source_id':2,'source_table':'fills'}
