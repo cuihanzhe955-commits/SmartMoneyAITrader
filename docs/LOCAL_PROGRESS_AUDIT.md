@@ -40,3 +40,22 @@ G1、G2、Brain、AI、执行与通知源码由最新 main 继承，不重写。
 未完成：全部九项并发/幂等验收中，独立子进程恢复、真实G1+Brain长时间竞争、重复交易账本专门测试尚未补齐；已有全量恢复测试通过不替代这些专项要求。因此数据库问题属于部分修正并验证，不宣称全部解决。
 
 本地日志 artifacts/round2-*.log；不上传。完整Windows安装/启停本轮未重新执行。真实平台五门槛仍未验收，未读取生产凭据。主计划和DOC-01未改。
+
+
+## 第三轮 Brain 租约、幂等与 Worker 隔离（2026-11-11）
+
+本轮基于 PR #10 的开发分支继续，初始审查点 81c2569；当前代码 HEAD `73c2843253a9a017900c419212e16875980106bd`。main 仍为 `4559f4282f659160273f5cc614b6884c879eca04`，未修改 main；PR #10 保持 open/Draft、未合并。仅更新远端开发分支文件；未操作本地工作树、运行数据库、凭据或 tests.zip。
+
+实现：brain_reflections 增加 lease_token，旧 SQLite 表采用增量 ALTER TABLE 迁移；next_try 兼作待处理到期时间与 RUNNING 租约期限，只有过期 RUNNING 才可回收；recover 失败时同步 worker 保留 recovery_required 并重试。任务完成/失败必须匹配当前 lease_token，旧 worker 无法覆盖新租约。hypothesis 记忆写入与 COMPLETED 状态在同一 SQLite 事务提交；兼容旧版本已持久化结果但未确认状态的记录，按稳定记忆 ID 直接补齐，不重复调用模型。手动 retry 不抢占有效租约。
+
+调用节流：保留跨任务 AI interval。RUNNING、COMPLETED、FAILED 任务的 next_try 冷却时间会阻止下一条任务过早调用；新增两任务间隔测试。每日 calls 预算与现有配置继续沿用。
+
+Worker 状态：Runtime、EventLab、Brain 同步、AI 复盘错误分别存储，error 字段聚合展示；某一工作线程成功不会清除其他通道仍存在的错误。Runtime/EventLab 调用点已改用各自状态字段。
+
+新增/补强专项：旧表迁移、过期租约恢复、旧租约 fencing、已持久化结果恢复、AI 结果与 COMPLETED 原子提交、有效租约禁止手动 retry、全局 interval 节流、Worker 错误通道隔离。并发 SQLite 压力仍为 4 线程/80 条唯一记录及 PRAGMA integrity_check；初次 10 次×10ms 重试在 Windows CI #43 发生一次耗尽，已调整为最多 50 次指数退避（单次睡眠上限 50ms），未降低并发量或完整性断言。
+
+Windows CI run #44（精确 HEAD `73c2843`）：**951 passed / 0 failed / 1 warning，183.46 秒**；npm ci、TypeScript/Vite 构建、event_research_browser.py、prediction_challenge_browser.py 均通过。唯一 warning 为既有 Starlette/httpx TestClient 弃用提示。运行记录：https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43032512262 。
+
+可靠性边界：外部 AI 调用与本地 SQLite 不能构成分布式 exactly-once。模型响应返回后、结果持久化前若进程崩溃或数据库持续不可写，恢复时可能再次调用模型；已持久化结果幂等，旧租约不能覆盖新状态，不宣称外部模型调用严格一次。
+
+仍未关闭：G1+Brain 长时间竞争、独立进程强制终止/恢复、完整保护单/历史回放/验收浏览器、OpenClaw 生产通知、干净 Windows 安装升级回滚；真实平台五项实盘门槛未验收。本轮未读取生产凭据、未进行真实资金操作。PR 保持 Draft，不自动合并。
