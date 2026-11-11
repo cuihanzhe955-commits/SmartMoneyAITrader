@@ -86,7 +86,7 @@ class Runtime:
             )
         self.brain=Brain(self.root / "terminal.db")
         try:self.brain.setup()
-        except ValueError:self.brain.error="模拟学习初始化暂不可用；核心交易状态保留"
+        except ValueError:self.brain.runtime_error="模拟学习初始化暂不可用；核心交易状态保留"
         self.ai.brain=self.brain
 
     def start_worker(self):
@@ -103,8 +103,11 @@ class Runtime:
                              recovery_required=True, latest="重启后先查原单、核对账户。核验后可手动恢复")
                 self.db.save(state)
         self.background = True
-        try:self.brain.recover()
-        except ValueError:self.brain.error="模拟学习恢复暂不可用；交易保护不受影响"
+        try:
+            self.brain.recover()
+            self.brain.runtime_error=""
+        except ValueError:
+            self.brain.runtime_error="模拟学习恢复暂不可用；交易保护不受影响"
         for name, callback, period in (("market", self.tick, .04), ("orders", self.order_tick, .25),
                                        ("protection", self.protection_tick, 2), ("hosted", self.hosted_tick, .5)):
             thread = threading.Thread(target=self.loop, args=(name, callback, period),
