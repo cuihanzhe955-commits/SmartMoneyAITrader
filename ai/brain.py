@@ -124,6 +124,16 @@ class Brain:
     def recover(self):
         now = self.clock()
         with self.db(True) as db:
+            # A previous release could persist the deterministic result before
+            # failing to acknowledge the job. Reconcile those rows without AI.
+            candidates=db.execute("""SELECT id,scope FROM brain_reflections
+                WHERE status IN ('PENDING','RUNNING','FAILED')""").fetchall()
+            for row in candidates:
+                result_id=digest(row["scope"]+":"+row["id"]+":ai-reflection")
+                if db.execute("SELECT 1 FROM brain_memories WHERE id=?",(result_id,)).fetchone():
+                    db.execute("""UPDATE brain_reflections
+                        SET status='COMPLETED',error='',lease_token='',lease_until=0,next_try=0
+                        WHERE id=? AND status IN ('PENDING','RUNNING','FAILED')""",(row["id"],))
             db.execute("""UPDATE brain_reflections
                 SET status='PENDING',lease_token='',lease_until=0,next_try=0
                 WHERE status='RUNNING' AND lease_until<=?""", (now,))
@@ -287,6 +297,7 @@ class Brain:
 
     def reflection_tick(self,provider_factory,stop):
         if stop.is_set() or not self.ready:return
+        if self.recovery_required:self.recover()
         settings=self.settings()
         if not settings["enabled"] or not settings["auto_reflect"]:
             self.reflection_error=""
@@ -372,8 +383,13 @@ class Brain:
     def retry(self,mid):
         now=self.clock()
         with self.db(True) as db:
-            row=db.execute("SELECT status,lease_until FROM brain_reflections WHERE id=?",(mid,)).fetchone()
+            row=db.execute("SELECT status,lease_until,scope FROM brain_reflections WHERE id=?",(mid,)).fetchone()
             if not row:raise ValueError("复盘任务不存在")
+            result_id=digest(row["scope"]+":"+mid+":ai-reflection")
+            if db.execute("SELECT 1 FROM brain_memories WHERE id=?",(result_id,)).fetchone():
+                db.execute("""UPDATE brain_reflections SET status='COMPLETED',error='',
+                    lease_token='',lease_until=0,next_try=0 WHERE id=?""",(mid,))
+                return {"ok":True,"duplicate":True}
             if row["status"]=="RUNNING" and row["lease_until"]>now:
                 raise ValueError("复盘仍在有效租约内，请等待任务超时")
             if row["status"]=="COMPLETED":return {"ok":True,"duplicate":True}
