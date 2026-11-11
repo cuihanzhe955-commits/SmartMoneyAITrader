@@ -67,12 +67,16 @@ def test_brain_worker_error_channels_do_not_overwrite_each_other(tmp_path):
     brain.setup()
     brain.sync_error='模拟事件同步暂不可用'
     brain.reflection_error='AI复盘数据库暂忙'
-    brain.error='事件研究学习暂不可用'
+    brain.runtime_error='Runtime恢复暂不可用'
+    brain.event_error='EventLab学习暂不可用'
+    brain.error='兼容旧调用的外部错误'
     combined=brain.error
-    assert '模拟事件同步暂不可用' in combined
-    assert 'AI复盘数据库暂忙' in combined
-    assert '事件研究学习暂不可用' in combined
+    for message in ('模拟事件同步暂不可用','AI复盘数据库暂忙','Runtime恢复暂不可用',
+                    'EventLab学习暂不可用','兼容旧调用的外部错误'):
+        assert message in combined
     brain.sync_error=''
     assert 'AI复盘数据库暂忙' in brain.error
-    assert '事件研究学习暂不可用' in brain.error
+    assert 'Runtime恢复暂不可用' in brain.error
+    assert 'EventLab学习暂不可用' in brain.error
+    assert '兼容旧调用的外部错误' in brain.error
     assert '模拟事件同步暂不可用' not in brain.error
