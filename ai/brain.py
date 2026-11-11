@@ -293,12 +293,13 @@ class Brain:
         provider.deadline=time.monotonic()+provider.c["timeout"]
         timeout=max(0.0,float(provider.c.get("timeout",30)))
         interval=max(0.0,float(provider.c.get("interval",120)))
-        lease_until=self.clock()+max(30.0,timeout+30.0,interval)
+        lease_seconds=max(30.0,timeout+30.0,interval)
         token=uuid.uuid4().hex
-        day=time.strftime('%Y-%m-%d',time.gmtime(self.clock()))
         with self.db(True) as db:
             current=db.execute("SELECT * FROM brain_reflections WHERE id=?",(row["id"],)).fetchone()
             now=self.clock()
+            lease_until=now+lease_seconds
+            day=time.strftime('%Y-%m-%d',time.gmtime(now))
             if (not current or current["status"] not in ("PENDING","RUNNING")
                     or current["next_try"]>now):return
             if db.execute("""SELECT 1 FROM brain_reflections
