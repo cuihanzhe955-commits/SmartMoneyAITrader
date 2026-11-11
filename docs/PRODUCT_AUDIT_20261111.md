@@ -52,7 +52,7 @@ v0.1 AI 默认关闭。开启后仅解释规则信号、列明风险或复盘历
 ## 7. 发布与协作风险
 
 - 938 项离线回归是历史工程证据，不能代替浏览器、Windows 干净安装、平台 demo 或真实账户验收。
-- 历史 Windows workflow run #5 针对检查点 `40f47c3f58a31eab8786016b8e29320112b7f527` 已结束：前端构建成功，离线回归为 **937 passed / 1 failed**。唯一失败为依赖审计 SHA 断言，根因是 Windows checkout 将 npm lockfile 从 LF 转为 CRLF。PR 已在 `.gitattributes` 中强制该文件使用 LF；检查点 `83a092c` 的 Windows workflow run #9 已排队，尚未取得结果。必须以最终 HEAD 的 CI 结果验收；不得手改审计值、删测试或放宽断言。
+- PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 本次 CI 只证明其实际执行的步骤通过，不证明未纳入 workflow 的保护单、图表压力和 acceptance 浏览器脚本通过。
 - 其他已知集成阻断：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收存在 ConnectionResetError。
 - 当前本机工作树信息来自 2026-11-10 历史审计；Copilot 开发前必须重新核验，不得将历史 SHA 当成实时状态。
 

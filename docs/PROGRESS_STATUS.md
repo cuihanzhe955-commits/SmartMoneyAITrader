@@ -157,13 +157,13 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 通知、Brain、G1/G2、事件研究、策略实验室、历史回测、实验报告、交易流水、账户/持仓、真实交易相关代码、永续连接器和测试全部保留。非核心入口可隐藏/下沉，不删除代码、数据、API、数据库表或测试。24 小时翻倍挑战已获准移除：审计依赖后只删除其专属实现、入口、配置、调度和专属测试，保留历史报告/记录；不得连带影响 G1 自动预测挑战、策略实验室、通用回测、通知或 Brain。
 
-## 当前 GitHub Actions 阻断
+## 当前 GitHub Actions 验证状态
 
-历史 Windows workflow run #5 针对检查点 `40f47c3f58a31eab8786016b8e29320112b7f527` 已结束：前端构建成功，离线回归 **937 passed / 1 failed**。唯一失败是 Windows checkout 将 package-lock 从 LF 转为 CRLF，导致依赖审计 SHA 断言失败。PR 已在 `.gitattributes` 中强制该 lockfile 使用 LF；检查点 `83a092c` 的 Windows workflow run #9 已排队，尚无通过结果。必须在最新 HEAD 验证修复，不得手改审计值、删除测试或放宽断言。
+PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 该结果对应 PR #2 修订前 HEAD；本次文档提交会改变 HEAD，合并前仍须确认检查对应最终 HEAD。
 
 ## 当前集成问题
 
-以下问题仍需复现/关闭：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收 ConnectionResetError。历史 938 项离线回归通过记录不能覆盖这些问题，也不能覆盖当前 CI 的 937/1 结果。
+以下四项仍需复现/关闭：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收 ConnectionResetError。Windows run #12 虽有 938 项离线测试通过及两个专项浏览器脚本通过，但没有运行 `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，不能据此关闭上述问题。
 
 ## 下一步唯一任务
 
@@ -173,4 +173,4 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 ### PR #2 状态核验规则（2026-11-11）
 
 - PR #2 是文档/产品范围提案，仍为 Draft / Open，未合并；main 不因本 PR 自动改变。
-- 提交 `40f47c3` 的 Windows run #5 已失败（937 passed / 1 failed），根因为 Windows checkout 行尾转换。PR 已加入 `.gitattributes` 的 LF 规则；检查点 `83a092c` 对应 run #9 已排队。后续文档提交会触发新检查，最终以最新 HEAD 的 Checks 为准。head SHA、ahead/behind 数量和变更文件数不固定写死；请以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最新 head 并通过。
+- PR #2 本次修订前仍为 Draft / Open、未合并；核验 HEAD `e5cdfb7`，base main `4dbda5f`，ahead 62 / behind 0，涉及 12 个文件。该 HEAD 的 Windows workflow run #12 已成功：938 passed / 1 warning，前端构建、事件研究浏览器和 G1 预测挑战浏览器通过；三个历史阻断浏览器脚本未纳入该 workflow。此次文档更新会推进 HEAD，最新 SHA 与检查状态以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最终 HEAD 并通过。

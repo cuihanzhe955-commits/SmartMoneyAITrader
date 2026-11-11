@@ -56,7 +56,7 @@
 ## 2. 推荐系统架构与核心边界
 
 ```text
-React/TypeScript UI：交易工作台 | AI 中心 | 两种挑战 | Brain | 设置中心
+React/TypeScript UI：交易工作台 | AI 中心 | G1 自动预测挑战 | Brain | 设置中心
                     |
              Python API / Application Services
                     |
@@ -208,7 +208,7 @@ AI Brain 提供：开启/暂停模拟学习、自动复盘、在后续决策中�
 - **24 小时翻倍挑战：** 已获准从产品中移除。审计依赖后只删除挑战专属实现与入口，保留历史报告/记录；不得影响 G1 自动预测挑战、策略实验室、回测、通知或 Brain。
 - **100轮 AI 预测：** 每轮可预测/跳过/模拟成交/等待结算/完成；记录时间、标的、模型、方向、成本、收益、资金、正确率、交易胜率、最长连胜/连败及最大回撤。
 - 已预测次数、已参与次数、已结算次数严格分开；`SKIP` 不生成虚假成交，未结算轮次不纳入已实现收益；同一结算幂等入账。
-- 两种挑战都支持中断恢复、历史回放、成绩分析与消息播报；模拟账本与真实余额严格隔离。
+- G1 自动预测挑战支持中断恢复、历史回放与成绩分析；模拟账本与真实余额严格隔离。消息通知闭环按 G2 独立验收，不把挑战报告等同于通知已交付。
 
 ## 12. 可执行测试矩阵与 Stable 发布闸门
 
@@ -642,7 +642,7 @@ v0.1 AI 默认关闭。开启后仅解释规则信号、列明风险或复盘历
 2. 86,401 点回放图表内存失败；
 3. G1 Worker 遇 Brain 数据库 busy 后异常退出；
 4. 浏览器验收的 ConnectionResetError；
-5. 历史 Windows workflow run #5 针对检查点 `40f47c3f58a31eab8786016b8e29320112b7f527` 已结束：前端构建成功，离线回归 937 passed / 1 failed。唯一失败是依赖审计 SHA 断言：Windows checkout 将 `frontend/package-lock.json` 从 Git blob 的 LF 行尾转换为 CRLF，导致工作树字节哈希与依赖审计 JSON 中的提交内容哈希不同。PR 已在 `.gitattributes` 中加入 `frontend/package-lock.json text eol=lf`；检查点 `83a092c` 的 Windows workflow run #9 已排队，尚无通过结果。文档修订会触发新的 HEAD 检查，必须以最终 HEAD 的 Windows CI 为准；不得删测试、手改审计值或放宽断言。
+5. PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 不得把 run #12 误读为四项历史浏览器阻断均已解决。
 
 v0.1 发布还需干净 Windows 目录安装/启动/停止/恢复证据、前端构建、关键浏览器流程、全量离线测试和 GitHub Actions 必需检查通过。测试日志有未解释异常时，即使退出码为 0 也不能算通过。
 
