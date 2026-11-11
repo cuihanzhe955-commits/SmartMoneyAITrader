@@ -4,7 +4,7 @@
 
 ## 数据契约
 
-SQLite增量表：`brain_preferences`、`brain_memories`、`brain_versions`、`brain_cursors`、`brain_reflections`、`brain_ai_usage`；事件轮次/现金为独立`event_lab_*`表。现货、事件与真实订单表不串用。
+SQLite增量表：`brain_preferences`、`brain_memories`、`brain_versions`、`brain_cursors`、`brain_reflections`、`brain_ai_usage`、`brain_ai_state`；事件轮次/现金为独立`event_lab_*`表。现货、事件与真实订单表不串用。
 
 记忆包含id、scope、kind、status、available_at、source_time、revision、来源/模型/快照/证据data。现货scope为`spot:交易所:会话ID`（仅paper），事件为`event:会话ID`（reference_paper）。模型不是主键，换模型不删记忆。
 
