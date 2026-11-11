@@ -240,6 +240,38 @@ def test_reflection_result_and_completion_are_atomic_after_busy(tmp_path):
         assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==1
 
 
+
+def test_transient_sqlite_busy_retries_same_reflection_result(tmp_path):
+    b,clock=brain(tmp_path)
+    source={'record':{'pnl':2},'source_id':3,'source_table':'fills'}
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('job','spot:okx:1',?,'PENDING',0,0,'','',0)""",(canonical(source),))
+    p=Mock();p.c=dict(model='mock',timeout=5,calls=4,interval=0)
+    p.chat.return_value=json.dumps(dict(observation='结果',hypothesis='同一响应重试提交',invalidation='证据不符'))
+    held={}
+    def chat_then_release(*args):
+        lock=sqlite3.connect(b.path,timeout=.05,check_same_thread=False)
+        lock.execute("BEGIN IMMEDIATE")
+        held["db"]=lock
+        def release():
+            time.sleep(.12)
+            lock.rollback();lock.close()
+        held["thread"]=threading.Thread(target=release,daemon=True)
+        held["thread"].start()
+        return p.chat.return_value
+    p.chat.side_effect=chat_then_release
+    b.reflection_tick(lambda:p,threading.Event())
+    held["thread"].join(1)
+    assert not held["thread"].is_alive()
+    assert p.chat.call_count==1
+    with b.db() as db:
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='job'").fetchone()[0]=="COMPLETED"
+        assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==1
+
+
+
 def test_expired_reflection_lease_fences_stale_worker_result(tmp_path):
     b,clock=brain(tmp_path)
     source={'record':{'pnl':1},'source_id':2,'source_table':'fills'}
