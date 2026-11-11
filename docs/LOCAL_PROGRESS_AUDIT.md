@@ -59,3 +59,34 @@ Windows CI run #44（精确 HEAD `73c2843`）：**951 passed / 0 failed / 1 warn
 可靠性边界：外部 AI 调用与本地 SQLite 不能构成分布式 exactly-once。模型响应返回后、结果持久化前若进程崩溃或数据库持续不可写，恢复时可能再次调用模型；已持久化结果幂等，旧租约不能覆盖新状态，不宣称外部模型调用严格一次。
 
 仍未关闭：G1+Brain 长时间竞争、独立进程强制终止/恢复、完整保护单/历史回放/验收浏览器、OpenClaw 生产通知、干净 Windows 安装升级回滚；真实平台五项实盘门槛未验收。本轮未读取生产凭据、未进行真实资金操作。PR 保持 Draft，不自动合并。
+
+
+## 第三轮第二批：租约/节流分离、旧结果恢复与错误通道修正（2026-11-11）
+
+本节修正并取代上一节中间态的时间字段设计：`next_try` 不再兼任 RUNNING 租约或全局 AI 冷却。验证代码提交为 `97c97fe2d91ac8e1aa01c74de3245c9149e708cb`；其后的 `08bfaa2` 仅更新设计文档。当前开发分支 HEAD 为 `08bfaa289ff97b98ac7aed7f2f32113a19dd4b84`。main 仍为 `4559f4282f659160273f5cc614b6884c879eca04`，PR #10 仍 open/Draft、未合并，base/head 未改变为 main。所有改动仅在 `feat/v0-1-first-release-completion`；未操作本地工作树、运行数据库、生产凭据或 tests.zip。
+
+### 最终实现方案
+
+- `brain_reflections.next_try`：只控制 PENDING 任务的再次尝试时间。
+- `lease_until`：当前 RUNNING 任务的租约到期时间；`lease_token`：本次持有者随机令牌。
+- `brain_ai_state.last_call_at`：持久化跨任务、跨进程、跨 UTC 日期的全局 AI 调用间隔；`brain_ai_usage`：每日 calls 预算。
+- 任务领取在 `BEGIN IMMEDIATE` 中原子执行：回收过期租约、阻止第二个有效 RUNNING 租约、校验全局 interval 与每日预算、更新任务租约/令牌/attempts，并预留调用额度与 last_call_at。即使 interval=0，也保持单任务 single-flight。
+- 租约时长为 `max(30 秒, provider timeout + 30 秒)`，不再用 interval 延长租约。模型网络调用始终在 SQLite 事务外。
+- 结果记忆稳定 ID 为 `digest(scope + ':' + job_id + ':ai-reflection')`；记忆写入与 COMPLETED 确认同一事务提交。提交时在取得写锁后重新读取时钟，并验证状态、令牌与租约期限。旧 Worker 无法覆盖新持有者。
+- 短暂 SQLite busy 时，最多四次可中断提交重试（50/100/200ms 退避），复用同一份 AI 响应。持久锁冲突或进程在结果持久化前崩溃时，租约过期后可能再次调用模型；外部 AI 与本地 SQLite 不宣称分布式 exactly-once。
+- recover 扫描 PENDING/RUNNING/FAILED 的稳定结果 ID；发现旧版本已持久化的结果时直接补齐 COMPLETED。手动 retry 也先检查稳定 ID。没有结果的过期 RUNNING 才回到 PENDING；有效租约不被抢占。
+- 旧库通过 `PRAGMA table_info` 增量添加 lease_token/lease_until，不重建表、不删除任务。旧 RUNNING 的 next_try 迁移为 lease_until；首次创建全局节流状态时，若存在旧版冷却或当天已有调用，则从迁移时刻保守开始计算 interval。
+- Runtime、EventLab、Brain 同步、AI 复盘错误分别保存；API error 聚合展示。普通同步只清 sync_error；只有 recover 成功才清 runtime_error；EventLab 学习成功才清 event_error；AI 复盘错误独立处理。
+
+### 测试覆盖与验证
+
+新增/补强覆盖：旧表无 token 与已有 token 两种迁移；有效旧租约和全局冷却继承；过期租约恢复；旧令牌在无人接管前也不能提交；结果与 COMPLETED 原子提交；瞬时锁冲突复用同一响应；持续锁冲突到期恢复；旧版 FAILED/PENDING/RUNNING 已持久化结果自动对账；手动 retry 不绕过 interval；跨重启 interval 持久化；每日预算预留；多线程只领取一次；有效租约即使 interval=0 也阻止第二次模型调用；Runtime/Brain/EventLab/Reflection 错误通道隔离。原有 SQLite 4 线程、80 条唯一写入与 `PRAGMA integrity_check` 压力测试保留，重试改为最多 50 次有上限指数退避，没有降低并发量或完整性断言。
+
+- Windows CI run #61（代码提交 `d9d7791`）：959 passed / 0 failed / 1 warning，174.32 秒；构建和两项浏览器测试通过。
+- Windows CI run #65（代码提交 `9768971`）：960 passed / 0 failed / 1 warning；构建和两项浏览器测试通过。
+- Windows CI run #68（代码提交 `97c97fe`）：**961 passed / 0 failed / 1 warning，148.24 秒**；npm ci、Vite 构建、`tests/event_research_browser.py`、`tests/prediction_challenge_browser.py` 全部通过。唯一 warning 为既有 Starlette/httpx TestClient 弃用提示。运行记录：https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43038792657 。
+- 中间回归失败均保留并已修正：全局 interval 测试曾把异常 Mock 放在 provider_factory，修正为断言 provider.chat 未被调用；旧版结果已存在的恢复测试预期从 PENDING 更正为 COMPLETED。没有删除测试或降低断言。
+
+### 仍未验收的事项
+
+G1+Brain 长时间竞争、独立进程强制终止/恢复、完整保护单/历史回放/全部验收浏览器、OpenClaw 生产通知、干净 Windows 安装升级回滚仍未全部关闭。真实平台五项实盘门槛仍未验收；本轮未读取生产凭据、未进行真实资金操作。PR #10 保持 Draft，不自动合并，不修改 main。
