@@ -251,6 +251,32 @@ def test_manual_retry_waits_for_running_lease_expiry(tmp_path):
     assert b.retry("job")=={"ok":True}
     assert b.search()["reflection_jobs"][0]["status"]=="PENDING"
 
+
+def test_reflection_interval_throttles_next_job_after_completion(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        for job in ('first','second'):
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error,lease_token)
+                VALUES(?, 'spot:okx:1', '{}','PENDING',0,0,'','')""",(job,))
+    result=json.dumps(dict(observation='结果',hypothesis='待验证',invalidation='证据不符'))
+    first=Mock();first.c=dict(model='first',timeout=5,calls=10,interval=60);first.chat.return_value=result
+    b.reflection_tick(lambda:first,threading.Event())
+    assert first.chat.call_count==1
+    with b.db() as db:
+        states={r['id']:r['status'] for r in db.execute("SELECT id,status FROM brain_reflections")}
+        assert states=={'first':'COMPLETED','second':'PENDING'}
+    blocked=Mock(side_effect=AssertionError("global interval must block the next provider call"))
+    b.reflection_tick(blocked,threading.Event())
+    blocked.assert_not_called()
+    clock[0]+=61
+    second=Mock();second.c=dict(model='second',timeout=5,calls=10,interval=60);second.chat.return_value=result
+    b.reflection_tick(lambda:second,threading.Event())
+    assert second.chat.call_count==1
+    with b.db() as db:
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='second'").fetchone()[0]=="COMPLETED"
+
+
 def test_live_events_are_never_ingested_into_paper_memory(tmp_path):
     rt=Runtime(tmp_path)
     try:
