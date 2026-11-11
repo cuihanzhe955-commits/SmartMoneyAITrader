@@ -141,25 +141,49 @@ def test_spot_reflection_failure_preserves_source_and_recovery(tmp_path):
     b.retry('job');clock[0]+=2;p.chat.return_value=json.dumps(dict(observation='证据',hypothesis='待验证',invalidation='不匹配'))
     b.reflection_tick(lambda:p,threading.Event());assert len(b.search()['rows'])==2
     with b.db(True) as db:
-        db.execute("UPDATE brain_reflections SET status='RUNNING',next_try=?",(clock[0]+1,))
+        db.execute("UPDATE brain_reflections SET status='RUNNING',next_try=?,lease_until=?",(clock[0]+1,clock[0]+1))
     clock[0]+=2
     b.recover();assert b.search()['reflection_jobs'][0]['status']=='PENDING'
 
 
 
-def test_legacy_reflection_table_is_migrated_without_losing_jobs(tmp_path):
-    path=tmp_path/'legacy.db'
+@pytest.mark.parametrize('has_token',[False,True])
+def test_legacy_reflection_migration_preserves_active_lease(tmp_path,has_token):
+    path=tmp_path/'legacy.db';clock=[float(NOW)]
+    token_column=",lease_token TEXT NOT NULL DEFAULT ''" if has_token else ""
     with sqlite3.connect(path) as db:
-        db.execute("""CREATE TABLE brain_reflections(
-            id TEXT PRIMARY KEY,scope TEXT,data TEXT,status TEXT,attempts INTEGER,next_try REAL,error TEXT)""")
-        db.execute("INSERT INTO brain_reflections VALUES('legacy','spot:okx:1','{}','PENDING',0,0,'')")
-    b=Brain(path,clock=lambda:float(NOW));b.setup()
+        db.execute(f"""CREATE TABLE brain_reflections(
+            id TEXT PRIMARY KEY,scope TEXT,data TEXT,status TEXT,attempts INTEGER,next_try REAL,
+            error TEXT{token_column})""")
+        if has_token:
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error,lease_token)
+                VALUES('pending','spot:okx:1','{}','PENDING',0,0,'','')""")
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error,lease_token)
+                VALUES('running','spot:okx:1','{}','RUNNING',1,?,'','legacy-token')""",(clock[0]+5,))
+        else:
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error)
+                VALUES('pending','spot:okx:1','{}','PENDING',0,0,'')""")
+            db.execute("""INSERT INTO brain_reflections
+                (id,scope,data,status,attempts,next_try,error)
+                VALUES('running','spot:okx:1','{}','RUNNING',1,?,'')""",(clock[0]+5,))
+    b=Brain(path,clock=lambda:clock[0]);b.setup()
     assert b.recovery_required
     with b.db() as db:
         columns={row["name"] for row in db.execute("PRAGMA table_info(brain_reflections)")}
-        assert "lease_token" in columns
-        assert db.execute("SELECT status FROM brain_reflections WHERE id='legacy'").fetchone()[0]=="PENDING"
+        assert {"lease_token","lease_until"}<=columns
+        running=db.execute("SELECT status,lease_until FROM brain_reflections WHERE id='running'").fetchone()
+        assert running["status"]=="RUNNING" and running["lease_until"]==clock[0]+5
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='pending'").fetchone()[0]=="PENDING"
     b.recover()
+    with b.db() as db:
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='running'").fetchone()[0]=="RUNNING"
+    clock[0]+=6;b.recover()
+    with b.db() as db:
+        recovered=db.execute("SELECT status,lease_token,lease_until FROM brain_reflections WHERE id='running'").fetchone()
+        assert recovered["status"]=="PENDING" and recovered["lease_token"]=="" and recovered["lease_until"]==0
     assert not b.recovery_required
 
 
@@ -243,8 +267,8 @@ def test_manual_retry_waits_for_running_lease_expiry(tmp_path):
     b,clock=brain(tmp_path)
     with b.db(True) as db:
         db.execute("""INSERT INTO brain_reflections
-            (id,scope,data,status,attempts,next_try,error,lease_token)
-            VALUES('job','spot:okx:1','{}','RUNNING',1,?,'','active')""",(clock[0]+5,))
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('job','spot:okx:1','{}','RUNNING',1,?,'','active',?)""",(clock[0]+5,clock[0]+5))
     with pytest.raises(ValueError,match="租约"):
         b.retry("job")
     clock[0]+=6
@@ -275,6 +299,78 @@ def test_reflection_interval_throttles_next_job_after_completion(tmp_path):
     assert second.chat.call_count==1
     with b.db() as db:
         assert db.execute("SELECT status FROM brain_reflections WHERE id='second'").fetchone()[0]=="COMPLETED"
+
+
+
+def test_expired_lease_cannot_commit_before_a_replacement_claim(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('job','spot:okx:1','{}','RUNNING',1,0,'','stale',?)""",(clock[0]-1,))
+    result=dict(observation='过期结果',hypothesis='不能提交',invalidation='租约已失效')
+    assert not b._commit_reflection_result('job','stale',{},result,'mock')
+    with b.db() as db:
+        assert db.execute("SELECT COUNT(*) FROM brain_memories").fetchone()[0]==0
+        assert db.execute("SELECT status FROM brain_reflections WHERE id='job'").fetchone()[0]=="RUNNING"
+    b.recover()
+    assert b.search()["reflection_jobs"][0]["status"]=="PENDING"
+
+
+def test_manual_retry_obeys_global_provider_interval(tmp_path):
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('job','spot:okx:1','{}','FAILED',1,0,'failed','','0')""")
+        db.execute("UPDATE brain_ai_state SET last_call_at=? WHERE id=1",(clock[0],))
+    assert b.retry('job')=={"ok":True}
+    p=Mock();p.c=dict(model='mock',timeout=5,calls=10,interval=60)
+    p.chat.return_value=json.dumps(dict(observation='结果',hypothesis='待验证',invalidation='证据不符'))
+    b.reflection_tick(lambda:p,threading.Event())
+    p.chat.assert_not_called()
+    assert b.search()["reflection_jobs"][0]["status"]=="PENDING"
+    clock[0]+=61
+    b.reflection_tick(lambda:p,threading.Event())
+    assert p.chat.call_count==1
+    assert b.search()["reflection_jobs"][0]["status"]=="COMPLETED"
+
+
+def test_concurrent_reflection_ticks_claim_one_job_once(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    b,clock=brain(tmp_path)
+    with b.db(True) as db:
+        db.execute("""INSERT INTO brain_reflections
+            (id,scope,data,status,attempts,next_try,error,lease_token,lease_until)
+            VALUES('job','spot:okx:1','{}','PENDING',0,0,'','',0)""")
+    barrier=threading.Barrier(2);providers=[]
+    result=json.dumps(dict(observation='结果',hypothesis='唯一调用',invalidation='证据不符'))
+    def factory():
+        barrier.wait(timeout=3)
+        p=Mock();p.c=dict(model='mock',timeout=5,calls=10,interval=0);p.chat.return_value=result
+        providers.append(p);return p
+    errors=[]
+    def tick():
+        try:b.reflection_tick(factory,threading.Event())
+        except Exception as error:errors.append(error)
+    with ThreadPoolExecutor(max_workers=2) as pool:list(pool.map(lambda _:tick(),range(2)))
+    assert not errors
+    assert sum(p.chat.call_count for p in providers)==1
+    with b.db() as db:
+        job=db.execute("SELECT status,attempts,lease_token FROM brain_reflections WHERE id='job'").fetchone()
+        assert job["status"]=="COMPLETED" and job["attempts"]==1 and job["lease_token"]==""
+        assert db.execute("SELECT calls FROM brain_ai_usage").fetchone()[0]==1
+
+
+def test_successful_brain_sync_does_not_clear_runtime_error(tmp_path):
+    b,clock=brain(tmp_path)
+    b.runtime_error="Runtime保护恢复仍有问题"
+    b.sync_error="上一次同步失败"
+    b.sync_spot=Mock()
+    b.sync_tick()
+    b.sync_spot.assert_called_once_with()
+    assert b.sync_error==""
+    assert b.runtime_error=="Runtime保护恢复仍有问题"
 
 
 def test_live_events_are_never_ingested_into_paper_memory(tmp_path):
