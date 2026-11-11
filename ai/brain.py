@@ -107,7 +107,17 @@ class Brain:
             db.execute("CREATE TABLE IF NOT EXISTS brain_ai_usage(day TEXT PRIMARY KEY,calls INTEGER NOT NULL)")
             db.execute("""CREATE TABLE IF NOT EXISTS brain_ai_state(
                 id INTEGER PRIMARY KEY CHECK(id=1),last_call_at REAL NOT NULL DEFAULT 0)""")
-            db.execute("INSERT OR IGNORE INTO brain_ai_state VALUES(1,0)")
+            state_created=db.execute("INSERT OR IGNORE INTO brain_ai_state VALUES(1,0)").rowcount==1
+            if state_created:
+                now=self.clock()
+                day=time.strftime('%Y-%m-%d',time.gmtime(now))
+                prior_usage=db.execute("SELECT 1 FROM brain_ai_usage WHERE day=? AND calls>0",(day,)).fetchone()
+                legacy_cooldown=db.execute("""SELECT 1 FROM brain_reflections
+                    WHERE status IN ('RUNNING','COMPLETED','FAILED') AND next_try>? LIMIT 1""",(now,)).fetchone()
+                if prior_usage or legacy_cooldown:
+                    # Older releases encoded their global cooldown in task next_try.
+                    # Start a conservative interval from migration rather than bypass it.
+                    db.execute("UPDATE brain_ai_state SET last_call_at=? WHERE id=1",(now,))
         self.ready=True
         self.recovery_required=True
 
