@@ -278,8 +278,11 @@ class EventLab:
             data['reference_cash_after_entry']=s['cash']
             db.execute("UPDATE event_lab_sessions SET state=? WHERE id=?",(canonical(s),row["session_id"]))
             self._save_round(db,row,data,"WAITING",now)
-        try:self._learn(row,data,False)
-        except Exception:self.brain.error="预测学习暂不可用；原轮次已保存，结算维护继续"
+        try:
+            self._learn(row,data,False)
+            self.brain.event_error=""
+        except Exception:
+            self.brain.event_error="预测学习暂不可用；原轮次已保存，结算维护继续"
 
     def settle(self,row):
         data=json.loads(row["data"]);snap=data["snapshot"]
