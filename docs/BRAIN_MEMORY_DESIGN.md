@@ -37,14 +37,47 @@ SQLite增量表：`brain_preferences`、`brain_memories`、`brain_versions`、`b
 校验SHA256检测意外损坏，不是来源签名或资金验证。导出可能包含私人研究记录，保存在用户选择的位置，不进入公开发布包。回滚保留当前库及新增表。
 
 
-## 2026-11-11：复盘任务租约与幂等恢复
+## 2026-11-11：复盘任务租约、幂等恢复与节流隔离
 
-现货 AI 复盘任务使用 `brain_reflections.next_try` 作为到期时间，并新增 `lease_token` 标识当前任务持有者。旧数据库通过 `PRAGMA table_info` 检查后执行增量 `ALTER TABLE`，不重建或覆盖已有表和任务。
+### 状态字段
 
-任务领取在 SQLite 写事务中完成；同一 Brain 数据库同一时刻只允许一个未过期的 RUNNING 复盘租约。进程中断或数据库忙导致任务未确认时，租约到期后可重新领取。完成和失败状态更新必须匹配当前 lease_token，过期 worker 不能覆盖新持有者的状态。手动 retry 不得抢占仍有效的租约。
+`brain_reflections` 使用独立的 `lease_token` 与 `lease_until`：
+- `next_try` 只表示 PENDING 任务的下一次允许尝试时间，不再兼作运行中租约。
+- `lease_until` 是当前 RUNNING 持有者的到期时间。
+- `lease_token` 是每次领取生成的随机持有者令牌；完成、失败和手动重试都必须尊重令牌与租约状态。
 
-AI 结果以 `digest(scope + ':' + job_id + ':ai-reflection')` 作为稳定记忆 ID。新版本将假设记忆写入与任务 COMPLETED 确认放在同一个 SQLite 事务中，锁冲突时二者一起回滚；恢复路径仍先检查稳定 ID，以兼容旧版本已经写入记忆但尚未确认任务状态的记录，不再次调用模型。SQLite 事务不跨越模型网络调用。
+`brain_ai_state.last_call_at` 持久化跨任务、跨进程、跨 UTC 日期的全局模型调用时间；`brain_ai_usage` 继续记录每日调用预算。全局调用间隔、每日预算和单任务租约彼此独立。
 
-外部模型调用无法与本地 SQLite 事务构成分布式 exactly-once：若模型响应返回后、结果持久化前进程崩溃或数据库持续不可写，恢复时可能再次调用模型。系统保证的是任务可恢复、已持久化结果幂等、旧租约不能覆盖新状态；不宣称外部模型调用严格一次。
+### 领取与恢复
 
-Brain 同步、AI 复盘和 EventLab/Runtime 外部错误分别保存；API 的 `error` 字段聚合展示，避免某个工作线程成功时清空另一个线程仍存在的错误。
+领取在 SQLite `BEGIN IMMEDIATE` 写事务内完成：
+1. 先把已过期 RUNNING 租约回收到 PENDING，清空旧令牌。
+2. 若仍存在未过期 RUNNING 租约，不创建第二个模型调用。
+3. 检查全局 `last_call_at + interval` 与当天 calls 预算。
+4. 原子地领取任务、递增 attempts、设置 `lease_until` 与新令牌，并预留一次每日调用额度、更新 `last_call_at`。
+
+同一数据库同一时刻只允许一个有效 RUNNING 租约；即使 interval 配置为 0，也不会并发执行两条复盘任务。租约长度为 `max(30 秒, provider timeout + 30 秒)`，不再借用 interval 延长租约。预算在领取时预留，因此若进程在实际请求前崩溃，也可能保守地消耗一次预算。
+
+`recover()` 只回收 `lease_until <= now` 的 RUNNING 任务。有效租约不会被重启流程或手动 retry 抢占；租约过期后，retry 才能清除旧令牌并重新排队。旧 Worker 即使稍后返回，也不能写入新任务状态。
+
+### 结果提交与幂等边界
+
+AI 结果使用稳定 ID：`digest(scope + ':' + job_id + ':ai-reflection')`。结果记忆写入与任务 COMPLETED 确认在同一个 SQLite 事务中提交；锁冲突时二者一起回滚。提交前在取得 SQLite 写锁后重新读取时钟，并同时验证 status、lease_token 与 lease_until，防止锁等待期间租约过期后仍提交。
+
+短暂 SQLite 锁冲突时，当前 Worker 最多进行四次提交尝试，采用可被 stop 中断的 50/100/200ms 退避，重用已经获得的同一份模型响应，不立即再次请求模型。若锁持续不可用、进程在结果持久化前崩溃，租约到期后仍可能再次调用模型；外部模型服务与本地 SQLite 无法构成分布式 exactly-once。系统保证已持久化结果幂等、旧令牌不能覆盖新状态，不宣称外部模型请求严格一次。
+
+旧数据库通过 `PRAGMA table_info` 增量增加缺失字段，不重建表、不删除任务。升级时将旧 RUNNING 任务的 `next_try` 迁移为 `lease_until`；首次创建全局节流状态时，如发现旧版仍在冷却的任务或当天已有调用记录，则从迁移时刻保守开始计算 interval，避免升级后立即绕过旧节流。
+
+### Worker 状态隔离
+
+Runtime 初始化/恢复、EventLab 学习、Brain 同步、AI 复盘分别保存错误状态；API 的 `error` 字段聚合展示。某条工作线程成功只清除自己的错误通道，不清除其他模块尚未解决的问题。Brain 同步成功只清除 `sync_error`；Runtime 恢复成功才清除 `runtime_error`；EventLab 学习成功才清除 `event_error`。
+
+### 专项测试覆盖
+
+- 旧表无 lease_token、已有 lease_token 但无 lease_until 两种迁移路径；保留有效旧租约与全局冷却。
+- 过期租约恢复、未过期租约禁止手动 retry、过期令牌即使没有新 Worker 接管也不能提交。
+- 同一任务结果稳定 ID 恢复、结果与 COMPLETED 原子提交、瞬时 SQLite 锁冲突复用同一模型响应、持续锁冲突到期后恢复。
+- 多线程同时 tick 只允许一个 Worker 领取；有效租约存在时即使 interval=0 也不启动第二个模型调用。
+- 完成后跨任务 interval、重启后 interval 持久化、手动 retry 不绕过 interval、每日调用预算对不同任务生效。
+- Runtime 与 Brain 同步错误隔离；原有并发 SQLite 4 线程/80 条唯一记录及 `PRAGMA integrity_check` 压力测试保留。
+
