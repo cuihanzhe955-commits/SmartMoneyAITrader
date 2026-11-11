@@ -136,7 +136,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 - 本轮文档修订前 GitHub main 基线：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`；文档合并后以最新 main SHA 为准。
 - PR #2：本轮产品与工程文档的审查记录；实际合并状态以 [PR 页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准，不能替代本机工程核验。
-- 2026-11-10 历史本机审计记录：主运行目录 `E:\\user\\ChatGPT\\SmartMoneyAITrader`（无 Git）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件；项目所有者曾另行授权删除原 G1 工作树中的指定 `tests.zip`，但本次文档更新不执行本地删除，也不授权清理其他目录中的同名文件。
+- 2026-11-10 历史本机审计记录：主运行目录（无 Git 的本地工作副本）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件；项目所有者曾另行授权删除原 G1 工作树中的指定 `tests.zip`，但本次文档更新不执行本地删除，也不授权清理其他目录中的同名文件。
 
 ## 按证据分类，而非按模块数量宣称完成
 
@@ -173,4 +173,4 @@ PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行�
 ### PR #2 状态核验规则（2026-11-11）
 
 - PR #2 是本轮产品范围的文档审查记录；仅实际合并提交才会改变 main，是否已经合并以 GitHub PR 页面为准。
-- PR #2 本次修订前仍为 Draft / Open、未合并；核验 HEAD `e5cdfb7`，base main `4dbda5f`，ahead 62 / behind 0，涉及 12 个文件。该 HEAD 的 Windows workflow run #12 已成功：938 passed / 1 warning，前端构建、事件研究浏览器和 G1 预测挑战浏览器通过；三个历史阻断浏览器脚本未纳入该 workflow。此次文档更新会推进 HEAD，最新 SHA 与检查状态以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最终 HEAD 并通过。
+- PR #2 的文档审查记录见 [GitHub 页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2)。历史提交 `e5cdfb7` 的 Windows run #12 已成功，离线回归 938 passed / 1 warning，前端构建和两项指定浏览器检查通过，但未覆盖全部历史阻断项。后续提交及合并状态必须以 GitHub 对应 HEAD 和 Checks 为准，不能将旧提交的成功等同于最新验收。
