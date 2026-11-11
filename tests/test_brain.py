@@ -154,10 +154,13 @@ def test_legacy_reflection_table_is_migrated_without_losing_jobs(tmp_path):
             id TEXT PRIMARY KEY,scope TEXT,data TEXT,status TEXT,attempts INTEGER,next_try REAL,error TEXT)""")
         db.execute("INSERT INTO brain_reflections VALUES('legacy','spot:okx:1','{}','PENDING',0,0,'')")
     b=Brain(path,clock=lambda:float(NOW));b.setup()
+    assert b.recovery_required
     with b.db() as db:
         columns={row["name"] for row in db.execute("PRAGMA table_info(brain_reflections)")}
         assert "lease_token" in columns
         assert db.execute("SELECT status FROM brain_reflections WHERE id='legacy'").fetchone()[0]=="PENDING"
+    b.recover()
+    assert not b.recovery_required
 
 
 def test_reflection_result_is_reused_after_interrupted_completion(tmp_path):
