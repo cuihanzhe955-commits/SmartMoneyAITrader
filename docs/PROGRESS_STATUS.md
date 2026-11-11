@@ -1,8 +1,8 @@
 # 项目进度口径与当前验收状态
 
-更新日期：2026-11-06。
+历史基线日期：2026-11-06。以下 A–I 阶段记录保留当时的工程证据；当前决策和状态见文末 2026-11-11 补充。
 
-**当前证据：** G1自动挑战调度、恢复、统计和UI已实现；840项离线回归通过，100轮Model Mock与浏览器检查通过。见[G1验收](PHASE_G1_CHALLENGE.md)、[G测试摘要](G_TEST_RESULTS.json)。真实100轮、通知闭环及独立影子/观察模式未验收，不能将测试替身当真实成绩。F历史814项与真实公开SKIP闭环证据保留。
+**历史工程证据（截至 2026-11-06）：** G1 自动挑战调度、恢复、统计和 UI 已实现；当时记录 840 项离线回归通过，100 轮 Model Mock 与浏览器检查通过。此处是历史证据，不代表本轮或当前 HEAD 重新运行。见[G1验收](PHASE_G1_CHALLENGE.md)、[G测试摘要](G_TEST_RESULTS.json)。真实100轮、通知闭环及独立影子/观察模式未验收，不能将测试替身当真实成绩。F历史814项与真实公开SKIP闭环证据保留。
 
 ## 1. 进度口径
 
@@ -18,7 +18,7 @@
 
 Mock、历史回放、公开只读行情、模拟成交、界面展示和文档声明均不能相互替代。
 
-## 2. A–I 阶段当前状态
+## 2. A–I 阶段历史状态快照（基于 2026-11-06 工程记录）
 
 | 阶段 | 当前可确认状态 | 尚未关闭的门槛 |
 |---|---|---|
@@ -75,13 +75,13 @@ E1/E2/E3 非资金工程验收通过，完整 E 平台门槛仍开放。详见 [
 
 D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)，市场发现见 [PHASE_D3_DISCOVERY.md](PHASE_D3_DISCOVERY.md)，监控池边界见 [PHASE_D4_MONITOR_POOL.md](PHASE_D4_MONITOR_POOL.md)。
 
-## 4. 当前优先未完成项
+## 4. 历史 A–I 开发队列（截至 2026-11-06；不再代表当前执行优先级）
 
 1. **E 外部门槛继续单列。** Binance地区限制、Gate源时间与私有执行能力缺口、三平台真实/demo账户联调及资金验收未关闭；不能用本地通过数抵消。
-2. **当前阶段：F非资金工程收尾。** 研究与参考模拟/Brain实现和验收见[F记录](PHASE_F_RESULTS.md)，下一阶段G可按主计划启动；不据此关闭外部平台或资金验收。
+2. **历史阶段记录：F 非资金工程收尾。** 该条反映 2026-11-06 的 A–I 阶段安排；当前产品交付顺序已由 2026-11-11 的 v0.1 范围合同更新，不应据此启动 G2 或其他扩张任务。
 3. **F：事件闭环。** 已有受限v1参考账本、官方幂等结算、状态恢复与真实公开SKIP闭环；平台忠实成本/资产与其他协议仍待逐项验收。
 4. **F：AI Memory。** 已实现paper观察/结果与AI复盘、持久化/版本/检索/导入导出和配对评价；真实Provider联调与策略有效性证据未证明。
-5. **G：下一步为G2异步通知。** G1自动挑战已有离线100轮和UI证据；完整消息闭环、观察/影子模式及真实持续运行待完成。
+5. **历史 G 阶段安排：** G2 异步通知曾列为下一工程任务；通知系统仍保留，但当前先完成 v0.1 垂直切片，不因本条自动启动 G2。
 6. **H：AI Intelligence Center 与模型迁移。** 完成 Provider 配置、连接测试、预算、回退、模型切换、通知和记忆管理的 UI 闭环。
 7. **I：发布准备。** 完成干净 Windows 环境、安装/升级/回滚、日志脱敏、依赖复审、完整回归和按平台/产品划分的能力清单。
 
@@ -107,14 +107,14 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ## 7. 权威计划与证据入口
 
-后续任务以 GitHub main 的 [SmartMoney_Stable_Plan.md](SmartMoney_Stable_Plan.md) 最新版本为需求真源；若其他路线图或旧本地记录冲突，以主计划最新修订和当前源码/验收证据为准。
+需求范围以主计划最新修订和 [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md) 为准；PR #2 尚未合并时，其变更仍是待审查提案，不得描述为 main 已包含。实际完成状态以当前源码、测试和阶段证据为准；旧本地记录与 GitHub 状态不一致时先只读核验，不覆盖本地独有成果。
 
 - [F4成本研究记录](PHASE_F4_COST_RESEARCH.md)
 - [F1–F3只读记录](PHASE_F_READONLY_RESULTS.md)
 - [F结构化测试摘要](F_TEST_RESULTS.json)
 - [事件研究操作说明](POLYMARKET_RESEARCH.md)
 - [主实施计划书](SmartMoney_Stable_Plan.md)
-- [Codex + GitHub Copilot 双 AI 协作规范](AI_DEVELOPMENT_COLLABORATION.md)
+- [AI 协作开发规范](AI_DEVELOPMENT_COLLABORATION.md)
 - [D 阶段最终验收](PHASE_D_RESULTS.md)
 - [组件测试结果](COMPONENT_TEST_RESULTS.json)
 - [依赖审查](DEPENDENCY_AUDIT.json)
@@ -126,3 +126,51 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 - [E1 工作器基础提交](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/6d4b296a8d25cca59171f099f469daca75900cb0)
 - [E1 后台 paper runtime 接入提交](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/commit/bcf96a4282b3ff7c1ee2d2f3090fbac9d6ded343)
 
+
+
+---
+
+# 当前状态补充（2026-11-11，优先于上方历史 A–I 快照）
+
+## 当前共享基线
+
+- 本轮文档修订前 GitHub main 基线：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`；文档合并后以最新 main SHA 为准。
+- PR #2：本轮产品与工程文档的审查记录；实际合并状态以 [PR 页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准，不能替代本机工程核验。
+- 2026-11-10 历史本机审计记录：主运行目录（无 Git 的本地工作副本）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件；项目所有者曾另行授权删除原 G1 工作树中的指定 `tests.zip`，但本次文档更新不执行本地删除，也不授权清理其他目录中的同名文件。
+
+## 按证据分类，而非按模块数量宣称完成
+
+| 分类 | 当前例子 | 不能推导出的结论 |
+|---|---|---|
+| 有源码并有局部离线证据 | FastAPI/React 工作台、历史/公开行情、规则策略、纸面会话、SQLite、部分风险/订单状态 | 不能推导为干净安装或完整用户工作流通过 |
+| 有代码但端到端未验收 | 现货受限实盘路径、swap/永续连接兼容、AI Provider/Worker、Brain、通知 Outbox/Worker/Gateway、保护和恢复 | 不能推导为真实平台、生产 AI 或生产通知已可用 |
+| 主要由 Mock/测试替身证明 | Mock AI、模拟成交、测试保护/恢复、G1 100 轮 Model Mock | 不能推导为真实模型质量、平台成交或策略收益 |
+| 尚未证明/未完成 | 真实 AI 增量价值、成本后盈利、完整永续交易、平台 demo/真实账户闭环、生产通知、干净 Windows 安装升级回滚 | 不得在 README/界面中宣传为已完成 |
+
+## v0.1 当前交付目标
+
+以 [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md) 为准：一个通过本机核验的公开现货数据源、1–3 个交易对、一套现有规则策略、纸面交易、费用后净值/回撤、暂停/停止/重启恢复、交易导出；AI 默认关闭，仅可选解释/复盘。v0.1 不开放实盘、永续和事件合约执行。
+
+这只是第一里程碑。v1.0 仍保留现货与永续、模拟与真实交易的产品目标；不得把 v0.1 的阶段限制写成永久取消。
+
+## 已采纳的保留规则
+
+通知、Brain、G1/G2、事件研究、策略实验室、历史回测、实验报告、交易流水、账户/持仓、真实交易相关代码、永续连接器和测试全部保留。非核心入口可隐藏/下沉，不删除代码、数据、API、数据库表或测试。24 小时翻倍挑战已获准移除：审计依赖后只删除其专属实现、入口、配置、调度和专属测试，保留历史报告/记录；不得连带影响 G1 自动预测挑战、策略实验室、通用回测、通知或 Brain。
+
+## Windows CI 记录与验收边界
+
+PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 该结果对应 PR #2 修订前 HEAD；本次文档提交会改变 HEAD，合并前仍须确认检查对应最终 HEAD。
+
+## 当前集成问题
+
+以下四项仍需复现/关闭：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收 ConnectionResetError。Windows run #12 虽有 938 项离线测试通过及两个专项浏览器脚本通过，但没有运行 `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，不能据此关闭上述问题。
+
+## 下一步唯一任务
+
+当前唯一开发主线是 v0.1 垂直切片。正式写代码前，先只读核验远端 main、PR #2 和本机全部候选工程/工作树，提交差异与风险清单；确认后再按 v0.1 范围合同分步实现。不得先重写 UI、重构交易引擎或删除研究模块；24 小时翻倍挑战按 §16.13.2 单独审计后清理，其他既有模块不得连带删除。
+
+
+### PR #2 状态核验规则（2026-11-11）
+
+- PR #2 是本轮产品范围的文档审查记录；仅实际合并提交才会改变 main，是否已经合并以 GitHub PR 页面为准。
+- PR #2 的文档审查记录见 [GitHub 页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2)。历史提交 `e5cdfb7` 的 Windows run #12 已成功，离线回归 938 passed / 1 warning，前端构建和两项指定浏览器检查通过，但未覆盖全部历史阻断项。后续提交及合并状态必须以 GitHub 对应 HEAD 和 Checks 为准，不能将旧提交的成功等同于最新验收。

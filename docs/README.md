@@ -5,7 +5,7 @@
 
 ## 建议阅读顺序
 
-1. **首次了解项目**：[仓库首页](../README.md) → [v1.0 公开路线图](V1_ROADMAP.md)。
+1. **首次了解项目**：[仓库首页](../README.md) → [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md) → [v1.0 公开路线图](V1_ROADMAP.md)。
 2. **希望运行软件**：[完整使用说明](../使用说明.md) → [Windows 快速启动](WINDOWS_QUICK_START.md)。
 3. **需要判断当前真实完成度**：[阶段与验收口径](PROGRESS_STATUS.md) → [C2 工程验收记录](PHASE_C2_DIAGNOSTICS.md) → [C3 联调准备](PHASE_C3_READINESS.md) → [D1 组件记录](PHASE_D_COMPONENTS.md) → [D2 协议对照](PHASE_D2_CCXT.md) → [D3 市场发现](PHASE_D3_DISCOVERY.md) → [D4 监控池](PHASE_D4_MONITOR_POOL.md) → [D最终验收](PHASE_D_RESULTS.md) → [E非资金验收](PHASE_E_RESULTS.md) → [F1–F3只读记录](PHASE_F_READONLY_RESULTS.md) → [F4成本研究](PHASE_F4_COST_RESEARCH.md) → [F5.1研究记录](PHASE_F5_OBSERVATIONS.md) → [F工程验收](PHASE_F_RESULTS.md) → [G1自动挑战](PHASE_G1_CHALLENGE.md) → [Brain说明](BRAIN_MEMORY_DESIGN.md) → [实盘验证状态](LIVE_TRADING_VERIFICATION.md)；[C1 记录](PHASE_C1_RESULTS.md)保留为历史证据。
 4. **查看尚未采用的新想法**：[产品决策池](PRODUCT_DECISION_POOL.md)。
@@ -20,13 +20,14 @@
 | 验收证据 | [PHASE_C1_RESULTS.md](PHASE_C1_RESULTS.md)、[LIVE_TRADING_VERIFICATION.md](LIVE_TRADING_VERIFICATION.md) | 历史阶段测试结果与实盘未通过项 |
 | 已发生的功能变更 | [CHALLENGE_TEMPLATE_UPDATE.md](CHALLENGE_TEMPLATE_UPDATE.md) | 挑战模板 UI 调整的历史记录 |
 | 仓库维护 | [GITHUB_UPLOAD.md](GITHUB_UPLOAD.md) | 公开仓库状态及上传说明的历史兼容信息 |
-| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | Codex 与 Copilot 的职责、分支、交接、测试和安全规范 |
+| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | 历史交接方式、单一写入者、分支、测试和安全规范 |
 | 未来候选 | [PRODUCT_DECISION_POOL.md](PRODUCT_DECISION_POOL.md) | 新模块、研究方向及延后理由，**不构成当前开发指令** |
 
 ## 状态与优先级
 
+- **当前执行范围**以 v0.1 范围合同为准；v1.0 路线图与 A–I 阶段表保留为最终目标和历史工程索引，不自动构成当前任务。
 - **计划**回答“准备做什么”；**验收记录**回答“实际上证明完成了什么”；**决策池**回答“将来可能做什么”。三者不可混用。
-- 公开 v1.0 路线图不扩充原定功能范围。新增想法先评估是否属于既定阶段，再决定是否进入未来候选。
+- 新增想法先评估是否属于 v0.1 / v1.0 已确认范围，再决定是否进入未来候选。
 - C1 是开发检查点；真实资金成交闭环和交易所托管保护单全生命周期尚未在公开证据中通过验收。不能用模拟回放、Mock 测试或 UI 展示替代。
 - 某次阶段报告是**历史记录**，其测试数量和当时状态不可不加说明地当成当前源码的重新验证结果。
 - 公开仓库仅存放适合对外披露的说明。不要提交私有密钥、用户运行数据库、本机工作目录、内部执行指令或个人数据。
@@ -70,3 +71,12 @@ SmartMoneyAITrader/
 - [结构化测试摘要](F_TEST_RESULTS.json)：历史检查点与未完成项，不能代替真实资金验收。
 
 - [F4费用与成本研究](PHASE_F4_COST_RESEARCH.md)：曲线限定、逐档预算/滑点/深度计算和实际执行边界。
+
+
+## 2026-11-11 当前决策与审计入口
+
+- [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md)：当前唯一交付主线和验收清单。
+- [产品与工程审计记录](PRODUCT_AUDIT_20261111.md)：审计结论及采纳/不采纳决定。
+- [主实施计划 §16.12–§16.13](SmartMoney_Stable_Plan.md)：v1.0 最终目标与 v0.1 阶段范围。
+- [当前进度补充](PROGRESS_STATUS.md)：历史阶段证据与当前事实分开记录。
+- [开源组件评估](OPEN_SOURCE_AUDIT.md)：既有 D 阶段结论与新增候选分开记录。

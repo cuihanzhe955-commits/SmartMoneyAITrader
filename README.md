@@ -1,18 +1,40 @@
 # Smart Money AI Trader
 
-**面向策略研究的 AI 辅助量化交易与可视化工作台**
+**面向数字资产现货与永续合约的 AI 辅助量化交易工作台**
 
 *AI-Assisted Quantitative Trading Research Workbench*
 
-![Development](https://img.shields.io/badge/Status-G1%20Checkpoint-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
+![Development](https://img.shields.io/badge/Status-v0.1%20Development-blue) ![Live](https://img.shields.io/badge/Live%20Trading-Not%20Verified-orange) ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white) ![React](https://img.shields.io/badge/React-TypeScript-087EA4?logo=react&logoColor=white)
 
-> **当前为 G1 + G2 开发集成检查点（2026-11-10），不是 Stable。** 已汇总 G1 修复、Windows 实例隔离和 G2 通知检查点。合并后后端 **938 通过、0 失败**，前端构建通过；保护单浏览器、图表压力与 Brain 工作线程异常仍待解决，完整验收未通过。G2 生产 Runtime/UI 通知闭环及真实账户验证尚未完成。见[集成结果与已知问题](docs/MAIN_INTEGRATION_20261110.md)。[G1 历史记录](docs/PHASE_G1_CHALLENGE.md)与[F 历史记录](docs/PHASE_F_RESULTS.md)保留原验收时点。
+> **当前为开发集成检查点，不是 Stable。** main 已集成 G1、Windows 实例隔离和 G2 通知相关代码；main 的历史集成报告曾记录 938 项离线测试通过，但保护单浏览器、86,401 点图表压力、G1 Worker/Brain 并发和 ConnectionResetError 仍未关闭。PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 后续文档提交会产生新 HEAD，最终状态以 [PR #2 Checks](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 的最新检查为准。详情见 [当前进度](docs/PROGRESS_STATUS.md) 与 [集成记录](docs/MAIN_INTEGRATION_20261110.md)。
+> **当前交付目标：v0.1 单一现货纸面交易垂直切片。** 这只是第一里程碑；v1.0 仍保留现货/永续、模拟/真实交易的最终产品目标。
 
 ## 项目概览
 
-Smart Money AI Trader 是一个使用 **Python、FastAPI、React 和 TypeScript** 构建的本地量化交易研究平台，围绕行情数据、规则策略、可选 AI 提案、风控约束、订单状态管理和可视化分析，探索**可解释、可追溯、可测试**的智能决策软件架构。
+Smart Money AI Trader 是一个使用 **Python、FastAPI、React 和 TypeScript** 构建的本地量化交易工作台。v0.1 先聚焦单一现货市场的规则纸面交易垂直切片；v1.0 的最终方向仍包括现货与永续、模拟与真实交易，以及可解释、可追溯、可测试的风险控制和决策能力。
 
-本项目侧重软件工程实践与技术验证，而非收益宣传。仓库中的「24小时翻倍挑战」是策略实验模板及目标名称，**不代表真实收益、盈利保证或经过验证的胜率**。
+本项目侧重软件工程实践与可复核验证，不承诺盈利。「24小时翻倍挑战」已获准从产品中移除：先审计路由、配置、调度、数据库、测试、报告和打包依赖，再只删除挑战专属代码与入口；历史报告和历史记录保留。不得连带删除 G1 自动预测挑战、策略实验室、回测、通知或 Brain。历史测试记录不代表真实收益或盈利保证。
+
+## v0.1 最小可用版本：当前唯一交付主线
+
+2026-11-11 产品与工程审计将“先做单一现货纸面交易垂直切片”确定为当前阶段的交付范围。**v0.1 是第一个可验证里程碑，不是整个产品的最终边界。**
+
+- 一个交易所：由只读核验后的现有代码、数据源稳定性和可测试性决定，不在未检查本机项目之前预先指定。
+- 少量现货交易对：优先选择 1–3 个数据完整、流动性和规则信息可核验的交易对。
+- 一个可解释的规则策略；不同时扩充多套策略。
+- 纸面交易：明确模拟撮合、手续费、滑点和数据时间戳。
+- AI 默认关闭；可选用于解释当前规则信号和复盘历史交易，不负责下单，不绕过风险控制。
+- 必须贯通：干净安装 → 启动 → 获取行情 → 规则信号 → 纸面成交 → 费用后盈亏/净值/回撤 → 暂停/停止 → 重启恢复 → 导出记录。
+- v0.1 不开放真实下单、永续下单、事件合约和新增交易所；这些不是被永久取消，而是进入后续版本验收。
+
+### v0.1 主导航目标
+
+1. **首页：** 运行状态、账户/模拟资产、净值、收益、回撤和风险告警。
+2. **运行：** 选择市场与规则策略，启动、暂停和停止纸面会话。
+3. **历史：** 订单、成交、费用、净值曲线、回撤和导出。
+4. **设置：** 数据源、策略参数、可选 AI 连接和风险上限。
+
+研究、事件预测、通知、Brain、G1/G2、实验报告和诊断能力默认保留；非核心入口可移至实验区、二级入口或隐藏导航，不得借 UI 收敛删除 API、数据库表、历史数据或测试。「24 小时翻倍挑战」已获准移除：审计依赖后只删除其专属代码、入口、配置、调度和专属测试，保留历史报告/记录；不得影响 G1 自动预测挑战、通用策略实验室、回测、通知或 Brain。
 
 ## 技术亮点
 
@@ -39,6 +61,8 @@ flowchart LR
 此图为核心模块关系示意，不代表所有外部交易接口已完成实盘联调。
 
 ## 当前功能与验证状态
+
+功能状态必须区分：源码存在、局部离线测试通过、Mock/测试替身通过、平台联调通过、真实账户验收通过。下方历史阶段数据保留其原始时点，不代表今天所有功能均可用。
 
 下表区分**已有代码/离线证据**与**尚未完成的外部验收**。测试替身、只读公开行情、历史回放和模拟成交都不能替代交易所 demo 或真实账户成交证明。
 
@@ -79,6 +103,8 @@ flowchart LR
 
 ## v1.0 阶段路线图
 
+当前优先执行 v0.1 范围合同；原 A–I 阶段表继续保留为既有工程阶段与历史验收索引，不要求在 v0.1 同时扩展所有模块。v0.1 通过后，再逐项恢复永续、AI 决策、通知生产闭环和其他后续能力。
+
 阶段状态以 [项目进度文档](docs/PROGRESS_STATUS.md) 和 [主计划书](docs/SmartMoney_Stable_Plan.md) 为准。当前不使用未经定义权重的单一百分比表示项目完成率。
 
 | 阶段 | 目标 | 当前状态 |
@@ -99,7 +125,7 @@ flowchart LR
 
 ## 快速开始（本地历史模拟）
 
-**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为G1开发检查点，**不是 Stable，完整平台与实盘验收未通过**。
+**系统要求**：Windows 11，Python 3.11 或以上；本轮验证 Python 3.12。前端已编译，普通使用无需 Node.js。当前为 v0.1 产品范围收敛中的开发检查点，**不是 Stable，v0.1 垂直切片尚待实现与验收，完整平台与实盘验收也未通过**。
 
 **无需安装 Git 也能体验**：点击本仓库的 **Code → Download ZIP**，解压后进入包含 start.bat 的项目根目录，**双击 start.bat**。喜欢命令行的开发者可以通过 Git 克隆：
 
@@ -111,7 +137,7 @@ cd SmartMoneyAITrader
 
 智能启动器会检查 Python 版本、已有本机服务与端口、项目虚拟环境和 requirements.txt 的依赖；**缺少项目依赖时自动安装到 .venv**，已安装则跳过。首次安装需要网络；没有 Python 时，会提示前往官方页面安装，而不是静默修改系统环境。想只准备依赖、不启动服务，可使用 install.bat。
 
-正常启动后访问 **http://127.0.0.1:8785**；运行期间保持命令行窗口打开。进入总览，选择「配置普通交易」→ **内置历史归档 + 规则引擎 + 本地模拟**，创建会话后再点击「开始运行」。结束时使用 stop.bat 安全退出。也可创建公开现货的动态模拟会话；地区或源时间不满足条件时显示拒绝原因，内置历史模拟仍可使用。
+正常启动后访问 **http://127.0.0.1:8785**；运行期间保持命令行窗口打开。**注意：当前源码界面尚未完成 v0.1 四入口收敛，以下操作仍按现有 G1 检查点的界面组织说明，不代表目标 UI 已交付。**进入总览，选择「配置普通交易」→ **内置历史归档 + 规则引擎 + 本地模拟**，创建会话后再点击「开始运行」。结束时使用 stop.bat 安全退出。也可创建公开现货的动态模拟会话；地区或源时间不满足条件时显示拒绝原因，内置历史模拟仍可使用。
 
 **遇到 Python 未识别、pip 安装失败、端口占用或刷新后打不开？** 请查看 [Windows 快速启动与常见问题](docs/WINDOWS_QUICK_START.md)。交易所接入、CSV 格式、风控细节及运行边界请阅读 [完整使用说明](使用说明.md)。
 
@@ -140,12 +166,14 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ~~~
 
-当前全量回归在Windows本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；当前结果见[F测试摘要](docs/F_TEST_RESULTS.json)；E历史结果仍见[E测试摘要](docs/E_TEST_RESULTS.json)。事件浏览器复验见`tests/event_research_browser.py`。
+早期 D/E/F 阶段测试与后续 GitHub Windows CI 对应不同提交和测试范围，不能混用。当前已有 Windows CI 验证离线回归、前端构建及指定浏览器检查，但尚未覆盖全部保护单、压力、安装和真实平台验收；原始证据见 [当前进度](docs/PROGRESS_STATUS.md) 及各阶段报告。
 
 ## 项目文档
 
-- [项目进度与验收口径](docs/PROGRESS_STATUS.md)：A–I 阶段状态、测试证据、未完成门槛和真实资金验证顺序
-- [Codex + GitHub Copilot 双 AI 协作规范](docs/AI_DEVELOPMENT_COLLABORATION.md)：额度切换、分支隔离、任务交接、测试和安全边界
+- [项目进度与验收口径](docs/PROGRESS_STATUS.md)：当前事实、历史证据、v0.1 验收和未关闭门槛
+- [v0.1 范围合同](docs/V0_1_SCOPE_CONTRACT.md)：第一里程碑的范围、排除项和验收清单
+- [产品与工程审计记录](docs/PRODUCT_AUDIT_20261111.md)：审计结论、采纳/不采纳决定及证据分类
+- [AI 协作开发规范](docs/AI_DEVELOPMENT_COLLABORATION.md)：额度切换、分支隔离、任务交接、测试和安全边界
 - [主实施计划书](docs/SmartMoney_Stable_Plan.md)：v1.0 冻结范围、平台优先级和后续执行依据
 - [文档导航与仓库结构](docs/README.md)：按计划、使用、验收和未来候选分类查看项目资料
 - [v1.0 公开开发路线图](docs/V1_ROADMAP.md)：A–I 阶段目标及验收边界
@@ -189,4 +217,4 @@ npm --prefix frontend run build
 
 ---
 
-*文档补录日期：2026-11-06。F1–F3源码分别在370b6b2、0491e4c上传；本次补齐遗漏记录，不把文档同步计为功能实现。完整F、E外部门槛和真实资金验收仍未通过。*
+*历史文档补录日期：2026-11-06。2026-11-11 产品收敛与审计结论见 v0.1 范围合同和主计划 §16.13；历史阶段证据继续保留，不把文档同步计为功能实现。*
