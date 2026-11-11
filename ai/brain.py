@@ -95,7 +95,7 @@ class Brain:
             db.execute("CREATE TABLE IF NOT EXISTS brain_cursors(id TEXT PRIMARY KEY,value INTEGER NOT NULL)")
             db.execute("""CREATE TABLE IF NOT EXISTS brain_reflections(
                 id TEXT PRIMARY KEY,scope TEXT,data TEXT,status TEXT,attempts INTEGER,next_try REAL,
-                error TEXT,lease_token TEXT NOT NULL DEFAULT '')""")
+                error TEXT,lease_token TEXT NOT NULL DEFAULT '',lease_until REAL NOT NULL DEFAULT 0)""")
             columns = {row["name"] for row in db.execute("PRAGMA table_info(brain_reflections)")}
             if "lease_token" not in columns:
                 db.execute("ALTER TABLE brain_reflections ADD COLUMN lease_token TEXT NOT NULL DEFAULT ''")
