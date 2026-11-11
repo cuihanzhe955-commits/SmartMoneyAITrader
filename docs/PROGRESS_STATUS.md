@@ -130,13 +130,13 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 ---
 
-# 当前状态补充（2026-11-11，优先于下方历史 A–I 快照）
+# 当前状态补充（2026-11-11，优先于上方历史 A–I 快照）
 
 ## 当前共享基线
 
 - 本轮文档修订前 GitHub main 基线：`4dbda5fc797f87b45c258456ff16dcfad3ac126c`；文档合并后以最新 main SHA 为准。
-- PR #2：文档方向分支，当前仍未合并；本次会继续修订。PR 不能替代本机工程核验。
-- 2026-11-10 历史本机审计记录：主运行目录 `E:\\user\\ChatGPT\\SmartMoneyAITrader`（无 Git）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件，必须只读保留。
+- PR #2：本轮产品与工程文档的审查记录；实际合并状态以 [PR 页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准，不能替代本机工程核验。
+- 2026-11-10 历史本机审计记录：主运行目录 `E:\\user\\ChatGPT\\SmartMoneyAITrader`（无 Git）；G1 `6afed70`；G2 integration `4f03671`；G2 review `da94294`；独立 main `234d833`。这些不是实时状态，下一位开发者必须重新检查。G1 的 `tests.zip` 当时是未跟踪文件；项目所有者曾另行授权删除原 G1 工作树中的指定 `tests.zip`，但本次文档更新不执行本地删除，也不授权清理其他目录中的同名文件。
 
 ## 按证据分类，而非按模块数量宣称完成
 
@@ -157,7 +157,7 @@ D 阶段具体采用决定见 [COMPONENT_DECISIONS.md](COMPONENT_DECISIONS.md)�
 
 通知、Brain、G1/G2、事件研究、策略实验室、历史回测、实验报告、交易流水、账户/持仓、真实交易相关代码、永续连接器和测试全部保留。非核心入口可隐藏/下沉，不删除代码、数据、API、数据库表或测试。24 小时翻倍挑战已获准移除：审计依赖后只删除其专属实现、入口、配置、调度和专属测试，保留历史报告/记录；不得连带影响 G1 自动预测挑战、策略实验室、通用回测、通知或 Brain。
 
-## 当前 GitHub Actions 验证状态
+## Windows CI 记录与验收边界
 
 PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 该结果对应 PR #2 修订前 HEAD；本次文档提交会改变 HEAD，合并前仍须确认检查对应最终 HEAD。
 
@@ -167,10 +167,10 @@ PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行�
 
 ## 下一步唯一任务
 
-当前唯一开发主线是 v0.1 垂直切片。Copilot 开始写代码前，先只读核验远端 main、PR #2 和本机全部候选工程/工作树，提交差异与风险清单；确认后再按 v0.1 范围合同分步实现。不得先重写 UI、重构交易引擎或删除研究模块；24 小时翻倍挑战按 §16.13.2 单独审计后清理，其他既有模块不得连带删除。
+当前唯一开发主线是 v0.1 垂直切片。正式写代码前，先只读核验远端 main、PR #2 和本机全部候选工程/工作树，提交差异与风险清单；确认后再按 v0.1 范围合同分步实现。不得先重写 UI、重构交易引擎或删除研究模块；24 小时翻倍挑战按 §16.13.2 单独审计后清理，其他既有模块不得连带删除。
 
 
 ### PR #2 状态核验规则（2026-11-11）
 
-- PR #2 是文档/产品范围提案，仍为 Draft / Open，未合并；main 不因本 PR 自动改变。
+- PR #2 是本轮产品范围的文档审查记录；仅实际合并提交才会改变 main，是否已经合并以 GitHub PR 页面为准。
 - PR #2 本次修订前仍为 Draft / Open、未合并；核验 HEAD `e5cdfb7`，base main `4dbda5f`，ahead 62 / behind 0，涉及 12 个文件。该 HEAD 的 Windows workflow run #12 已成功：938 passed / 1 warning，前端构建、事件研究浏览器和 G1 预测挑战浏览器通过；三个历史阻断浏览器脚本未纳入该 workflow。此次文档更新会推进 HEAD，最新 SHA 与检查状态以 [PR #2 实时页面](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/pull/2) 为准。合并前必须确保检查针对最终 HEAD 并通过。

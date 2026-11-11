@@ -17,7 +17,7 @@ Smart Money AI Trader 是一个使用 **Python、FastAPI、React 和 TypeScript*
 
 ## v0.1 最小可用版本：当前唯一交付主线
 
-Copilot 2026-11-11 产品审计提出的“先做单一现货纸面交易垂直切片”作为当前阶段的交付范围。**v0.1 是第一个可验证里程碑，不是整个产品的最终边界。**
+2026-11-11 产品与工程审计将“先做单一现货纸面交易垂直切片”确定为当前阶段的交付范围。**v0.1 是第一个可验证里程碑，不是整个产品的最终边界。**
 
 - 一个交易所：由只读核验后的现有代码、数据源稳定性和可测试性决定，不在未检查本机项目之前预先指定。
 - 少量现货交易对：优先选择 1–3 个数据完整、流动性和规则信息可核验的交易对。
@@ -166,13 +166,13 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ~~~
 
-当前全量回归在Windows本地通过隔离运行器执行，不是 GitHub Actions CI 或平台资金验收。D阶段495项为历史证据；当前结果见[F测试摘要](docs/F_TEST_RESULTS.json)；E历史结果仍见[E测试摘要](docs/E_TEST_RESULTS.json)。事件浏览器复验见`tests/event_research_browser.py`。
+早期 D/E/F 阶段测试与后续 GitHub Windows CI 对应不同提交和测试范围，不能混用。当前已有 Windows CI 验证离线回归、前端构建及指定浏览器检查，但尚未覆盖全部保护单、压力、安装和真实平台验收；原始证据见 [当前进度](docs/PROGRESS_STATUS.md) 及各阶段报告。
 
 ## 项目文档
 
 - [项目进度与验收口径](docs/PROGRESS_STATUS.md)：当前事实、历史证据、v0.1 验收和未关闭门槛
 - [v0.1 范围合同](docs/V0_1_SCOPE_CONTRACT.md)：第一里程碑的范围、排除项和验收清单
-- [Copilot 产品审计记录](docs/PRODUCT_AUDIT_20261111.md)：审计结论、采纳/不采纳决定及证据分类
+- [产品与工程审计记录](docs/PRODUCT_AUDIT_20261111.md)：审计结论、采纳/不采纳决定及证据分类
 - [AI 协作开发规范](docs/AI_DEVELOPMENT_COLLABORATION.md)：额度切换、分支隔离、任务交接、测试和安全边界
 - [主实施计划书](docs/SmartMoney_Stable_Plan.md)：v1.0 冻结范围、平台优先级和后续执行依据
 - [文档导航与仓库结构](docs/README.md)：按计划、使用、验收和未来候选分类查看项目资料

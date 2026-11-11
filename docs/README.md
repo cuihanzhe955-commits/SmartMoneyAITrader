@@ -20,7 +20,7 @@
 | 验收证据 | [PHASE_C1_RESULTS.md](PHASE_C1_RESULTS.md)、[LIVE_TRADING_VERIFICATION.md](LIVE_TRADING_VERIFICATION.md) | 历史阶段测试结果与实盘未通过项 |
 | 已发生的功能变更 | [CHALLENGE_TEMPLATE_UPDATE.md](CHALLENGE_TEMPLATE_UPDATE.md) | 挑战模板 UI 调整的历史记录 |
 | 仓库维护 | [GITHUB_UPLOAD.md](GITHUB_UPLOAD.md) | 公开仓库状态及上传说明的历史兼容信息 |
-| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | Codex 与 Copilot 的职责、分支、交接、测试和安全规范 |
+| AI 协作 | [AI_DEVELOPMENT_COLLABORATION.md](AI_DEVELOPMENT_COLLABORATION.md) | 历史交接方式、单一写入者、分支、测试和安全规范 |
 | 未来候选 | [PRODUCT_DECISION_POOL.md](PRODUCT_DECISION_POOL.md) | 新模块、研究方向及延后理由，**不构成当前开发指令** |
 
 ## 状态与优先级
@@ -76,7 +76,7 @@ SmartMoneyAITrader/
 ## 2026-11-11 当前决策与审计入口
 
 - [v0.1 范围合同](V0_1_SCOPE_CONTRACT.md)：当前唯一交付主线和验收清单。
-- [Copilot 产品审计记录](PRODUCT_AUDIT_20261111.md)：审计结论及采纳/不采纳决定。
+- [产品与工程审计记录](PRODUCT_AUDIT_20261111.md)：审计结论及采纳/不采纳决定。
 - [主实施计划 §16.12–§16.13](SmartMoney_Stable_Plan.md)：v1.0 最终目标与 v0.1 阶段范围。
 - [当前进度补充](PROGRESS_STATUS.md)：历史阶段证据与当前事实分开记录。
 - [开源组件评估](OPEN_SOURCE_AUDIT.md)：既有 D 阶段结论与新增候选分开记录。

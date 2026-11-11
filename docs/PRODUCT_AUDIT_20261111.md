@@ -1,6 +1,6 @@
 # SmartMoneyAITrader 产品与工程审计记录（2026-11-11）
 
-> 来源：项目所有者提供的 GitHub Copilot 全面审计意见。本文记录审计结论及项目所有者采纳的决策。代码规模统计和部分 UI/架构观察未在本次文档更新中重新逐项计数，后续本机只读审计应复核。
+> 来源：项目所有者提供的产品与工程审计意见。本文记录审计结论及项目所有者采纳的决策。代码规模统计和部分 UI/架构观察未在本次文档更新中重新逐项计数，后续本机只读审计应复核。
 
 ## 1. 总体判断
 
@@ -54,7 +54,7 @@ v0.1 AI 默认关闭。开启后仅解释规则信号、列明风险或复盘历
 - 938 项离线回归是历史工程证据，不能代替浏览器、Windows 干净安装、平台 demo 或真实账户验收。
 - PR #2 修订前 HEAD `e5cdfb7` 的 Windows workflow run #12 已成功（[运行记录](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/42862025213)）：依赖安装、`npm ci`、TypeScript/Vite 构建通过；`tests/run_offline.py` 为 **938 passed / 1 warning**（156.69 秒）；事件研究浏览器和 G1 预测挑战浏览器均通过。该 workflow **没有运行** `tests/protection_browser.py`、`tests/replay_browser.py`、`tests/acceptance_browser.py`，因此四项历史浏览器/压力阻断仍未关闭。历史 run #5 的 937/1 仅属于旧检查点，原因为 Windows checkout 的 CRLF 行尾转换；`.gitattributes` 的 LF 规则已在 run #12 得到验证。 本次 CI 只证明其实际执行的步骤通过，不证明未纳入 workflow 的保护单、图表压力和 acceptance 浏览器脚本通过。
 - 其他已知集成阻断：保护单浏览器流程超时、86,401 点图表压力内存失败、G1 Worker 遇 Brain 数据库 busy 后退出、浏览器验收存在 ConnectionResetError。
-- 当前本机工作树信息来自 2026-11-10 历史审计；Copilot 开发前必须重新核验，不得将历史 SHA 当成实时状态。
+- 当前本机工作树信息来自 2026-11-10 历史审计；后续开发前必须重新核验，不得将历史 SHA 当成实时状态。
 
 ## 8. 项目所有者采纳决定
 
