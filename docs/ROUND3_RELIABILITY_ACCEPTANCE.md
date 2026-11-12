@@ -55,3 +55,13 @@ OpenClaw Gateway、Outbox、Worker的飞书/Telegram协议与错误状态由完�
 回滚基线为3da6e28；不使用reset/clean或旧数据库恢复。必要时在用户批准后对本轮提交做revert，并保留未知订单和运行账本。本轮无需数据库结构升级。提交仅含源码/测试/workflow/报告，不含依赖目录、数据库、密钥或私人数据。
 
 新提交SHA和CI以Git历史及PR10对应HEAD Checks为准；在新CI完成前不声称通过。最终独立审核仍由用户/ChatGPT执行。
+
+## 新 HEAD CI 实测结果（2026-11-12）
+
+源码提交4d80ac886b51997b801a351cde7e3d376f24794a；LF修正提交69ef2d0722798f23f3f883203bd7d2ffe055801b。后者本地完整回归再次968 passed / 0 failed / 1 warning，83.00秒，日志artifacts/round3-final/lf-regression.log。
+
+[Windows CI run 43149616347](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43149616347)：依赖安装、TypeScript/Vite构建、完整离线回归、15个浏览器入口和独立.venv安装步骤通过；windows_smoke失败，整个CI不通过。完整日志保存在artifacts/round3-final/ci.log，浏览器日志作为该run的artifact保存。
+
+失败发生在恢复后等待100秒结束时，lifecycle_status仍为RUNNING，模拟时间1722896760，目标1722902400（相差5640秒模拟时间）；进程仍有心跳、持仓和成交推进。此证据说明在该CI机器上未能在既定时限内完成；不能仅凭此断言恢复数据损坏，也不能将本机通过覆盖远端失败。未擅自扩大超时、删除精确成交/净值断言或将失败标记为跳过。
+
+最终结论更新为FAIL（完整Windows CI门槛未通过）。需进一步验证恢复回放吞吐及测试时限的合理性，另保留上文连接关闭异常、保护单刷新偶发超时及整包升级回滚缺口。当前交付为已保存并推送的可靠性修复检查点，不是v0.1最终通过版本。main和PR10 Draft状态均保留。
