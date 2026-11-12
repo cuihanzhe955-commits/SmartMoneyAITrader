@@ -34,3 +34,9 @@ tests/windows_smoke.py增加未中断基线及连续三轮实际启动4秒后强
 推送后需核对Windows CI：workflow原有windows_smoke入口现在自身跑未中断+三轮恢复，保留全部断言。新CI尚未返回前不能声称远端PASS。第三轮其他遗留连接关闭异常、偶发保护刷新及整包升级回滚缺口不由本性能修复自动关闭。BrainBusy退避日志保留，未过滤。原始失败日志replay-three.log保留；它是验收新增SQLite连接未close导致清理失败，非成交结果失败。
 
 最终CI链接和提交SHA以之后追加的核验记录为准；main及PR10 Open/Draft保持原样。
+
+## CI补充
+
+run43226262715（c0aebf6）及run43228277267（c2628e5）先后暴露旧压力辅助函数在无轮次/预留扫描时间下的错误假设；修正仅针对合成压力时钟和有界重试，最终20轮和全部唯一性断言保留，不影响真实恢复计时。6a3533e本地975通过；Windows run43229744883也975通过（333.77秒），浏览器14通过/1失败（prediction_challenge_browser），后续恢复测试被跳过。日志artifacts/replay-ci*.log保留。
+
+因此增加独立replay-performance job，直接在Windows2022/Python3.12.2新环境安装并运行同一个windows_smoke（未中断基线+三轮真实进程崩溃恢复+全部100秒/成交/净值/分钟/完整性断言），留存JSONL。原regression job及其失败不被绕过或改为通过。此项保证专项性能证据不被其他浏览器失败遮挡。
