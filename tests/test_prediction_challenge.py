@@ -50,6 +50,9 @@ def one(manager,lab,cid,clock):
         row=manager.view(cid)['challenges'][0];sid=row['session_id']
         rounds=lab.view(sid)['rounds']
         if not rounds:
+            # Discovery reserves its next retry before a lock-delayed enqueue.
+            # Advance the synthetic fixture clock to that durable retry boundary.
+            clock[0]=max(clock[0],row.get('next_scan',clock[0]))
             from ai.worker_policy import BrainBusy
             raise BrainBusy('fixture scheduling deferred by database contention')
         latest=rounds[0]
