@@ -40,3 +40,17 @@ tests/windows_smoke.py增加未中断基线及连续三轮实际启动4秒后强
 run43226262715（c0aebf6）及run43228277267（c2628e5）先后暴露旧压力辅助函数在无轮次/预留扫描时间下的错误假设；修正仅针对合成压力时钟和有界重试，最终20轮和全部唯一性断言保留，不影响真实恢复计时。6a3533e本地975通过；Windows run43229744883也975通过（333.77秒），浏览器14通过/1失败（prediction_challenge_browser），后续恢复测试被跳过。日志artifacts/replay-ci*.log保留。
 
 因此增加独立replay-performance job，直接在Windows2022/Python3.12.2新环境安装并运行同一个windows_smoke（未中断基线+三轮真实进程崩溃恢复+全部100秒/成交/净值/分钟/完整性断言），留存JSONL。原regression job及其失败不被绕过或改为通过。此项保证专项性能证据不被其他浏览器失败遮挡。
+
+## 最终专项证据及验收结论
+
+[Windows CI run43231734354](https://github.com/cuihanzhe955-commits/SmartMoneyAITrader/actions/runs/43231734354)，实际执行源码HEAD：2e11c5bd0cb51a61d3915dc1c8d30556c6d3ca78。
+
+独立replay-performance job131228510583：SUCCESS。真实Windows2022/Python3.12.2全新项目.venv安装通过，未中断完整回放41.203秒；三轮强制终止后恢复等待分别34.656、36.000、35.141秒，恢复初始化分别1.508、1.416、1.414秒。每轮仍100秒上限。完整24小时、272笔成交、净值943.8943549007662、1441个连续分钟、integrity_check=ok、完整成交账本与未中断基线一致。性能日志artifacts/replay-ci-performance.log；JSONL在该run的replay-performance-traces artifact。
+
+性能专项结论：PASS；满足原100秒要求；交易结果保留；恢复吞吐阻断已关闭，允许进入第三轮其他剩余问题的验收，不能等同于第三轮总体验收通过。
+
+同一源码的regression job131228509664：FAIL，974 passed / 1 failed（194.92秒）；test_g1_brain_shared_database_stress[0]因reflection workers did not drain all tasks失败，既定30秒期限未放宽。日志artifacts/replay-ci4.log保留。此前run43229744883离线975通过但prediction_challenge_browser失败，亦未宣布修复。完整项目结论仍FAIL，不能发布Stable。
+
+本专项没有为这些压力或浏览器失败减少工作量/断言；不继续扩大生产模块修改。尚需独立定位高并发复盘排空、G1浏览器及历史连接关闭/保护刷新问题。本地全量975与本地15浏览器通过不覆盖远端失败。
+
+本报告之后若仅追加文档提交，新HEAD不替代上述实际执行源码SHA；最终代码证据固定指向该run，而不是将未运行的新提交宣称已验收。回滚点5b45e9a，按提交revert并保留真实运行账本，不恢复旧数据库。main和PR10均未合并或变更权限。
