@@ -48,7 +48,11 @@ def one(manager,lab,cid,clock):
     for _ in range(3):
         lab.tick('work')
         row=manager.view(cid)['challenges'][0];sid=row['session_id']
-        latest=lab.view(sid)['rounds'][0]
+        rounds=lab.view(sid)['rounds']
+        if not rounds:
+            from ai.worker_policy import BrainBusy
+            raise BrainBusy('fixture scheduling deferred by database contention')
+        latest=rounds[0]
         if latest['status'] in ('WAITING','FAILED'):break
     manager.tick();clock[0]+=61;lab.tick('settle');lab.tick('work');manager.tick()
 
