@@ -1,4 +1,5 @@
 from ai.worker_policy import WorkerUnavailable
+import os
 import hashlib
 import json
 import threading
@@ -521,9 +522,15 @@ class Runtime:
         return pool
 
     def loop(self, lane, step, period):
-        while not self.exit.wait(period):
+        delay = period
+        while not self.exit.wait(delay):
             try:
+                trace = lane == "market" and os.environ.get("SMART_MONEY_ACCEPTANCE_TRACE") == "1"
+                began = time.perf_counter() if trace else 0
                 step()
+                delay = self.replay_delay(period) if lane == "market" else period
+                if trace:
+                    self.acceptance_trace(time.perf_counter() - began)
             except Exception as err:
                 with self.lock, self.db.db:
                     state = self.db.load()
@@ -535,6 +542,48 @@ class Runtime:
                                      recovery_required=True, needs_check=state["config"].get("execution")!="paper")
                         self.db.save(state)
                 self.exit.wait(1)
+
+    def replay_delay(self, default):
+        # Only drain already-due, rule-only historical paper minutes. Each tick
+        # retains its own FULL transaction and releases the runtime lock.
+        with self.lock:
+            s = self.db.load()
+            if s and s["lifecycle_status"] == "RUNNING":
+                c = s["config"]
+                if (c["execution"] == "paper" and c["source"] == "history"
+                        and s.get("engine_override", c["engine"]) == "rules" and c["speed"] > 1
+                        and s.get("next_scan") is not None
+                        and s["next_scan"] <= market_time(s)):
+                    return .001
+        return default
+
+    def acceptance_trace(self, duration):
+        """Opt-in local performance counters; excludes config, holdings and credentials."""
+        try:
+            now = time.perf_counter()
+            stats = getattr(self, "_acceptance_stats", None)
+            if stats is None:
+                stats = self._acceptance_stats = dict(start=now, last=0., calls=0, total=0.)
+            stats["calls"] += 1
+            stats["total"] += duration
+            if now - stats["last"] < 1:
+                return
+            stats["last"] = now
+            with self.lock:
+                s = self.db.load()
+                if not s or s["config"]["execution"] != "paper" or s["config"]["source"] != "history":
+                    return
+                count = self.db.db.execute("SELECT COUNT(*) FROM market_snapshots WHERE challenge_id=?", (s["id"],)).fetchone()[0]
+                elapsed = now - stats["start"]
+                row = {k:s.get(k) for k in ("lifecycle_status", "current_activity", "t", "next_scan", "deadline", "heartbeat")}
+                row.update(elapsed_seconds=elapsed, process_id=os.getpid(), processed_bars=count,
+                           scans_per_second=count/max(elapsed,.001), average_tick_duration=stats["total"]/stats["calls"],
+                           report_generated=s["lifecycle_status"] == "COMPLETED")
+            with (self.root / "acceptance-performance.jsonl").open("a", encoding="utf8") as stream:
+                stream.write(json.dumps(row)+"\n")
+        except (OSError, ValueError):
+            # Diagnostics must not change trading or recovery state.
+            pass
 
     def admit(self, state):
         self.check_binding(state)
