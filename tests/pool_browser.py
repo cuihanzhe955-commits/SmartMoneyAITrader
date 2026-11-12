@@ -54,7 +54,7 @@ def run():
             with sync_playwright() as p:
                 browser=p.chromium.launch(channel="chrome");page=browser.new_page(viewport={"width":1366,"height":768})
                 errors=[];page.on("pageerror",lambda e:errors.append(str(e)))
-                page.goto(url);page.locator("aside").get_by_role("button",name="市场雷达",exact=True).click()
+                page.goto(url);page.locator("aside").get_by_role("button",name="实验功能",exact=True).click();page.locator("aside").get_by_role("button",name="市场雷达",exact=True).click()
                 page.locator("[data-monitor-pool]").wait_for()
                 page.get_by_text("本轮取得行情 2 币",exact=False).wait_for()
                 page.get_by_text("NEW · 因持仓保留监控",exact=False).wait_for()

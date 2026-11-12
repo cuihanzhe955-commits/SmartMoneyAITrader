@@ -328,3 +328,21 @@ def test_optional_lab_initialization_failure_does_not_block_core_and_can_retry(t
         assert c.post('/api/research/lab/retry',json={}).status_code==200
         assert c.get('/api/research/lab').status_code==200
         assert c.get('/api/state').json()['state'] is None
+
+
+def test_transient_write_lock_retains_round_for_next_tick(tmp_path):
+    from ai.worker_policy import BrainBusy
+    obj,sid,clock,provider,_=lab(tmp_path)
+    q,rid=enqueue(obj,sid)
+    original=obj.predict
+    obj.predict=Mock(side_effect=BrainBusy('synthetic lock'))
+    obj.tick('work')
+    row=obj.view(sid)['rounds'][0]
+    assert row['status']=='QUEUED' and row['id']==rid
+    assert '事件任务已保留' in obj.error
+    provider.chat.assert_not_called()
+    obj.predict=original
+    obj.tick('work')
+    row=obj.view(sid)['rounds'][0]
+    assert row['status']=='WAITING' and row['id']==rid
+    assert len(obj.view(sid)['rounds'])==1 and not obj.error

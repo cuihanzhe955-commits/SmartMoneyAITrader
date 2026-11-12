@@ -30,5 +30,11 @@ jobs:
       - run: npm ci --prefix frontend
       - run: npm run build --prefix frontend
       - run: python -X utf8 -B tests/run_offline.py
-      - run: python -X utf8 -B tests/event_research_browser.py
-      - run: python -X utf8 -B tests/prediction_challenge_browser.py
+      - run: python -X utf8 -B tests/run_browsers.py
+      - run: .\start.bat --install-only
+      - run: python -X utf8 -B tests/windows_smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: acceptance-browser-logs
+          path: artifacts/browser-suite/

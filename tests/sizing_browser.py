@@ -47,7 +47,7 @@ def run():
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.route("**/*", lambda route: route.continue_()
                            if route.request.url.startswith(url + "/") else route.abort())
-                page.goto(url)
+                page.goto(url);page.locator("aside").get_by_role("button",name="实验功能",exact=True).click()
                 page.get_by_role("button", name="配置普通交易").click()
                 page.get_by_label("单笔目标 / 净资产 %", exact=True).fill("80")
                 page.get_by_label("单笔风险预算 / 净资产 %", exact=True).fill("3")

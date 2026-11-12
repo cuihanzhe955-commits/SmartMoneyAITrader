@@ -11,6 +11,7 @@ from typing import Literal
 from uuid import uuid4
 from pydantic import BaseModel, ConfigDict, Field
 from ai.brain import Reflection
+from ai.worker_policy import BrainBusy
 from events.observations import canonical, digest
 from market.event_costs import CostQuery
 from market.event_details import MarketSelector
@@ -383,6 +384,10 @@ class EventLab:
             elif lane=="settle":self.settle(row)
             else:self.reflect(row)
             self.error=""
+        except BrainBusy:
+            # Contention is retryable; do not convert a valid round to FAILED.
+            # The next worker tick reloads its durable state before continuing.
+            self.error="Brain数据库暂忙；事件任务已保留，稍后重试"
         except Exception as err:
             if self.stop.is_set():
                 return

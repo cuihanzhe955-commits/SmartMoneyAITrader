@@ -52,7 +52,7 @@ def run():
             with sync_playwright() as p:
                 browser=p.chromium.launch(channel="chrome");page=browser.new_page(viewport={"width":1366,"height":768})
                 errors=[];page.on("pageerror",lambda e:errors.append(str(e)))
-                page.goto(url);page.locator("aside").get_by_role("button",name="策略实验室",exact=True).click()
+                page.goto(url);page.locator("aside").get_by_role("button",name="实验功能",exact=True).click();page.locator("aside").get_by_role("button",name="策略实验室",exact=True).click()
                 page.get_by_role("heading",name="动态市场发现与预算预检",exact=True).wait_for()
                 page.get_by_text("尚未查询。",exact=False).wait_for()
                 button=page.get_by_role("button",name="发现并预检交易对",exact=True)

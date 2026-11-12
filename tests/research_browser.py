@@ -53,7 +53,7 @@ def run():
             with sync_playwright() as p:
                 browser=p.chromium.launch(channel="chrome");page=browser.new_page(viewport={"width":1366,"height":768})
                 errors=[];page.on("pageerror",lambda e:errors.append(str(e)))
-                page.goto(url)
+                page.goto(url);page.locator("aside").get_by_role("button",name="实验功能",exact=True).click()
                 page.locator("[data-chart-points]").wait_for()
                 assert int(page.locator("[data-chart-markers]").first.get_attribute("data-chart-markers"))>0
                 page.get_by_label("切换主题").click()

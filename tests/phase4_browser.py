@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory() as tmp, socket.socket() as sock:
             p=browser.new_page(viewport={"width":1366,"height":768})
             errors=[]
             p.on("pageerror",lambda e:errors.append(str(e)))
-            p.goto(url)
+            p.goto(url);p.locator("aside").get_by_role("button",name="实验功能",exact=True).click()
             p.locator("aside").get_by_role("button",name="设置",exact=True).click()
             field=p.get_by_label("故障策略")
             field.select_option("manual")
