@@ -57,7 +57,7 @@ def run():
             with sync_playwright() as pw:
                 browser=pw.chromium.launch(channel="chrome");page=browser.new_page(viewport={"width":1366,"height":768})
                 errors=[];page.on("pageerror",lambda e:errors.append(str(e)));page.on("dialog",lambda d:d.accept())
-                page.goto(url);page.get_by_role("button",name="配置普通交易",exact=False).click()
+                page.goto(url);page.locator("aside").get_by_role("button",name="实验功能",exact=True).click();page.get_by_role("button",name="配置普通交易",exact=False).click()
                 page.get_by_label("行情来源",exact=False).select_option("public")
                 page.get_by_label("入场候选来源",exact=True).select_option("dynamic")
                 page.get_by_label("动态白名单",exact=True).press_sequentially("NEW,BTC")

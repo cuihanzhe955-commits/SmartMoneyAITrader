@@ -44,7 +44,7 @@ def run():
                 errors = []
                 p.on("pageerror", lambda e: errors.append(str(e)))
                 p.on("dialog", lambda d: d.accept())
-                p.goto("http://127.0.0.1:18786")
+                p.goto("http://127.0.0.1:18786");p.locator("aside").get_by_role("button",name="实验功能",exact=True).click()
                 p.get_by_role("button", name="配置普通交易").click()
                 p.get_by_label("历史市场回放倍率").select_option("3600")
                 p.get_by_label("已确认账户").check()
@@ -60,10 +60,10 @@ def run():
                         "总览",
                         "市场雷达",
                         "决策中心",
-                        "自动交易",
+                        "运行",
                         "持仓与资产",
                         "交易流水",
-                        "历史回测",
+                        "历史",
                         "设置",
                     ):
                         p.locator("aside").get_by_role(
@@ -89,7 +89,7 @@ def run():
                 p.screenshot(path=str(out / "挑战创建.png"))
                 p.get_by_role("button", name="创建会话").click()
                 p.get_by_role("button", name="开始运行").click()
-                p.locator("aside").get_by_role("button", name="自动交易").click()
+                p.locator("aside").get_by_role("button", name="运行").click()
                 for w, h in ((1366, 768), (1920, 1080)):
                     p.set_viewport_size(dict(width=w, height=h))
                     p.wait_for_timeout(400)
@@ -100,7 +100,7 @@ def run():
                 b.close()
                 assert not errors, errors
                 print(
-                    "PASS browser: 12 navigation sections, session setup, controls, journal, report and viewport screenshots"
+                    "PASS browser: current navigation sections, session setup, controls, journal, report and viewport screenshots"
                 )
         finally:
             proc.terminate()

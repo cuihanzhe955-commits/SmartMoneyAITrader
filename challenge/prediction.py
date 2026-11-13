@@ -1,3 +1,4 @@
+from ai.worker_policy import BrainBusy, run_worker
 """Durable, bounded automatic prediction challenges over the reference-paper lab."""
 import json,math,threading,time
 from uuid import UUID,uuid4,uuid5,NAMESPACE_URL
@@ -242,6 +243,8 @@ class PredictionChallenges:
             for row in rows:
                 if self.stop.is_set():break
                 try:self._advance(row['id']);self.error=''
+                except BrainBusy:
+                    raise
                 except Exception as err:
                     if self.stop.is_set():
                         return
@@ -268,7 +271,7 @@ class PredictionChallenges:
 
     def start(self):
         def run():
-            while not self.stop.wait(1):self.tick()
+            run_worker(self.tick, self.stop, lambda message: setattr(self, 'error', message))
         with self.lifecycle_lock:
             if self.stop.is_set() or self.thread is not None:
                 return

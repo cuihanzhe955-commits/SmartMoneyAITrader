@@ -26,7 +26,7 @@ def run():
                 # Configure only synthetic credentials in the temporary vault.
                 r=page.request.post(url+'/api/ai',data={'config':{'base':'https://fixture.invalid/v1','model':'model-mock','timeout':5,'interval':30,'calls':40,'ttl':30,'fallback':'rules'},'key':'synthetic-model-fixture'})
                 assert r.status==200,r.text()
-                page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
+                page.locator('aside').get_by_role('button',name='实验功能',exact=True).click();page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
                 brain=page.locator('[data-brain]');brain.get_by_text('已记录 0 条',exact=False).wait_for()
                 brain.get_by_label('后续决策引用记忆',exact=True).check()
                 discovery=page.locator('[data-event-research]');discovery.get_by_role('button',name='查询 Polymarket 公开市场',exact=True).click()
@@ -69,7 +69,7 @@ def run():
                 lab.get_by_role('button',name='暂停新预测',exact=True).click()
                 lab.get_by_text('环境：参考模拟 · 已暂停',exact=False).wait_for()
                 assert lab.get_by_role('button',name='提交一轮预测研究',exact=True).is_disabled()
-                page.reload();page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
+                page.reload();page.locator('aside').get_by_role('button',name='实验功能',exact=True).click();page.locator('aside').get_by_role('button',name='策略实验室',exact=True).click()
                 page.locator('[data-event-lab]').get_by_label('当前研究会话',exact=True).select_option(index=1)
                 page.locator('[data-event-lab]').get_by_text('已结算 / 参考模拟买入',exact=False).wait_for()
                 assert page.request.get(url+'/api/state').json()['state'] is None

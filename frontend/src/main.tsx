@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Radar,
   ListTree,
-  Bot,
   Zap,
   Wallet,
   Rows3,
@@ -38,16 +37,18 @@ import {
 import "./style.css";
 const nav = [
   ["总览", LayoutDashboard],
+  ["运行", Activity],
+  ["历史", History],
+  ["设置", Gear],
+] as const;
+const advancedNav = [
   ["市场雷达", Radar],
   ["决策中心", ListTree],
-  ["自动交易", Bot],
   ["持仓与资产", Wallet],
   ["交易流水", Rows3],
   ["策略实验室", SlidersHorizontal],
-  ["历史回测", History],
   ["实验报告", Files],
   ["通知中心", Bell],
-  ["设置", Gear],
 ] as const;
 function Events({ rows }: { rows: Row[] }) {
   const show = useUI((s) => s.show);
@@ -314,6 +315,7 @@ function Terminal() {
   const u = useUI(),
     [builder, B] = useState(false),
     [template, setTemplate] = useState(false),
+    [advancedOpen, setAdvancedOpen] = useState(false),
     [theme, T] = useState(localStorage.getItem("terminal-theme") || "dark"),
     [ws, W] = useState(false);
   const q = useQuery({
@@ -358,6 +360,7 @@ function Terminal() {
   const go = (page: string) => {
     u.go(page);
     B(false);
+    if (advancedNav.some(([name]) => name === page)) setAdvancedOpen(true);
   };
   const command = (cmd: string) => {
     if (
@@ -382,19 +385,19 @@ function Terminal() {
       d.archive.length &&
       !["COMPLETED", "STOPPED"].includes(d.archive[0].status);
   const setup = (challenge: boolean) => {
-    go("自动交易");
+    go("运行");
     setTemplate(challenge);
     if (active) {
       u.open(d.archive[0].id);
       u.tell("已有会话，请先结束当前会话再新建");
     } else B(true);
   };
-  const modePage = u.page === "自动交易";
+  const modePage = u.page === "运行" || u.page === "自动交易";
   const render = () => {
     if (q.isError) return <p>本地服务连接失败。请检查后台进程。</p>;
     if (u.page === "设置") return <Settings />;
     if (u.page === "策略实验室") return <Lab onUseTemplate={setup} />;
-    if (u.page === "历史回测")
+    if (u.page === "历史" || u.page === "历史回测")
       return (
         <>
           <Panel title="导入分钟行情 CSV" cap="OFFLINE REPLAY">
@@ -667,6 +670,29 @@ function Terminal() {
             {n}
           </button>
         ))}
+        <button
+          className={
+            advancedOpen || advancedNav.some(([n]) => n === u.page)
+              ? "active"
+              : ""
+          }
+          aria-expanded={advancedOpen}
+          onClick={() => setAdvancedOpen((open) => !open)}
+        >
+          <SlidersHorizontal size={16} />
+          实验功能
+        </button>
+        {advancedOpen &&
+          advancedNav.map(([n, Icon]) => (
+            <button
+              className={"secondary-nav " + (u.page === n ? "active" : "")}
+              key={n}
+              onClick={() => go(n)}
+            >
+              <Icon size={15} />
+              {n}
+            </button>
+          ))}
         <footer>
           <i /> 本机工作台 <small>v1.0 BETA</small>
         </footer>
@@ -689,7 +715,9 @@ function Terminal() {
             <div>
               <small>
                 VELOCITY TERMINAL　 /　{" "}
-                {String(nav.findIndex(([n]) => n === u.page) + 1).padStart(
+                {String(
+                  [...nav, ...advancedNav].findIndex(([n]) => n === u.page) + 1,
+                ).padStart(
                   2,
                   "0",
                 )}

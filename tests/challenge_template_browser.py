@@ -45,7 +45,7 @@ def run():
                 p.on("request",lambda r:posts.append(r.post_data_json)
                      if r.method=="POST" and r.url==url+"/api/sessions" else None)
                 p.on("dialog",lambda d:d.accept())
-                p.goto(url)
+                p.goto(url);p.locator("aside").get_by_role("button",name="实验功能",exact=True).click()
                 side=p.locator("aside")
                 assert side.get_by_role("button",name="24小时翻倍挑战",exact=True).count()==0
                 side.get_by_role("button",name="策略实验室",exact=True).click()
@@ -82,7 +82,7 @@ def run():
                 current=p.request.get(url+"/api/state").json()
                 sid=current["state"]["id"]
                 assert current["state"]["lifecycle_status"]=="CREATED" and not current["fills"]
-                side.get_by_role("button",name="自动交易",exact=True).click()
+                side.get_by_role("button",name="运行",exact=True).click()
                 assert p.get_by_text("24H DOUBLE CHALLENGE",exact=False).is_visible()
                 assert selector.count()==0
                 # Existing challenge remains accessible and cannot be replaced through a template.
@@ -95,8 +95,8 @@ def run():
                 p.get_by_role("button",name="暂停",exact=True).click()
                 p.get_by_role("button",name="恢复",exact=True).wait_for()
                 p.screenshot(path=str(output/"challenge-workbench.png"))
-                p.reload()
-                side.get_by_role("button",name="自动交易",exact=True).click()
+                p.reload();p.locator("aside").get_by_role("button",name="实验功能",exact=True).click()
+                side.get_by_role("button",name="运行",exact=True).click()
                 p.get_by_role("button",name="恢复",exact=True).wait_for()
                 assert p.request.get(url+"/api/state").json()["state"]["id"]==sid
                 p.get_by_role("button",name="结束",exact=True).click()

@@ -48,7 +48,14 @@ def one(manager,lab,cid,clock):
     for _ in range(3):
         lab.tick('work')
         row=manager.view(cid)['challenges'][0];sid=row['session_id']
-        latest=lab.view(sid)['rounds'][0]
+        rounds=lab.view(sid)['rounds']
+        if not rounds:
+            # Discovery reserves its next retry before a lock-delayed enqueue.
+            # Advance the synthetic fixture clock to that durable retry boundary.
+            clock[0]=max(clock[0],row.get('next_scan',clock[0]))
+            from ai.worker_policy import BrainBusy
+            raise BrainBusy('fixture scheduling deferred by database contention')
+        latest=rounds[0]
         if latest['status'] in ('WAITING','FAILED'):break
     manager.tick();clock[0]+=61;lab.tick('settle');lab.tick('work');manager.tick()
 
@@ -404,3 +411,19 @@ def test_resolution_known_before_model_finishes_is_not_counted_as_success(tmp_pa
 @pytest.mark.parametrize('data',[dict(rounds=0),dict(rounds=True),dict(capital=float('nan')),dict(scan_interval_sec=0),dict(execution='live'),dict(request_id='-'*36)])
 def test_bad_or_live_config_is_rejected(data):
     with pytest.raises(ValidationError):PredictionConfig(**dict({'request_id':str(uuid4())},**data))
+
+def test_worker_survives_scan_failure_and_retries(tmp_path):
+    manager,lab,cid,*_=system(tmp_path)
+    retried=threading.Event()
+    def tick():
+        if not retried.is_set():
+            retried.set()
+            raise __import__('ai.worker_policy', fromlist=['BrainBusy']).BrainBusy('synthetic busy database')
+        manager.stop.set()
+    with patch.object(manager,'tick',side_effect=tick):
+        manager.start()
+        manager.thread.join(timeout=5)
+        assert retried.is_set()
+        assert manager.stop.is_set(), 'worker died instead of retrying after database failure'
+        assert '退避重试' in manager.error
+    manager.close()
